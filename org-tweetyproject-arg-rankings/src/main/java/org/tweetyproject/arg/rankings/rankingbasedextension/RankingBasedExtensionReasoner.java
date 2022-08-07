@@ -20,5 +20,21 @@ package org.tweetyproject.arg.rankings.rankingbasedextension;
  *  Copyright 2022 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
 
-public class RankingBasedExtensionReasoner {
+import org.tweetyproject.arg.dung.reasoner.AbstractExtensionReasoner;
+import org.tweetyproject.arg.dung.semantics.Extension;
+import org.tweetyproject.arg.dung.syntax.DungTheory;
+
+import java.util.Collection;
+
+//TODO: sollte abstrakt sein
+public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
+    @Override
+    public Collection<Extension<DungTheory>> getModels(DungTheory bbase) {
+        return null;
+    }
+
+    @Override
+    public Extension<DungTheory> getModel(DungTheory bbase) {
+        return null;
+    }
 }
