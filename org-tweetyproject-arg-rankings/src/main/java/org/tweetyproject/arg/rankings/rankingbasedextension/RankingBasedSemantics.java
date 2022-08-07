@@ -1,6 +1,5 @@
 package org.tweetyproject.arg.rankings.rankingbasedextension;
 
-
 /*
  *  This file is part of "TweetyProject", a collection of Java libraries for
  *  logical aspects of artificial intelligence and knowledge representation.
@@ -19,6 +18,5 @@ package org.tweetyproject.arg.rankings.rankingbasedextension;
  *
  *  Copyright 2022 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
-
-public class RankingBasedExtensionReasoner {
+public class RankingBasedSemantics {
 }
