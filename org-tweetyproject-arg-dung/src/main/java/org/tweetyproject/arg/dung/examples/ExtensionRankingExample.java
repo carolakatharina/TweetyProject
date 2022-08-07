@@ -29,7 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
- * Example on how to use the OrderingSemanticsReasoner.
+ * Example on how to use the {@link ExtensionRankingReasoner}.
  *
  * @author Lars Bengel
  */
