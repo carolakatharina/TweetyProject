@@ -18,11 +18,16 @@
  */
 package org.tweetyproject.arg.rankings.rankingbasedextension;
 
-import org.tweetyproject.arg.dung.reasoner.SimpleCompleteReasoner;
+import org.tweetyproject.arg.dung.reasoner.SimpleGroundedReasoner;
+import org.tweetyproject.arg.dung.reasoner.SimpleIdealReasoner;
+import org.tweetyproject.arg.dung.reasoner.SimplePreferredReasoner;
+import org.tweetyproject.arg.dung.reasoner.SimpleStableReasoner;
 import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.Attack;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -154,51 +159,184 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
             example5.add(new Attack(e,h), new Attack(e,d), new Attack(e,i));
             example5.add(new Attack(h,g));
             example5.add(new Attack(j,i));
+            
+            var theories = List.of(example1, example2, example3, example4a, example4b, example4c, example5);
+            
+        
+                 for (DungTheory theory : theories) {
 
-            // Ranking-Based Extension semantics
-            RankingBasedExtensionReasoner rankingBasedExtensionReasoner = new RankingBasedExtensionReasoner(Semantics.COMPLETE_SEMANTICS,
-                    RankingBasedExtensionReasoner.RankingSemantics.CATEGORIZER);
-            System.out.println(rankingBasedExtensionReasoner.getClass().getSimpleName());
-            var catRankingBasedCompleteExtensions = rankingBasedExtensionReasoner.getModels(example1);
-            System.out.println("RB-CO-Extensions"+catRankingBasedCompleteExtensions);
-            var dungCompleteReasoner = new SimpleCompleteReasoner();
-            var dungCompleteExtensions = dungCompleteReasoner.getModels(example1);
-            System.out.println("DUNG-CO-Extensions"+dungCompleteExtensions);
-            //assertEquals(dungCompleteExtensions.size(), catRankingBasedCompleteExtensions.size());
+                     System.out.println("Beispiel Nr."+theories.indexOf(theory));
 
-            // Strategy-Based Extension semantics
-            RankingBasedExtensionReasoner strategyBasedRankingReasoner = new RankingBasedExtensionReasoner(Semantics.COMPLETE_SEMANTICS,
-                    RankingBasedExtensionReasoner.RankingSemantics.STRATEGY);
-            System.out.println(strategyBasedRankingReasoner.getClass().getSimpleName());
-            var strategyRankingBasedCompleteExtensions = strategyBasedRankingReasoner.getModels(example1);
-            System.out.println("RB-CO-Extensions"+strategyRankingBasedCompleteExtensions);
-            System.out.println("DUNG-CO-Extensions"+dungCompleteExtensions);
-            //assertEquals(dungCompleteExtensions.size(), strategyRankingBasedCompleteExtensions.size());
+                     //STABLE
 
-            // SAF-Ranking Extension semantics
-            RankingBasedExtensionReasoner safRankingReasoner = new RankingBasedExtensionReasoner(Semantics.COMPLETE_SEMANTICS,
-                    RankingBasedExtensionReasoner.RankingSemantics.SAF);
-            System.out.println(safRankingReasoner.getClass().getSimpleName());
-            var safCompleteExtensions = safRankingReasoner.getModels(example1);
-            System.out.println("RB-CO-Extensions"+safCompleteExtensions);
-            System.out.println("DUNG-CO-Extensions"+dungCompleteExtensions);
-            //assertEquals(dungCompleteExtensions.size(), safCompleteExtensions.size());
+                     System.out.println("STABLE");
 
-            // Counting-Ranking Extension semantics
-            RankingBasedExtensionReasoner countingRankingReasoner = new RankingBasedExtensionReasoner(Semantics.COMPLETE_SEMANTICS,
-                    RankingBasedExtensionReasoner.RankingSemantics.COUNTING);
-            System.out.println(countingRankingReasoner.getClass().getSimpleName());
-            var countingCompleteExtensions = countingRankingReasoner.getModels(example1);
-            System.out.println("RB-CO-Extensions"+countingCompleteExtensions);
-            System.out.println("DUNG-CO-Extensions"+dungCompleteExtensions);
-            assertEquals(dungCompleteExtensions.size(), countingCompleteExtensions.size());
+                     // Ranking-Based Extension semantics
+                     RankingBasedExtensionReasoner rankingBasedExtensionReasonerStable = new RankingBasedExtensionReasoner(Semantics.STABLE_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.CATEGORIZER);
+                     System.out.println(rankingBasedExtensionReasonerStable.getClass().getSimpleName());
+                     var catRankingBasedStableExtensions = rankingBasedExtensionReasonerStable.getModels(theory);
+                     System.out.println("RB-ST-Extensions" + catRankingBasedStableExtensions);
+                     var dungStableReasoner = new SimpleStableReasoner();
+                     var dungStableExtensions = dungStableReasoner.getModels(theory);
+                     System.out.println("DUNG-ST-Extensions" + dungStableExtensions);
+                     //assertEquals(dungStableExtensions.size(), catRankingBasedStableExtensions.size());
 
-            System.out.println(countingRankingReasoner.getModels(example2));
-            System.out.println(countingRankingReasoner.getModels(example3));
-            System.out.println(countingRankingReasoner.getModels(example4a));
-            System.out.println(countingRankingReasoner.getModels(example4b));
-            System.out.println(countingRankingReasoner.getModels(example4c));
-            System.out.println(countingRankingReasoner.getModels(example5));
+                     // Strategy-Based Extension semantics
+                     RankingBasedExtensionReasoner strategyBasedRankingStableReasoner = new RankingBasedExtensionReasoner(Semantics.STABLE_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.STRATEGY);
+                     System.out.println(strategyBasedRankingStableReasoner.getClass().getSimpleName());
+                     var strategyRankingBasedStableExtensions = strategyBasedRankingStableReasoner.getModels(theory);
+                     System.out.println("RB-ST-Extensions" + strategyRankingBasedStableExtensions);
+                     System.out.println("DUNG-ST-Extensions" + dungStableExtensions);
+                     //assertEquals(dungStableExtensions.size(), strategyRankingBasedStableExtensions.size());
+
+                     // SAF-Ranking Extension semantics
+                     RankingBasedExtensionReasoner safRankingStableReasoner = new RankingBasedExtensionReasoner(Semantics.STABLE_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.SAF);
+                     System.out.println(safRankingStableReasoner.getClass().getSimpleName());
+                     var safStableExtensions = safRankingStableReasoner.getModels(theory);
+                     System.out.println("RB-ST-Extensions" + safStableExtensions);
+                     System.out.println("DUNG-ST-Extensions" + dungStableExtensions);
+                     //assertEquals(dungStableExtensions.size(), safStableExtensions.size());
+
+                     // Counting-Ranking Extension semantics
+                     RankingBasedExtensionReasoner countingRankingStableReasoner = new RankingBasedExtensionReasoner(Semantics.STABLE_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.COUNTING);
+                     System.out.println(countingRankingStableReasoner.getClass().getSimpleName());
+                     var countingStableExtensions = countingRankingStableReasoner.getModels(theory);
+                     System.out.println("RB-ST-Extensions" + countingStableExtensions);
+                     System.out.println("DUNG-ST-Extensions" + dungStableExtensions);
+                     //assertEquals(dungStableExtensions.size(), countingStableExtensions.size());
+
+
+                     //GROUNDED
+
+                     System.out.println("GROUNDED");
+
+                     // Ranking-Based Extension semantics
+                     RankingBasedExtensionReasoner rankingBasedExtensionGroundedReasoner = new RankingBasedExtensionReasoner(Semantics.GROUNDED_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.CATEGORIZER);
+                     System.out.println(rankingBasedExtensionGroundedReasoner.getClass().getSimpleName());
+                     var catRankingBasedGroundedExtensions = rankingBasedExtensionGroundedReasoner.getModels(theory);
+                     System.out.println("RB-GR-Extensions" + catRankingBasedGroundedExtensions);
+                     var dungGroundedReasoner = new SimpleGroundedReasoner();
+                     var dungGroundedExtensions = dungGroundedReasoner.getModels(theory);
+                     System.out.println("DUNG-GR-Extensions" + dungGroundedExtensions);
+                     //assertEquals(dungGroundedExtensions.size(), catRankingBasedGroundedExtensions.size());
+
+                     // Strategy-Based Extension semantics
+                     RankingBasedExtensionReasoner strategyBasedRankingReasoner = new RankingBasedExtensionReasoner(Semantics.GROUNDED_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.STRATEGY);
+                     System.out.println(strategyBasedRankingReasoner.getClass().getSimpleName());
+                     var strategyRankingBasedGroundedExtensions = strategyBasedRankingReasoner.getModels(theory);
+                     System.out.println("RB-GR-Extensions" + strategyRankingBasedGroundedExtensions);
+                     System.out.println("DUNG-GR-Extensions" + dungGroundedExtensions);
+                     //assertEquals(dungGroundedExtensions.size(), strategyRankingBasedGroundedExtensions.size());
+
+                     // SAF-Ranking Extension semantics
+                     RankingBasedExtensionReasoner safRankingReasoner = new RankingBasedExtensionReasoner(Semantics.GROUNDED_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.SAF);
+                     System.out.println(safRankingReasoner.getClass().getSimpleName());
+                     var safGroundedExtensions = safRankingReasoner.getModels(theory);
+                     System.out.println("RB-GR-Extensions" + safGroundedExtensions);
+                     System.out.println("DUNG-GR-Extensions" + dungGroundedExtensions);
+                     //assertEquals(dungGroundedExtensions.size(), safGroundedExtensions.size());
+
+                     // Counting-Ranking Extension semantics
+                     RankingBasedExtensionReasoner countingRankingReasoner = new RankingBasedExtensionReasoner(Semantics.GROUNDED_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.COUNTING);
+                     System.out.println(countingRankingReasoner.getClass().getSimpleName());
+                     var countingGroundedExtensions = countingRankingReasoner.getModels(theory);
+                     System.out.println("RB-GR-Extensions" + countingGroundedExtensions);
+                     System.out.println("DUNG-GR-Extensions" + dungGroundedExtensions);
+                     //assertEquals(dungGroundedExtensions.size(), countingGroundedExtensions.size());
+
+
+                     //PREFERRED
+                     System.out.println("PREFERRED");
+
+                     // Ranking-Based Extension semantics
+                     RankingBasedExtensionReasoner rankingBasedExtensionPreferredReasoner = new RankingBasedExtensionReasoner(Semantics.PREFERRED_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.CATEGORIZER);
+                     System.out.println(rankingBasedExtensionPreferredReasoner.getClass().getSimpleName());
+                     var catRankingBasedPreferredExtensions = rankingBasedExtensionPreferredReasoner.getModels(theory);
+                     System.out.println("RB-IDExtensions" + catRankingBasedPreferredExtensions);
+                     var dungPreferredReasoner = new SimplePreferredReasoner();
+                     var dungPreferredExtensions = dungPreferredReasoner.getModels(theory);
+                     System.out.println("DUNG-PR-Extensions" + dungPreferredExtensions);
+                     //assertEquals(dungPreferredExtensions.size(), catRankingBasedPreferredExtensions.size());
+
+                     // Strategy-Based Extension semantics
+                     RankingBasedExtensionReasoner strategyBasedRankingReasonerPreferred = new RankingBasedExtensionReasoner(Semantics.PREFERRED_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.STRATEGY);
+                     System.out.println(strategyBasedRankingReasonerPreferred.getClass().getSimpleName());
+                     var strategyRankingBasedPreferredExtensions = strategyBasedRankingReasonerPreferred.getModels(theory);
+                     System.out.println("RB-PR-Extensions" + strategyRankingBasedPreferredExtensions);
+                     System.out.println("DUNG-PR-Extensions" + dungPreferredExtensions);
+                     //assertEquals(dungPreferredExtensions.size(), strategyRankingBasedPreferredExtensions.size());
+
+                     // SAF-Ranking Extension semantics
+                     RankingBasedExtensionReasoner safRankingReasonerPreferred = new RankingBasedExtensionReasoner(Semantics.PREFERRED_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.SAF);
+                     System.out.println(safRankingReasonerPreferred.getClass().getSimpleName());
+                     var safPreferredExtensions = safRankingReasonerPreferred.getModels(theory);
+                     System.out.println("RB-PR-Extensions" + safPreferredExtensions);
+                     System.out.println("DUNG-PR-Extensions" + dungPreferredExtensions);
+                     //assertEquals(dungPreferredExtensions.size(), safPreferredExtensions.size());
+
+                     // Counting-Ranking Extension semantics
+                     RankingBasedExtensionReasoner countingRankingReasonerPreferred = new RankingBasedExtensionReasoner(Semantics.PREFERRED_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.COUNTING);
+                     System.out.println(countingRankingReasonerPreferred.getClass().getSimpleName());
+                     var countingPreferredExtensions = countingRankingReasonerPreferred.getModels(theory);
+                     System.out.println("RB-PR-Extensions" + countingPreferredExtensions);
+                     System.out.println("DUNG-PR-Extensions" + dungPreferredExtensions);
+                     //assertEquals(dungPreferredExtensions.size(), countingPreferredExtensions.size());
+
+                     //IDEAL
+                     System.out.println("IDEAL");
+
+                     // Ranking-Based Extension semantics
+                     RankingBasedExtensionReasoner rankingBasedExtensionIdealReasoner = new RankingBasedExtensionReasoner(Semantics.IDEAL_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.CATEGORIZER);
+                     System.out.println(rankingBasedExtensionIdealReasoner.getClass().getSimpleName());
+                     var catRankingBasedIdealExtensions = rankingBasedExtensionIdealReasoner.getModels(theory);
+                     System.out.println("RB-ID-Extensions" + catRankingBasedIdealExtensions);
+                     var dungIdealReasoner = new SimpleIdealReasoner();
+                     var dungIdealExtensions = dungIdealReasoner.getModels(theory);
+                     System.out.println("DUNG-ID-Extensions" + dungIdealExtensions);
+                     //assertEquals(dungIdealExtensions.size(), catRankingBasedIdealExtensions.size());
+
+                     // Strategy-Based Extension semantics
+                     RankingBasedExtensionReasoner strategyBasedRankingReasonerIdeal = new RankingBasedExtensionReasoner(Semantics.IDEAL_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.STRATEGY);
+                     System.out.println(strategyBasedRankingReasonerIdeal.getClass().getSimpleName());
+                     var strategyRankingBasedIdealExtensions = strategyBasedRankingReasonerIdeal.getModels(theory);
+                     System.out.println("RB-ID-Extensions" + strategyRankingBasedIdealExtensions);
+                     System.out.println("DUNG-ID-Extensions" + dungIdealExtensions);
+                     //assertEquals(dungIdealExtensions.size(), strategyRankingBasedIdealExtensions.size());
+
+                     // SAF-Ranking Extension semantics
+                     RankingBasedExtensionReasoner safRankingReasonerIdeal = new RankingBasedExtensionReasoner(Semantics.IDEAL_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.SAF);
+                     System.out.println(safRankingReasonerIdeal.getClass().getSimpleName());
+                     var safIdealExtensions = safRankingReasonerIdeal.getModels(theory);
+                     System.out.println("RB-ID-Extensions" + safIdealExtensions);
+                     System.out.println("DUNG-ID-Extensions" + dungIdealExtensions);
+                     //assertEquals(dungIdealExtensions.size(), safIdealExtensions.size());
+
+                     // Counting-Ranking Extension semantics
+                     RankingBasedExtensionReasoner countingRankingReasonerIdeal = new RankingBasedExtensionReasoner(Semantics.IDEAL_SEMANTICS,
+                             RankingBasedExtensionReasoner.RankingSemantics.COUNTING);
+                     System.out.println(countingRankingReasonerIdeal.getClass().getSimpleName());
+                     var countingIdealExtensions = countingRankingReasonerIdeal.getModels(theory);
+                     System.out.println("RB-ID-Extensions" + countingIdealExtensions);
+                     System.out.println("DUNG-ID-Extensions" + dungIdealExtensions);
+                     //assertEquals(dungIdealExtensions.size(), countingIdealExtensions.size());
+
+                 }
+
 
 
 
