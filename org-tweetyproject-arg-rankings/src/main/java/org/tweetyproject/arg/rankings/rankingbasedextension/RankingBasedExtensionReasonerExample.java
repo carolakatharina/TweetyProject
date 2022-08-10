@@ -26,6 +26,8 @@ import org.tweetyproject.arg.dung.syntax.DungTheory;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 /*
  *  This file is part of "TweetyProject", a collection of Java libraries for
@@ -204,6 +206,17 @@ public class RankingBasedExtensionReasonerExample {
                 System.out.println("RB-Extensions" + countingExtensions);
                 System.out.println("DUNG-Extensions" + dungExtensions);
                 //assertEquals(dungExtensions.size(), countingExtensions.size());
+
+                //Prob-Ranking Extension semantics
+                RankingBasedExtensionReasoner probRankingReasoner = new RankingBasedExtensionReasoner(semantic,
+                        RankingBasedExtensionReasoner.RankingSemantics.PROBABILISTIC);
+                System.out.println(probRankingReasoner.getClass().getSimpleName());
+                var probExtensions = probRankingReasoner.getModels(theory);
+                System.out.println("RB-Extensions" + probExtensions);
+                System.out.println("DUNG-Extensions" + dungExtensions);
+                assertEquals(dungExtensions.size(),probExtensions.size());
+
+
 
 
             }

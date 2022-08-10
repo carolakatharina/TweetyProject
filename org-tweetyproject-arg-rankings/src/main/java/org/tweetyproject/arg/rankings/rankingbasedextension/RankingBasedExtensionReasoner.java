@@ -27,9 +27,11 @@ import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.rankings.reasoner.*;
+import org.tweetyproject.math.probability.Probability;
 
 import java.util.*;
 
+// vermutlich so eher für gradual semantics, noch einen fuer reine ranking-semantics bauen
 public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     RankingSemantics rankingSemantics;
     Semantics extensionSemantics;
@@ -41,11 +43,15 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         STRATEGY,
         SAF,
 
-        COUNTING
+        COUNTING,
+        PROBABILISTIC,
+
     }
 
     public RankingBasedExtensionReasoner(Semantics extensionSemantics,
                                          RankingSemantics semantics) {
+
+        System.out.println(semantics);
         this.rankingSemantics = semantics;
         this.extensionSemantics = extensionSemantics;
     }
@@ -65,6 +71,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case STRATEGY -> new StrategyBasedRankingReasoner().getModel(bbase);
             case SAF -> new SAFRankingReasoner().getModel(bbase);
             case COUNTING -> new CountingRankingReasoner().getModel(bbase);
+            case PROBABILISTIC -> new ProbabilisticRankingReasoner(extensionSemantics, new Probability(0.5), false).getModel(bbase);
         });
         Collection<Extension<DungTheory>> allExtensions = new HashSet<>();
 
