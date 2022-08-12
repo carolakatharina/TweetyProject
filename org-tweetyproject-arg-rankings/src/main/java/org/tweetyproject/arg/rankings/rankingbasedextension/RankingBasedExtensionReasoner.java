@@ -45,6 +45,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
         COUNTING,
         PROBABILISTIC,
+        MAX
 
     }
 
@@ -71,10 +72,15 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case STRATEGY -> new StrategyBasedRankingReasoner().getModel(bbase);
             case SAF -> new SAFRankingReasoner().getModel(bbase);
             case COUNTING -> new CountingRankingReasoner().getModel(bbase);
-            case PROBABILISTIC -> new ProbabilisticRankingReasoner(extensionSemantics, new Probability(0.5), false).getModel(bbase);
+            case PROBABILISTIC ->
+                    new ProbabilisticRankingReasoner(extensionSemantics, new Probability(0.5), false).getModel(bbase);
+            case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
         });
         Collection<Extension<DungTheory>> allExtensions = new HashSet<>();
 
+
+        //alle Kombinationen durch und Gesamtthreshhold anschauen
+        /*
         for (int k = ranking.size(); k > 0; k--) {
             Iterator<int[]> iterator = CombinatoricsUtils.combinationsIterator(ranking.size(), k);
 
@@ -105,10 +111,56 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
         }
+        */
+
+        // nur Argumente über bestimmten Thresshold für Extensionen berücksichtigen
+        Map<Argument, Double> akzeptableArgumente = new HashMap<>();
+        for (Argument arg : ranking.keySet()) {
+            System.out.println(arg.getName() + ": " + ranking.get(arg));
+
+            if (ranking.get(arg) > getThreshold()) {
+                akzeptableArgumente.put(arg, ranking.get(arg));
+
+            }
+        }
+
+        for (int k = akzeptableArgumente.size(); k > 0; k--) {
+
+            Iterator<int[]> iterator = CombinatoricsUtils.combinationsIterator(akzeptableArgumente.size(), k);
+
+
+            while (iterator.hasNext()) {
+                final int[] combination = iterator.next();
+                Collection<Argument> arguments = new HashSet<>();
+                for (int index : combination) {
+
+                    var argument = (Argument) (akzeptableArgumente.keySet().toArray()[index]);
+                    arguments.add(argument);
+
+                    System.out.println(argument.getName() + ": " + akzeptableArgumente.get(argument));
+
+                }
+
+                //System.out.println(sum);
+
+
+                allExtensions.add(new Extension<>(arguments));
+
+
+            }
+
+
+        }
+
         return allExtensions;
     }
 
+
+    //TODO: switch cases und Methode für Summe-Threshhold
     private double getThreshold() {
+        if (this.rankingSemantics == RankingSemantics.MAX) {
+            return 0.4;
+        }
         return 1.5;
 
     }
