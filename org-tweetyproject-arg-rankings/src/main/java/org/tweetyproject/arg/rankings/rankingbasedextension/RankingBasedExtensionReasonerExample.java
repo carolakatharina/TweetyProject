@@ -158,8 +158,7 @@ public class RankingBasedExtensionReasonerExample {
 
         var theories = List.of(example1, example2, example3, example4a, example4b, example4c, example5);
 
-        var semantics = List.of(Semantics.STABLE_SEMANTICS, Semantics.GROUNDED_SEMANTICS, Semantics.PREFERRED_SEMANTICS,
-                Semantics.IDEAL_SEMANTICS);
+        var semantics = List.of(Semantics.STABLE_SEMANTICS);
         for (Semantics semantic : semantics) {
 
             System.out.println(semantic.description());

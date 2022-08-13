@@ -30,6 +30,7 @@ import org.tweetyproject.arg.rankings.reasoner.*;
 import org.tweetyproject.math.probability.Probability;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 // vermutlich so eher für gradual semantics, noch einen fuer reine ranking-semantics bauen
 public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
@@ -79,50 +80,23 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         Collection<Extension<DungTheory>> allExtensions = new HashSet<>();
 
 
-        //alle Kombinationen durch und Gesamtthreshhold anschauen
-        /*
-        for (int k = ranking.size(); k > 0; k--) {
-            Iterator<int[]> iterator = CombinatoricsUtils.combinationsIterator(ranking.size(), k);
-
-
-            while (iterator.hasNext()) {
-                final int[] combination = iterator.next();
-                Collection<Argument> arguments = new HashSet<>();
-                double sum = 0;
-                for (int index : combination) {
-
-                    var argument = (Argument) (ranking.keySet().toArray()[index]);
-                    arguments.add(argument);
-
-                    System.out.println(argument.getName() + ": " + ranking.get(argument));
-
-                    sum = sum + ranking.get(argument);
-                }
-
-                //System.out.println(sum);
-
-                if (sum > getThreshold()) {
-
-                    allExtensions.add(new Extension<>(arguments));
-                }
-
-
-            }
-
-
-        }
-        */
-
         // nur Argumente über bestimmten Thresshold für Extensionen berücksichtigen
         Map<Argument, Double> akzeptableArgumente = new HashMap<>();
+        int sumrejected=0;
         for (Argument arg : ranking.keySet()) {
             System.out.println(arg.getName() + ": " + ranking.get(arg));
+            System.out.println("Cycle"+bbase.containsCycle());
 
-            if (ranking.get(arg) > getThreshold()) {
+
+            if (ranking.get(arg) > getThresholdSingle()) {
                 akzeptableArgumente.put(arg, ranking.get(arg));
+            } else {
+                sumrejected = sumrejected +1;
 
             }
         }
+
+        System.out.println("rejected"+sumrejected);
 
         for (int k = akzeptableArgumente.size(); k > 0; k--) {
 
@@ -132,19 +106,22 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             while (iterator.hasNext()) {
                 final int[] combination = iterator.next();
                 Collection<Argument> arguments = new HashSet<>();
+                double sum = 0;
                 for (int index : combination) {
 
                     var argument = (Argument) (akzeptableArgumente.keySet().toArray()[index]);
+                    sum = sum + (Double)(akzeptableArgumente.values().toArray()[index]) ;
                     arguments.add(argument);
-
-                    System.out.println(argument.getName() + ": " + akzeptableArgumente.get(argument));
 
                 }
 
-                //System.out.println(sum);
+                System.out.println("Summe"+sum);
+                Extension<DungTheory> e = new Extension<>(arguments);
 
-
-                allExtensions.add(new Extension<>(arguments));
+                if (getConditionForSemantics(ranking, sum,  bbase, e)) {
+                    System.out.println("added");
+                    allExtensions.add(e);
+                }
 
 
             }
@@ -155,14 +132,26 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         return allExtensions;
     }
 
+    private boolean getConditionForSemantics(Map<Argument, Double> ranking, double sum, DungTheory bbase, Extension e) {
+        if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics == Semantics.STABLE_SEMANTICS) {
+            AtomicReference<Double> sumGesamt = new AtomicReference<>(0.0);
+            ranking.values().stream().forEach(arg -> {
+                sumGesamt.set(sumGesamt.get() + arg.doubleValue());
+            });
 
-    //TODO: switch cases und Methode für Summe-Threshhold
-    private double getThreshold() {
-        if (this.rankingSemantics == RankingSemantics.MAX) {
-            return 0.4;
+            return  ((sumGesamt.get() - sum) / (ranking.size() - e.size()) < getThresholdSingle());
+
+        } return true;
+    }
+
+    private double getThresholdSingle() {
+        if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics==Semantics.STABLE_SEMANTICS) {
+            return 0.021;
         }
-        return 1.5;
+        return 0.0;
 
     }
+
+
 }
 

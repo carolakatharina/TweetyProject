@@ -54,7 +54,7 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
         WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the current iteration
         WeightedDungTheoryWithSelfWeight valuationsOld = valuations; // Stores values of the last iteration
 
-        for (int step = 0; step <= 1000; step++) {
+        for (int step = 0; step <= 10; step++) {
 
 
             for (var argument : valuations) {
