@@ -50,11 +50,10 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
         NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<Argument, DungTheory>();
         ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
 
-        int n = ((DungTheory) kb).getNumberOfNodes();
         WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the current iteration
-        WeightedDungTheoryWithSelfWeight valuationsOld = valuations; // Stores values of the last iteration
+        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the last iteration
 
-        for (int step = 0; step <= 10; step++) {
+        for (int step = 0; step < 10; step++) {
 
 
             for (var argument : valuations) {
@@ -62,25 +61,28 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
                 if (attackers.size() == 0) {
                     //donothing
 
-
                 } else {
                     Argument max = attackers.iterator().next();
-                    //find the strongest attacker of each argument
+                    //find the strongest attacker of argument
                     for (var att : attackers) {
                         if (valuationsOld.getWeight(att) > valuationsOld.getWeight(max)) {
                             max = att;
                         }
                     }
-                    valuations.setWeight(argument, getNewWeight(valuationsOld.getWeight(argument), valuationsOld.getWeight(max)));
+                    var oldNewMax = valuations.getWeight(argument);
+                    var newNewMax = getNewWeight(valuationsOld.getWeight(argument), valuationsOld.getWeight(max));
+                    valuations.setWeight(argument, newNewMax);
+                    valuationsOld.setWeight(argument, oldNewMax );
 
                 }
             }
 
             for (Argument arg : (valuations))
                 ranking.put(arg, valuations.getWeight(arg));
+            }
+            return ranking;
         }
-        return ranking;
-    }
+
 
     /**
      * Calculates the new weight.

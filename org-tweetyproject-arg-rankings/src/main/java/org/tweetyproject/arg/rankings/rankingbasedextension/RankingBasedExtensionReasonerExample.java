@@ -158,7 +158,7 @@ public class RankingBasedExtensionReasonerExample {
 
         var theories = List.of(example1, example2, example3, example4a, example4b, example4c, example5);
 
-        var semantics = List.of(Semantics.STABLE_SEMANTICS);
+        var semantics = List.of(Semantics.PREFERRED_SEMANTICS);
         for (Semantics semantic : semantics) {
 
             System.out.println(semantic.description());
@@ -227,7 +227,7 @@ public class RankingBasedExtensionReasonerExample {
                 var maxExtensions = maxRankingReasoner.getModels(theory);
                 System.out.println("RB-Extensions" + maxExtensions);
                 System.out.println("DUNG-Extensions" + dungExtensions);
-                //assertEquals(dungExtensions.size(), maxExtensions.size());
+                assertEquals(dungExtensions.size(), maxExtensions.size());
 
 
             }

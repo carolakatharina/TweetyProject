@@ -31,6 +31,7 @@ import org.tweetyproject.math.probability.Probability;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 // vermutlich so eher für gradual semantics, noch einen fuer reine ranking-semantics bauen
 public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
@@ -77,26 +78,27 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                     new ProbabilisticRankingReasoner(extensionSemantics, new Probability(0.5), false).getModel(bbase);
             case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
         });
+
         Collection<Extension<DungTheory>> allExtensions = new HashSet<>();
+        Collection<Extension<DungTheory>> allExtensionsFinal = new HashSet<>();
 
 
         // nur Argumente über bestimmten Thresshold für Extensionen berücksichtigen
         Map<Argument, Double> akzeptableArgumente = new HashMap<>();
-        int sumrejected=0;
+        int sumrejected = 0;
         for (Argument arg : ranking.keySet()) {
             System.out.println(arg.getName() + ": " + ranking.get(arg));
-            System.out.println("Cycle"+bbase.containsCycle());
+            System.out.println("Cycle" + bbase.containsCycle());
 
 
             if (ranking.get(arg) > getThresholdSingle()) {
                 akzeptableArgumente.put(arg, ranking.get(arg));
-            } else {
-                sumrejected = sumrejected +1;
-
             }
         }
 
-        System.out.println("rejected"+sumrejected);
+        System.out.println("rejected" + sumrejected);
+
+        Map<Extension, Double> allSums = new HashMap<>();
 
         for (int k = akzeptableArgumente.size(); k > 0; k--) {
 
@@ -110,18 +112,16 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                 for (int index : combination) {
 
                     var argument = (Argument) (akzeptableArgumente.keySet().toArray()[index]);
-                    sum = sum + (Double)(akzeptableArgumente.values().toArray()[index]) ;
+                    sum = sum + (Double) (akzeptableArgumente.values().toArray()[index]);
                     arguments.add(argument);
 
                 }
 
-                System.out.println("Summe"+sum);
                 Extension<DungTheory> e = new Extension<>(arguments);
 
-                if (getConditionForSemantics(ranking, sum,  bbase, e)) {
-                    System.out.println("added");
-                    allExtensions.add(e);
-                }
+
+                allExtensions.add(e);
+                allSums.put(e, sum);
 
 
             }
@@ -129,26 +129,83 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
         }
 
-        return allExtensions;
+        for (Extension e : allExtensions) {
+
+            if (getConditionForSemantics(ranking, allSums, bbase, allExtensions, e)) {
+                allExtensionsFinal.add(e);
+            }
+        }
+
+        return allExtensionsFinal;
     }
 
-    private boolean getConditionForSemantics(Map<Argument, Double> ranking, double sum, DungTheory bbase, Extension e) {
+    private boolean getConditionForSemantics(Map<Argument, Double> ranking, Map<Extension, Double> allSums, DungTheory bbase,
+                                             Collection<Extension<DungTheory>> extensions,
+                                             Extension e) {
+        AtomicReference<Double> sumGesamt = new AtomicReference<>(0.0);
+        ranking.values().stream().forEach(arg -> {
+            sumGesamt.set(sumGesamt.get() + arg.doubleValue());
+        });
         if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics == Semantics.STABLE_SEMANTICS) {
-            AtomicReference<Double> sumGesamt = new AtomicReference<>(0.0);
-            ranking.values().stream().forEach(arg -> {
-                sumGesamt.set(sumGesamt.get() + arg.doubleValue());
+
+
+            return ((sumGesamt.get() - allSums.get(e)) / (ranking.size() - e.size()) < getThresholdSingle()
+            );
+
+        }
+        if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
+            var otherAcceptedArguments = ranking.entrySet().stream().collect(Collectors.toList()).stream()
+                    .filter((entry) -> (!e.contains(entry.getKey())
+                            && (entry.getValue() >= getThresholdSingle()))).collect(Collectors.toList());
+            AtomicReference<Double> accGesamtOthers = new AtomicReference<>(0.0);
+            otherAcceptedArguments.stream().forEach(entry -> {
+                accGesamtOthers.set(accGesamtOthers.get() + entry.getValue());
             });
 
-            return  ((sumGesamt.get() - sum) / (ranking.size() - e.size()) < getThresholdSingle());
 
-        } return true;
+            return (getMaxDiff(ranking, e)<0.6 && getMaxDiff(ranking, e)>0);
+
+
+
+        }
+        System.out.println("Stop!");
+        return true;
     }
 
     private double getThresholdSingle() {
-        if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics==Semantics.STABLE_SEMANTICS) {
-            return 0.021;
+        if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics == Semantics.STABLE_SEMANTICS) {
+            return 0.1;
+        }
+        if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
+
+            return 0.1;
+
+
         }
         return 0.0;
+    }
+
+    private double getMaxDiff(Map<Argument, Double> ranking, Extension e) {
+        if (e.size()==1) {
+            return 0;
+        }
+        var werteListe = ranking.entrySet().stream().filter(entry -> e.contains(entry.getKey()))
+                .collect(Collectors.toList());
+
+        double max=0.;
+        double min = 10.;
+
+        for (var entry: werteListe) {
+            var newValue = entry.getValue();
+            if (newValue> max) {
+                max = newValue;
+            }
+            if (newValue< min) {
+                min = newValue;
+            }
+        }
+        System.out.println("Diff: "+(max-min));
+        return (max-min);
 
     }
 
