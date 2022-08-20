@@ -218,7 +218,7 @@ public class RankingBasedExtensionReasonerExample {
                 System.out.println("DUNG-Extensions" + dungExtensions);
                 //assertEquals(dungExtensions.size(),probExtensions.size());
 
-                 */
+
 
                 //MaxBased-Ranking Extension semantics
                 RankingBasedExtensionReasoner maxRankingReasoner = new RankingBasedExtensionReasoner(semantic,
@@ -228,6 +228,32 @@ public class RankingBasedExtensionReasonerExample {
                 System.out.println("RB-Extensions" + maxExtensions);
                 System.out.println("DUNG-Extensions" + dungExtensions);
                 assertEquals(dungExtensions.size(), maxExtensions.size());
+
+
+
+                //TrustBased-Ranking Extension semantics
+
+                RankingBasedExtensionReasoner maxRankingReasoner = new RankingBasedExtensionReasoner(semantic,
+                        RankingBasedExtensionReasoner.RankingSemantics.TRUST);
+                System.out.println(maxRankingReasoner.getClass().getSimpleName());
+                var maxExtensions = maxRankingReasoner.getModels(theory);
+                System.out.println("RB-Extensions" + maxExtensions);
+                System.out.println("DUNG-Extensions" + dungExtensions);
+                assertEquals(dungExtensions.size(), maxExtensions.size());
+
+
+                 */
+
+                //Euler-MaxBased-Ranking Extension semantics
+
+                RankingBasedExtensionReasoner maxRankingReasoner = new RankingBasedExtensionReasoner(semantic,
+                        RankingBasedExtensionReasoner.RankingSemantics.EULER_MB);
+                System.out.println(maxRankingReasoner.getClass().getSimpleName());
+                var maxExtensions = maxRankingReasoner.getModels(theory);
+                System.out.println("RB-Extensions" + maxExtensions);
+                System.out.println("DUNG-Extensions" + dungExtensions);
+                assertEquals(dungExtensions.size(), maxExtensions.size());
+
 
 
             }

@@ -47,7 +47,8 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
         COUNTING,
         PROBABILISTIC,
-        MAX
+        MAX,
+        EULER_MB, TRUST
 
     }
 
@@ -70,13 +71,15 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     public Collection<Extension<DungTheory>> getModels(DungTheory bbase) {
         Map<Argument, Double> ranking;
         ranking = new HashMap<>(switch (this.rankingSemantics) {
-            case CATEGORIZER -> new CategorizerRankingReasoner().getModel(bbase);
+            case CATEGORIZER -> new WeightedCategorizerRankingReasoner().getModel(bbase);
             case STRATEGY -> new StrategyBasedRankingReasoner().getModel(bbase);
             case SAF -> new SAFRankingReasoner().getModel(bbase);
             case COUNTING -> new CountingRankingReasoner().getModel(bbase);
             case PROBABILISTIC ->
                     new ProbabilisticRankingReasoner(extensionSemantics, new Probability(0.5), false).getModel(bbase);
             case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
+            case TRUST -> new TrustBasedRategorizerRankingReasoner().getModel(bbase);
+            case EULER_MB -> new EulerMaxBasedRankingReasoner().getModel(bbase);
         });
 
         Collection<Extension<DungTheory>> allExtensions = new HashSet<>();
@@ -96,7 +99,6 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             }
         }
 
-        System.out.println("rejected" + sumrejected);
 
         Map<Extension, Double> allSums = new HashMap<>();
 
@@ -146,28 +148,46 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         ranking.values().stream().forEach(arg -> {
             sumGesamt.set(sumGesamt.get() + arg.doubleValue());
         });
-        if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics == Semantics.STABLE_SEMANTICS) {
+
+        for (Argument arg: ranking.keySet()) {
+
+            if (!e.contains(arg) && ranking.get(arg).doubleValue()==1) {
+                return false;
+            }
+
+            if (e.contains(arg) && ranking.get(arg).doubleValue()< getThresholdSingle()) {
+                return false;
+            }
+
+        }
+        if (extensionSemantics == Semantics.STABLE_SEMANTICS) {
+            //TODO: Logische Überlegungen welche Bedingung
+
 
 
             return ((sumGesamt.get() - allSums.get(e)) / (ranking.size() - e.size()) < getThresholdSingle()
             );
 
         }
-        if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
-            var otherAcceptedArguments = ranking.entrySet().stream().collect(Collectors.toList()).stream()
-                    .filter((entry) -> (!e.contains(entry.getKey())
-                            && (entry.getValue() >= getThresholdSingle()))).collect(Collectors.toList());
-            AtomicReference<Double> accGesamtOthers = new AtomicReference<>(0.0);
-            otherAcceptedArguments.stream().forEach(entry -> {
-                accGesamtOthers.set(accGesamtOthers.get() + entry.getValue());
-            });
+        if ( extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
+            //TODO: Logische Überlegungen welche Bedingung
 
 
-            return (getMaxDiff(ranking, e)<0.6 && getMaxDiff(ranking, e)>0);
+            List<Extension<DungTheory>> bessereExtensions = extensions.stream()
+                    .filter(ext ->
+                            ((ext.size()> e.size()
+                                    &&  allSums.get(ext) > allSums.get(e))
 
+                            ))
+                    .collect(Collectors.toList());
+
+            return (bessereExtensions.size() == 0) && getMaxDiff(ranking.entrySet().stream().filter(entry -> e
+                    .contains(entry.getKey()) && entry.getValue()!=1).collect(Collectors.toMap(
+                    Map.Entry::getKey, Map.Entry::getValue)), e) ==0;
 
 
         }
+
         System.out.println("Stop!");
         return true;
     }
@@ -179,6 +199,27 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
 
             return 0.1;
+
+
+        }
+
+        if ((this.rankingSemantics == RankingSemantics.CATEGORIZER) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
+
+            return 0.00;
+
+
+        }
+
+        if ((this.rankingSemantics == RankingSemantics.TRUST) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
+
+            return 0.49;
+
+
+        }
+
+        if ((this.rankingSemantics == RankingSemantics.EULER_MB) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
+
+            return 0.04;
 
 
         }
@@ -205,7 +246,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             }
         }
         System.out.println("Diff: "+(max-min));
-        return (max-min);
+        return Math.abs(max-min);
 
     }
 
