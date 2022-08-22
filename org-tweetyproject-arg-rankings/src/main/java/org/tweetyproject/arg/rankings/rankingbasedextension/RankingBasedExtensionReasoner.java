@@ -156,7 +156,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         System.out.println("extensionen nach 1. Filter: " + allExtensionsFinal);
 
         allExtensionsFinal = getFinalExtensions(ranking, allSums,
-                finalAllExtensionsFinalTemp);
+                finalAllExtensionsFinalTemp, extensions);
         System.out.println("extensionen nach 2. Filter: " + allExtensionsFinal);
 
         return allExtensionsFinal;
@@ -187,7 +187,21 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
             }
             case ST: {
-                return (sumGesamt.get() - allSums.get(e)) / (ranking.size() - e.size()) < this.getThresholdSingle();
+                var sicherakzeptierteArgumenteNichtInExt = extensions.stream()
+                        .anyMatch(ext ->
+                                !ext.equals(e)
+                                        && (ext.stream().anyMatch(
+                                        arg -> ranking.get(arg).doubleValue() == 1
+                                                && !e.contains(arg))));
+                // nicht mit reinen Zahlen darstellbar, wie soll gezeigt werden, dass Argument nicht in e durch e attackiert?
+                //hoechstens mit historischen Daten
+
+                //alle-Stärke der akzeptierten = nichtakzeptierte+x
+
+                System.out.println( "durchschnitt"+(sumGesamt.get()+" -"+ allSums.get(e)) +"/"+ (ranking.values().size() - e.size()));
+
+                return sicherakzeptierteArgumenteNichtInExt &&
+                        ((sumGesamt.get() - allSums.get(e)) / (ranking.values().size() - e.size())) < this.getThresholdSingle();
 
             }
             case GR: {
@@ -196,8 +210,14 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                         extensions.stream()
                                 .filter(ext ->
                                         !ext.equals(e)
-                                                && ext.size() < e.size()
-                                ).collect(Collectors.toList()));
+                                                && (ext.stream().anyMatch(
+                                                arg -> ranking.get(arg).doubleValue() == 1
+                                                        && !e.contains(arg))
+                                                || e.stream().allMatch(ext::contains)
+                                                && ext.size() > e.size())).collect(Collectors.toList()));
+                System.out.println("Extension:" + e);
+                System.out.println("BESSERE Extensions:" + bessereExtensions);
+
                 return bessereExtensions.size() == 0;
 
 
@@ -210,12 +230,12 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                                                 && (ext.stream().anyMatch(
                                                 arg -> ranking.get(arg).doubleValue() == 1
                                                         && !e.contains(arg))
-                                                || ext.containsAll(e)
-                                                && ext.size() > e.size()
-                                                || (ext.size() > e.size() && allSums.get(ext) > allSums.get(e)
-                                        ))).collect(Collectors.toList()));
-                return bessereExtensions.size() == 0;
+                                                || e.stream().allMatch(ext::contains)
+                                                && ext.size() > e.size())).collect(Collectors.toList()));
+                System.out.println("Extension:" + e);
+                System.out.println("BESSERE Extensions:" + bessereExtensions);
 
+                return bessereExtensions.size() == 0;
 
             default: {
                 System.out.println("Default");
@@ -227,44 +247,108 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
     private Collection<Extension<DungTheory>> getFinalExtensions(Map<Argument, Double> ranking, Map<Extension<DungTheory>, Double> allSums,
-                                       Collection<Extension<DungTheory>> extensions) {
+                                                                 Collection<Extension<DungTheory>> extensions, Collection<Extension<DungTheory>> conflictfreeExtensions) {
 
-        //rausfiltern schlechterer Extensions mit gleichen Elementen
-        Collection<Extension<DungTheory>> finalExtensions = new HashSet<>();
-        Map<Extension<DungTheory>, List<Extension<DungTheory>>> alledoppelteExtensions = new HashMap<>();
-
-        extensions.stream()
-                .forEach(ext -> {
-                    var list = new ArrayList<>(extensions.stream().filter(e->
-                            !e.equals(ext) && e.stream().anyMatch(arg ->
-                            ranking.get(arg).doubleValue() != 1 && ext.contains(arg))
-                    ).collect(Collectors.toList()));
-                    alledoppelteExtensions.put(ext, list);
-                });
+        switch (extensionSemantics) {
 
 
-        for (Extension<DungTheory> e: extensions) {
+            case PR: {
+                //rausfiltern schlechterer Extensions mit gleichen Elementen
+                Collection<Extension<DungTheory>> finalExtensions = new HashSet<>();
+                Map<Extension<DungTheory>, List<Extension<DungTheory>>> alledoppelteExtensions = new HashMap<>();
+
+                extensions.stream()
+                        .forEach(ext -> {
+                            var list = new ArrayList<>(extensions.stream().filter(e ->
+                                    !e.equals(ext) && e.stream().anyMatch(arg ->
+                                            ranking.get(arg).doubleValue() != 1 && ext.contains(arg))
+                            ).collect(Collectors.toList()));
+                            alledoppelteExtensions.put(ext, list);
+                        });
 
 
-            if (alledoppelteExtensions.get(e).size()==0) {
-                finalExtensions.add(e);
-            } else {
-                System.out.println("doppelte Extensions"+alledoppelteExtensions +"von "+e+" mit Wert"+allSums.get(e)
-                +alledoppelteExtensions.get(e).stream().allMatch(ext1 ->
-                        allSums.get(e) > allSums.get(ext1)));
+                for (Extension<DungTheory> e : extensions) {
 
-                if (alledoppelteExtensions.get(e).stream().allMatch(ext1 ->
-                        allSums.get(e) > allSums.get(ext1))
-                || (alledoppelteExtensions.get(e).stream().noneMatch(ext2
-                -> alledoppelteExtensions.get(ext2).stream().allMatch(
-                        ext3-> allSums.get(ext2) > allSums.get(ext3))))) {
-                    finalExtensions.add(e);
+
+                    if (alledoppelteExtensions.get(e).size() == 0) {
+                        finalExtensions.add(e);
+                    } else {
+                        System.out.println("doppelte Extensions" + alledoppelteExtensions + "von " + e + " mit Wert" + allSums.get(e)
+                                + alledoppelteExtensions.get(e).stream().allMatch(ext1 ->
+                                allSums.get(e) > allSums.get(ext1)));
+
+                        if (alledoppelteExtensions.get(e).stream().allMatch(ext1 ->
+                                allSums.get(e) > allSums.get(ext1))
+                                || (alledoppelteExtensions.get(e).stream().noneMatch(ext2
+                                -> alledoppelteExtensions.get(ext2).stream().allMatch(
+                                ext3 -> allSums.get(ext2) > allSums.get(ext3))))) {
+                            finalExtensions.add(e);
+                        }
+                    }
+
                 }
+                return finalExtensions;
             }
+            case GR: {
+                //nur Extensions, die in allen gültigen preferredExtensions enthalten
+                Collection<Extension<DungTheory>> finalExtensions = new HashSet<>();
 
+                //ermittle preferred extensions
+                //rausfiltern schlechterer Extensions mit gleichen Elementen
+                Collection<Extension<DungTheory>> preferredExtensions = new HashSet<>();
+                Map<Extension<DungTheory>, List<Extension<DungTheory>>> alledoppelteExtensions = new HashMap<>();
+
+                extensions.stream()
+                        .forEach(ext -> {
+                            var list = new ArrayList<>(extensions.stream().filter(e ->
+                                    !e.equals(ext) && e.stream().anyMatch(arg ->
+                                            ranking.get(arg).doubleValue() != 1 && ext.contains(arg))
+                            ).collect(Collectors.toList()));
+                            alledoppelteExtensions.put(ext, list);
+                        });
+
+
+                for (Extension<DungTheory> e : extensions) {
+
+
+                    if (alledoppelteExtensions.get(e).size() == 0) {
+                        preferredExtensions.add(e);
+                    } else {
+
+                        if (alledoppelteExtensions.get(e).stream().allMatch(ext1 ->
+                                allSums.get(e) > allSums.get(ext1))
+                                || (alledoppelteExtensions.get(e).stream().noneMatch(ext2
+                                -> alledoppelteExtensions.get(ext2).stream().allMatch(
+                                ext3 -> allSums.get(ext2) > allSums.get(ext3))))) {
+                            preferredExtensions.add(e);
+                        }
+                    }
+
+                }
+                finalExtensions = conflictfreeExtensions.stream().filter(ext ->
+                                preferredExtensions.stream().allMatch(extpr ->
+                                        ext.stream().allMatch(arg -> extpr.contains(arg)))
+                        && preferredExtensions.stream().noneMatch(extpr ->
+                                        extpr.stream().anyMatch(arg ->
+                                                ranking.get(arg).doubleValue() == 1 && !ext.contains(arg))))
+                        .collect(Collectors.toSet());
+
+                Collection<Extension<DungTheory>> finalExtensions1 = finalExtensions;
+
+                System.out.print("temp"+finalExtensions1);
+                return finalExtensions.stream()
+                        .filter(ext ->
+                            finalExtensions1.stream().noneMatch(e ->
+                                    !e.equals(ext) && ext.stream().allMatch(arg ->
+                                            e.contains(arg)
+                                            && e.size() > ext.size()
+                                    )
+                                    ))
+                            .collect(Collectors.toSet());
+            }
+            default: return List.of();
         }
-        return finalExtensions;
-        }
+    }
 
 
 

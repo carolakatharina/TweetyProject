@@ -159,7 +159,8 @@ public class RankingBasedExtensionReasonerExample {
 
         var theories = List.of(example1, example2, example3, example4a, example4b, example4c, example5);
 
-        var semantics = List.of(Semantics.PREFERRED_SEMANTICS);
+        var semantics = List.of(Semantics.PREFERRED_SEMANTICS, Semantics.GROUNDED_SEMANTICS,
+                Semantics.COMPLETE_SEMANTICS);
         for (Semantics semantic : semantics) {
 
             System.out.println(semantic.description());
@@ -196,8 +197,8 @@ public class RankingBasedExtensionReasonerExample {
                 assertEquals(dungExtensions.size(), maxExtensions.size());
 
 
-
                 /*
+
                 //TrustBased-Ranking Extension semantics
 
                 RankingBasedExtensionReasoner trustRankingReasoner = new RankingBasedExtensionReasoner(semantic,
@@ -209,9 +210,9 @@ public class RankingBasedExtensionReasonerExample {
                 assertTrue(dungExtensions.containsAll(trustExtensions));
                 assertEquals(dungExtensions.size(), trustExtensions.size());
 
-                 */
 
-                /*
+
+
 
                 //Euler-MaxBased-Ranking Extension semantics
 
