@@ -83,12 +83,10 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         });
 
         Collection<Extension<DungTheory>> allExtensions = new HashSet<>();
-        Collection<Extension<DungTheory>> allExtensionsFinal = new HashSet<>();
 
 
         // nur Argumente über bestimmten Thresshold für Extensionen berücksichtigen
         Map<Argument, Double> akzeptableArgumente = new HashMap<>();
-        int sumrejected = 0;
         for (Argument arg : ranking.keySet()) {
             System.out.println(arg.getName() + ": " + ranking.get(arg));
             System.out.println("Cycle" + bbase.containsCycle());
@@ -100,7 +98,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         }
 
 
-        Map<Extension, Double> allSums = new HashMap<>();
+        Map<Extension<DungTheory>, Double> allSums = new HashMap<>();
 
         for (int k = akzeptableArgumente.size(); k > 0; k--) {
 
@@ -121,9 +119,13 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
                 Extension<DungTheory> e = new Extension<>(arguments);
 
+                if (bbase.isConflictFree(e)) {
 
-                allExtensions.add(e);
-                allSums.put(e, sum);
+
+                    allExtensions.add(e);
+                    allSums.put(e, sum);
+
+                }
 
 
             }
@@ -131,122 +133,187 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
         }
 
-        for (Extension e : allExtensions) {
 
-            if (getConditionForSemantics(ranking, allSums, bbase, allExtensions, e)) {
+        return getExtensionsForSemantics(ranking, allSums, allExtensions);
+    }
+
+    private Collection<Extension<DungTheory>> getExtensionsForSemantics(Map<Argument, Double> ranking, Map<Extension<DungTheory>, Double> allSums,
+                                                                        Collection<Extension<DungTheory>> extensions) {
+
+
+        Collection<Extension<DungTheory>> allExtensionsFinal = new HashSet<>();
+        System.out.println("Konfliktfreie Extensions:" + extensions);
+
+        for (Extension<DungTheory> e : extensions) {
+
+
+            if (getConditionForSemantics(ranking, allSums, extensions, e)) {
                 allExtensionsFinal.add(e);
             }
         }
+        Collection<Extension<DungTheory>> finalAllExtensionsFinalTemp = allExtensionsFinal;
+
+        System.out.println("extensionen nach 1. Filter: " + allExtensionsFinal);
+
+        allExtensionsFinal = getFinalExtensions(ranking, allSums,
+                finalAllExtensionsFinalTemp);
+        System.out.println("extensionen nach 2. Filter: " + allExtensionsFinal);
 
         return allExtensionsFinal;
     }
 
-    private boolean getConditionForSemantics(Map<Argument, Double> ranking, Map<Extension, Double> allSums, DungTheory bbase,
-                                             Collection<Extension<DungTheory>> extensions,
-                                             Extension e) {
+    private boolean getConditionForSemantics(Map<Argument, Double> ranking, Map<Extension<DungTheory>, Double> allSums,
+                                             Collection<Extension<DungTheory>> extensions, Extension<DungTheory> e) {
         AtomicReference<Double> sumGesamt = new AtomicReference<>(0.0);
-        ranking.values().stream().forEach(arg -> {
-            sumGesamt.set(sumGesamt.get() + arg.doubleValue());
+        allSums.values().stream().forEach(value -> {
+            sumGesamt.set(sumGesamt.get() + value);
         });
 
-        for (Argument arg: ranking.keySet()) {
+        switch (extensionSemantics) {
+            case PR: {
+                List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
+                        extensions.stream()
+                                .filter(ext ->
+                                        !ext.equals(e)
+                                                && (ext.stream().anyMatch(
+                                                arg -> ranking.get(arg).doubleValue() == 1
+                                                        && !e.contains(arg))
+                                                || e.stream().allMatch(ext::contains)
+                                                && ext.size() > e.size())).collect(Collectors.toList()));
+                System.out.println("Extension:" + e);
+                System.out.println("BESSERE Extensions:" + bessereExtensions);
 
-            if (!e.contains(arg) && ranking.get(arg).doubleValue()==1) {
-                return false;
+                return bessereExtensions.size() == 0;
+
             }
+            case ST: {
+                return (sumGesamt.get() - allSums.get(e)) / (ranking.size() - e.size()) < this.getThresholdSingle();
 
-            if (e.contains(arg) && ranking.get(arg).doubleValue()< getThresholdSingle()) {
-                return false;
             }
+            case GR: {
 
+                List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
+                        extensions.stream()
+                                .filter(ext ->
+                                        !ext.equals(e)
+                                                && ext.size() < e.size()
+                                ).collect(Collectors.toList()));
+                return bessereExtensions.size() == 0;
+
+
+            }
+            case CO:
+                List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
+                        extensions.stream()
+                                .filter(ext ->
+                                        !ext.equals(e)
+                                                && (ext.stream().anyMatch(
+                                                arg -> ranking.get(arg).doubleValue() == 1
+                                                        && !e.contains(arg))
+                                                || ext.containsAll(e)
+                                                && ext.size() > e.size()
+                                                || (ext.size() > e.size() && allSums.get(ext) > allSums.get(e)
+                                        ))).collect(Collectors.toList()));
+                return bessereExtensions.size() == 0;
+
+
+            default: {
+                System.out.println("Default");
+                return true;
+            }
         }
-        if (extensionSemantics == Semantics.STABLE_SEMANTICS) {
-            //TODO: Logische Überlegungen welche Bedingung
 
-
-
-            return ((sumGesamt.get() - allSums.get(e)) / (ranking.size() - e.size()) < getThresholdSingle()
-            );
-
-        }
-        if ( extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
-            //TODO: Logische Überlegungen welche Bedingung
-
-
-            List<Extension<DungTheory>> bessereExtensions = extensions.stream()
-                    .filter(ext ->
-                            ((ext.size()> e.size()
-                                    &&  allSums.get(ext) > allSums.get(e))
-
-                            ))
-                    .collect(Collectors.toList());
-
-            return (bessereExtensions.size() == 0) && getMaxDiff(ranking.entrySet().stream().filter(entry -> e
-                    .contains(entry.getKey()) && entry.getValue()!=1).collect(Collectors.toMap(
-                    Map.Entry::getKey, Map.Entry::getValue)), e) ==0;
-
-
-        }
-
-        System.out.println("Stop!");
-        return true;
     }
+
+
+    private Collection<Extension<DungTheory>> getFinalExtensions(Map<Argument, Double> ranking, Map<Extension<DungTheory>, Double> allSums,
+                                       Collection<Extension<DungTheory>> extensions) {
+
+        //rausfiltern schlechterer Extensions mit gleichen Elementen
+        Collection<Extension<DungTheory>> finalExtensions = new HashSet<>();
+        Map<Extension<DungTheory>, List<Extension<DungTheory>>> alledoppelteExtensions = new HashMap<>();
+
+        extensions.stream()
+                .forEach(ext -> {
+                    var list = new ArrayList<>(extensions.stream().filter(e->
+                            !e.equals(ext) && e.stream().anyMatch(arg ->
+                            ranking.get(arg).doubleValue() != 1 && ext.contains(arg))
+                    ).collect(Collectors.toList()));
+                    alledoppelteExtensions.put(ext, list);
+                });
+
+
+        for (Extension<DungTheory> e: extensions) {
+
+
+            if (alledoppelteExtensions.get(e).size()==0) {
+                finalExtensions.add(e);
+            } else {
+                System.out.println("doppelte Extensions"+alledoppelteExtensions +"von "+e+" mit Wert"+allSums.get(e)
+                +alledoppelteExtensions.get(e).stream().allMatch(ext1 ->
+                        allSums.get(e) > allSums.get(ext1)));
+
+                if (alledoppelteExtensions.get(e).stream().allMatch(ext1 ->
+                        allSums.get(e) > allSums.get(ext1))
+                || (alledoppelteExtensions.get(e).stream().noneMatch(ext2
+                -> alledoppelteExtensions.get(ext2).stream().allMatch(
+                        ext3-> allSums.get(ext2) > allSums.get(ext3))))) {
+                    finalExtensions.add(e);
+                }
+            }
+
+        }
+        return finalExtensions;
+        }
+
+
+
 
     private double getThresholdSingle() {
-        if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics == Semantics.STABLE_SEMANTICS) {
-            return 0.1;
+        switch (this.rankingSemantics) {
+
+            case CATEGORIZER -> {
+                System.out.println("getThresholdSingle for CAT");
+
+                return 0.005;
+            }
+
+            case MAX -> {
+                return 0.1;
+            }
+            case EULER_MB -> {
+                return 0.2;
+            }
+            case TRUST -> {
+                return 0.2;
+            }
+            default -> {
+                return 0.5;
+            }
         }
-        if ((this.rankingSemantics == RankingSemantics.MAX) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
-
-            return 0.1;
-
-
-        }
-
-        if ((this.rankingSemantics == RankingSemantics.CATEGORIZER) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
-
-            return 0.00;
-
-
-        }
-
-        if ((this.rankingSemantics == RankingSemantics.TRUST) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
-
-            return 0.49;
-
-
-        }
-
-        if ((this.rankingSemantics == RankingSemantics.EULER_MB) && extensionSemantics == Semantics.PREFERRED_SEMANTICS) {
-
-            return 0.04;
-
-
-        }
-        return 0.0;
     }
 
-    private double getMaxDiff(Map<Argument, Double> ranking, Extension e) {
-        if (e.size()==1) {
+    private double getMaxDiff(Map<Argument, Double> ranking, Extension<DungTheory> e) {
+        if (e.size() == 1 || e.stream().allMatch(arg -> ranking.get(arg) == null)) {
             return 0;
         }
         var werteListe = ranking.entrySet().stream().filter(entry -> e.contains(entry.getKey()))
                 .collect(Collectors.toList());
 
-        double max=0.;
+        double max = 0.;
         double min = 10.;
 
-        for (var entry: werteListe) {
+        for (var entry : werteListe) {
             var newValue = entry.getValue();
-            if (newValue> max) {
+            if (newValue > max) {
                 max = newValue;
             }
-            if (newValue< min) {
+            if (newValue < min) {
                 min = newValue;
             }
         }
-        System.out.println("Diff: "+(max-min));
-        return Math.abs(max-min);
+        System.out.println("Diff: " + (max - min));
+        return Math.abs(max - min);
 
     }
 

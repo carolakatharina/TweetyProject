@@ -20,13 +20,10 @@
 package org.tweetyproject.arg.rankings.reasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
-import org.tweetyproject.arg.dung.syntax.Attack;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of a weighted argumentation theory
@@ -83,11 +80,21 @@ public class WeightedDungTheoryWithSelfWeight extends DungTheory {
 
 
     /**
-     * return weight of the attack between the given arguments
-     * @return weight of the attack
+     * return weight of the argument
+     * @return weight of the argument
      */
     public Double getWeight(Argument arg) {
         return this.weights.get(arg);
+    }
+
+    /**
+     * return weights all arguments as array
+     * @return weights
+     */
+    public Double[] getWeights() {
+        return this.weights.values()
+                .stream().toArray(
+                        Double[]::new);
     }
 
 

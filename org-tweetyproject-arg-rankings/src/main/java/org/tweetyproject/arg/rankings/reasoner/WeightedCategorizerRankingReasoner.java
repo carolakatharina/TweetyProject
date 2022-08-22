@@ -33,7 +33,10 @@ import java.util.HashSet;
  *
  * @author Carola Bauer
  */
+
 public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
+
+    private double epsilon=0.0001;
 
 
     @Override
@@ -49,34 +52,43 @@ public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<
         ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
 
         WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the current iteration
-        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the last iteration
-
-        for (int step = 0; step < 100000; step++) {
-
-
+        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the previous iteration
+       double distanceOld;
+       double distanceNew;
+        do {
+            distanceOld = getDistance(valuationsOld.getWeights(), valuations.getWeights())/ valuations.getNumberOfNodes();
             for (var argument : valuations) {
-                var attackers = valuationsOld.getAttackers(argument);
-                if (attackers.size() == 0) {
-                    //donothing
-
-                } else {
-                    double sumAttacks = 0;
-                    for (var att : attackers) {
-                        sumAttacks= sumAttacks+ valuationsOld.getWeight(att);
-                    }
-                    var oldNewMax = valuations.getWeight(argument);
-                    var newNewMax = getNewWeight(valuationsOld.getWeight(argument), sumAttacks);
-                    valuations.setWeight(argument, newNewMax);
-                    valuationsOld.setWeight(argument, oldNewMax );
-
-                }
+                setArgumentWeight(valuations, valuationsOld, argument);
             }
+            distanceNew = getDistance(valuationsOld.getWeights(), valuations.getWeights())/valuations.getNumberOfNodes();
+        }while(Math.abs(distanceNew-distanceOld)>epsilon);
 
-            for (Argument arg : (valuations))
-                ranking.put(arg, valuations.getWeight(arg));
-            }
-            return ranking;
+        for (Argument arg : (valuations)) {
+            ranking.put(arg, valuations.getWeight(arg));
         }
+        return ranking;
+    }
+
+    private void setArgumentWeight(WeightedDungTheoryWithSelfWeight valuations, WeightedDungTheoryWithSelfWeight valuationsOld,
+                                   Argument argument) {
+        var attackers = valuationsOld.getAttackers(argument);
+        if (attackers.size() == 0) {
+            //donothing
+
+        } else {
+            double sumAttacks = 0;
+            for (var att : attackers) {
+                sumAttacks = sumAttacks + valuationsOld.getWeight(att);
+            }
+            var newWeight = getNewWeight(valuationsOld.getWeight(argument), sumAttacks);
+            valuationsOld.setWeight(argument, valuations.getWeight(argument));
+            System.out.println("OldWeight:"+valuationsOld.getWeight(argument));
+            valuations.setWeight(argument, newWeight);
+            System.out.println("nEWWeight:"+valuations.getWeight(argument));
+
+
+        }
+    }
 
 
     /**
@@ -87,6 +99,22 @@ public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<
     private double getNewWeight(Double arg, Double sumAttacks) {
 
         return arg / (1 + sumAttacks);
+    }
+
+
+    /**
+     * Computes the Euclidean distance between to the given arrays.
+     * @param vOld first array
+     * @param v second array
+     * @return distance between v and vOld
+     */
+    private double getDistance(Double[] vOld, Double[] v) {
+        double sum = 0.0;
+        for (int i = 0; i < v.length; i++) {
+            sum += Math.pow(v[i]-vOld[i],2.0);
+        }
+        System.out.println( Math.sqrt(sum));
+        return Math.sqrt(sum);
     }
 
 

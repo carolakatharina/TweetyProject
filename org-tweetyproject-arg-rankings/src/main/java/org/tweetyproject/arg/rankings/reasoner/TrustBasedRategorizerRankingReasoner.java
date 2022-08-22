@@ -36,48 +36,60 @@ import java.util.HashSet;
 public class TrustBasedRategorizerRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
 
+
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<NumericalPartialOrder<Argument, DungTheory>>();
+        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
         ranks.add(this.getModel(bbase));
         return ranks;
     }
 
     @Override
     public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
-        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<Argument, DungTheory>();
+        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<>();
         ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
 
-        WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 0.5); // Stores values of the current iteration
-        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 0.5); // Stores values of the last iteration
+        WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 1); // Stores values of the current iteration
+        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 1); // Stores values of the last iteration
+        double distanceOld;
+        double distanceNew;
+        do {
+            distanceOld = getDistance(valuationsOld.getWeights(), valuations.getWeights());
 
-        for (int step = 0; step < 10000; step++) {
 
 
             for (var argument : valuations) {
                 var attackers = valuationsOld.getAttackers(argument);
-                Argument max = null;
+
 
                 //find the strongest attacker of argument
-                if (attackers.size()!=0) {
-                    max = attackers.iterator().next();
+                if (attackers.size() == 0) {
+
+                }
+                else {
+                    Argument max = attackers.iterator().next();
                     for (var att : attackers) {
                         if (valuationsOld.getWeight(att) > valuationsOld.getWeight(max)) {
                             max = att;
                         }
                     }
+
+                    var oldNewWeight = valuations.getWeight(argument);
+                    var newNewWeight = getNewWeight(valuationsOld.getWeight(argument), valuationsOld.getWeight(max));
+                    valuations.setWeight(argument, newNewWeight);
+                    valuationsOld.setWeight(argument, oldNewWeight);
                 }
+            }
+            distanceNew = getDistance(valuationsOld.getWeights(), valuations.getWeights());
 
-                var oldNewWeight = valuations.getWeight(argument);
-                var newNewWeight = (max == null) ? 1. :getNewWeight(valuationsOld.getWeight(argument), valuationsOld.getWeight(max));
-                valuations.setWeight(argument, newNewWeight);
-                valuationsOld.setWeight(argument, oldNewWeight);
 
+        } while(distanceOld!=distanceNew);
+
+
+        for (Argument arg : (valuations)) {
+            ranking.put(arg, valuations.getWeight(arg));
         }
 
-        for (Argument arg : (valuations))
-            ranking.put(arg, valuations.getWeight(arg));
-    }
             return ranking;
 }
 
@@ -100,6 +112,25 @@ public class TrustBasedRategorizerRankingReasoner extends AbstractRankingReasone
     public boolean isInstalled() {
         return true;
     }
+
+    /**
+     * Computes the Euclidean distance between to the given arrays.
+     * @param vOld first array
+     * @param v second array
+     * @return distance between v and vOld
+     */
+    private double getDistance(Double[] vOld, Double[] v) {
+        double sum = 0.0;
+        for (int i = 0; i < v.length; i++) {
+            sum += Math.pow(v[i]-vOld[i],2.0);
+        }
+        System.out.println("Distanz"+Math.sqrt(sum));
+
+        return Math.sqrt(sum);
+    }
+
+
+
 
 
 }

@@ -24,6 +24,7 @@ import org.tweetyproject.comparator.NumericalPartialOrder;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import static java.lang.StrictMath.exp;
 
@@ -39,10 +40,13 @@ import static java.lang.StrictMath.exp;
  */
 public class EulerMaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
+    private double epsilon=0.5;
+    //TODO: überprüfem
+
 
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<NumericalPartialOrder<Argument, DungTheory>>();
+        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
         ranks.add(this.getModel(bbase));
         return ranks;
     }
@@ -53,37 +57,54 @@ public class EulerMaxBasedRankingReasoner extends AbstractRankingReasoner<Numeri
         ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
 
         WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the current iteration
-        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the last iteration
+        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the current iteration
 
-        for (int step = 0; step < 10; step++) {
-
+        double distanceOld;
+        double distanceNew;
+        do {
+            distanceOld = getDistance(valuationsOld.getWeights(), valuations.getWeights());
 
             for (var argument : valuations) {
-                var attackers = valuationsOld.getAttackers(argument);
-                if (attackers.size() == 0) {
-                    //donothing
-
-                } else {
-                    Argument max = attackers.iterator().next();
-                    //find the strongest attacker of argument
-                    for (var att : attackers) {
-                        if (valuationsOld.getWeight(att) > valuationsOld.getWeight(max)) {
-                            max = att;
-                        }
-                    }
-                    var oldNewMax = valuations.getWeight(argument);
-                    var newNewMax = getNewWeight(valuationsOld.getWeight(argument), valuationsOld.getWeight(max));
-                    valuations.setWeight(argument, newNewMax);
-                    valuationsOld.setWeight(argument, oldNewMax );
-
-                }
+                setArgumentWeight(valuations, valuationsOld, argument);
             }
+            distanceNew = getDistance(valuationsOld.getWeights(), valuations.getWeights());
 
-            for (Argument arg : (valuations))
-                ranking.put(arg, valuations.getWeight(arg));
-            }
-            return ranking;
+        }while(Math.abs(distanceOld-distanceNew)>epsilon);
+
+        for (Argument arg : (valuations)) {
+            ranking.put(arg, valuations.getWeight(arg));
         }
+        return ranking;
+        }
+
+
+
+    private void setArgumentWeight(WeightedDungTheoryWithSelfWeight valuations,
+                                   WeightedDungTheoryWithSelfWeight valuationsOld, Argument argument) {
+        var attackers = valuationsOld.getAttackers(argument);
+        if (attackers.size() == 0) {
+            //donothing
+
+        } else {
+            Argument max = getMax(valuationsOld, attackers);
+            var newValue = getNewWeight(valuationsOld.getWeight(argument),
+                    valuationsOld.getWeight(max));
+            valuationsOld.setWeight(argument, valuations.getWeight(argument));
+            valuations.setWeight(argument, newValue);
+
+        }
+    }
+
+    private Argument getMax(WeightedDungTheoryWithSelfWeight valuations, Set<Argument> attackers) {
+        Argument max = attackers.iterator().next();
+        //find the strongest attacker of argument
+        for (var att : attackers) {
+            if (valuations.getWeight(att) > valuations.getWeight(max)) {
+                max = att;
+            }
+        }
+        return max;
+    }
 
 
     /**
@@ -91,7 +112,7 @@ public class EulerMaxBasedRankingReasoner extends AbstractRankingReasoner<Numeri
      *
      * @return new weight of the argument
      */
-    private double getNewWeight(Double arg, Double max) {
+    private static double getNewWeight(Double arg, Double max) {
 
         return arg * exp(-max);
     }
@@ -105,5 +126,21 @@ public class EulerMaxBasedRankingReasoner extends AbstractRankingReasoner<Numeri
         return true;
     }
 
+
+    /**
+     * Computes the Euclidean distance between to the given arrays.
+     * @param vOld first array
+     * @param v second array
+     * @return distance between v and vOld
+     */
+    private double getDistance(Double[] vOld, Double[] v) {
+        double sum = 0.0;
+        for (int i = 0; i < v.length; i++) {
+            sum += Math.pow(v[i]-vOld[i],2.0);
+        }
+        System.out.println("Distanz"+Math.sqrt(sum));
+
+        return Math.sqrt(sum);
+    }
 
 }

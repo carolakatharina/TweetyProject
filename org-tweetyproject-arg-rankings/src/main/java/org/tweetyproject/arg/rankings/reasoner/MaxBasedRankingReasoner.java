@@ -37,6 +37,8 @@ import java.util.HashSet;
  */
 public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
+    private double epsilon=0.0001;
+
 
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
@@ -52,8 +54,10 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
 
         WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the current iteration
         WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the last iteration
-
-        for (int step = 0; step < 10; step++) {
+        double distanceOld;
+        double distanceNew;
+        do {
+            distanceOld = getDistance(valuationsOld.getWeights(), valuations.getWeights())/ valuations.getNumberOfNodes();
 
 
             for (var argument : valuations) {
@@ -72,17 +76,19 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
                     var oldNewMax = valuations.getWeight(argument);
                     var newNewMax = getNewWeight(valuationsOld.getWeight(argument), valuationsOld.getWeight(max));
                     valuations.setWeight(argument, newNewMax);
-                    valuationsOld.setWeight(argument, oldNewMax );
+                    valuationsOld.setWeight(argument, oldNewMax);
 
                 }
-            }
+            }   distanceNew = getDistance(valuationsOld.getWeights(), valuations.getWeights())/ valuations.getNumberOfNodes();
+        }while(Math.abs(distanceNew-distanceOld)>epsilon);
 
-            for (Argument arg : (valuations))
+            for (Argument arg : (valuations)) {
                 ranking.put(arg, valuations.getWeight(arg));
             }
-            return ranking;
-        }
 
+            return ranking;
+
+    }
 
     /**
      * Calculates the new weight.
@@ -102,6 +108,21 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
     public boolean isInstalled() {
         return true;
     }
+
+    /**
+     * Computes the Euclidean distance between to the given arrays.
+     * @param vOld first array
+     * @param v second array
+     * @return distance between v and vOld
+     */
+    private double getDistance(Double[] vOld, Double[] v) {
+        double sum = 0.0;
+        for (int i = 0; i < v.length; i++) {
+            sum += Math.pow(v[i]-vOld[i],2.0);
+        }
+        return Math.sqrt(sum);
+    }
+
 
 
 }
