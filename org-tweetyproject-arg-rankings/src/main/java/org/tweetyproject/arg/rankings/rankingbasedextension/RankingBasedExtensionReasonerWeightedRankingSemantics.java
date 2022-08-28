@@ -22,6 +22,7 @@ package org.tweetyproject.arg.rankings.rankingbasedextension;
 
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.tweetyproject.arg.dung.reasoner.AbstractExtensionReasoner;
+import org.tweetyproject.arg.dung.semantics.ArgumentStatus;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
@@ -34,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 // vermutlich so eher für gradual semantics, noch einen fuer reine ranking-semantics bauen
-public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
+public class RankingBasedExtensionReasonerWeightedRankingSemantics extends AbstractExtensionReasoner {
     RankingSemantics rankingSemantics;
     Semantics extensionSemantics;
 
@@ -48,12 +49,12 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         COUNTING,
         PROBABILISTIC,
         MAX,
-        EULER_MB, TRUST
+        EULER_MB, TRUST, SERIALIZABLE
 
     }
 
-    public RankingBasedExtensionReasoner(Semantics extensionSemantics,
-                                         RankingSemantics semantics) {
+    public RankingBasedExtensionReasonerWeightedRankingSemantics(Semantics extensionSemantics,
+                                                                 RankingSemantics semantics) {
 
         System.out.println(semantics);
         this.rankingSemantics = semantics;
@@ -80,6 +81,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
             case TRUST -> new TrustBasedRategorizerRankingReasoner().getModel(bbase);
             case EULER_MB -> new EulerMaxBasedRankingReasoner().getModel(bbase);
+            case SERIALIZABLE -> new SerialisabilityRankingReasoner().getModel(bbase);
         });
 
         Collection<Extension<DungTheory>> allExtensions = new HashSet<>();
@@ -92,11 +94,14 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             System.out.println("Cycle" + bbase.containsCycle());
 
 
+
+
             if (ranking.get(arg) > getThresholdSingle()) {
                 akzeptableArgumente.put(arg, ranking.get(arg));
             }
         }
 
+        //TODO: bei Serialisability anders umgehen
 
         Map<Extension<DungTheory>, Double> allSums = new HashMap<>();
 
@@ -134,11 +139,12 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         }
 
 
-        return getExtensionsForSemantics(ranking, allSums, allExtensions);
+        return getExtensionsForSemantics(ranking, allSums, allExtensions, bbase);
     }
 
     private Collection<Extension<DungTheory>> getExtensionsForSemantics(Map<Argument, Double> ranking, Map<Extension<DungTheory>, Double> allSums,
-                                                                        Collection<Extension<DungTheory>> extensions) {
+                                                                        Collection<Extension<DungTheory>> extensions,
+                                                                        DungTheory bbase) {
 
 
         Collection<Extension<DungTheory>> allExtensionsFinal = new HashSet<>();
@@ -147,7 +153,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         for (Extension<DungTheory> e : extensions) {
 
 
-            if (getConditionForSemantics(ranking, allSums, extensions, e)) {
+            if (getConditionForSemantics(ranking, allSums, extensions, e, bbase)) {
                 allExtensionsFinal.add(e);
             }
         }
@@ -163,22 +169,23 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     }
 
     private boolean getConditionForSemantics(Map<Argument, Double> ranking, Map<Extension<DungTheory>, Double> allSums,
-                                             Collection<Extension<DungTheory>> extensions, Extension<DungTheory> e) {
+                                             Collection<Extension<DungTheory>> extensions, Extension<DungTheory> e,
+                                             DungTheory bbase) {
         AtomicReference<Double> sumGesamt = new AtomicReference<>(0.0);
-        allSums.values().stream().forEach(value -> {
-            sumGesamt.set(sumGesamt.get() + value);
-        });
+        allSums.values().stream().forEach(value -> sumGesamt.set(sumGesamt.get() + value));
 
         switch (extensionSemantics) {
             case PR: {
+
+
                 List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
                         extensions.stream()
                                 .filter(ext ->
                                         !ext.equals(e)
                                                 && (ext.stream().anyMatch(
-                                                arg -> ranking.get(arg).doubleValue() == 1
+                                                arg -> ranking.get(arg) == 1
                                                         && !e.contains(arg))
-                                                || e.stream().allMatch(ext::contains)
+                                                || ext.containsAll(e)
                                                 && ext.size() > e.size())).collect(Collectors.toList()));
                 System.out.println("Extension:" + e);
                 System.out.println("BESSERE Extensions:" + bessereExtensions);
@@ -187,33 +194,30 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
             }
             case ST: {
-                var sicherakzeptierteArgumenteNichtInExt = extensions.stream()
-                        .anyMatch(ext ->
-                                !ext.equals(e)
-                                        && (ext.stream().anyMatch(
-                                        arg -> ranking.get(arg).doubleValue() == 1
-                                                && !e.contains(arg))));
-                // nicht mit reinen Zahlen darstellbar, wie soll gezeigt werden, dass Argument nicht in e durch e attackiert?
-                //hoechstens mit historischen Daten
 
-                //alle-Stärke der akzeptierten = nichtakzeptierte+x
 
-                System.out.println( "durchschnitt"+(sumGesamt.get()+" -"+ allSums.get(e)) +"/"+ (ranking.values().size() - e.size()));
-
-                return sicherakzeptierteArgumenteNichtInExt &&
-                        ((sumGesamt.get() - allSums.get(e)) / (ranking.values().size() - e.size())) < this.getThresholdSingle();
+                return
+                        ranking.keySet().stream().
+                                filter(arg -> !e.contains(arg)).
+                                allMatch(arg ->
+                                        bbase.getAttackers(arg).stream().anyMatch(
+                                                e::contains
+                                        ));
 
             }
             case GR: {
 
+                System.out.println("IN"+e.getArgumentsOfStatus(ArgumentStatus.IN));
+
+                //nur eine, miminales Subset von complete
                 List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
                         extensions.stream()
                                 .filter(ext ->
                                         !ext.equals(e)
                                                 && (ext.stream().anyMatch(
-                                                arg -> ranking.get(arg).doubleValue() == 1
+                                                arg -> ranking.get(arg) == 1
                                                         && !e.contains(arg))
-                                                || e.stream().allMatch(ext::contains)
+                                                || ext.containsAll(e)
                                                 && ext.size() > e.size())).collect(Collectors.toList()));
                 System.out.println("Extension:" + e);
                 System.out.println("BESSERE Extensions:" + bessereExtensions);
@@ -222,20 +226,17 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
             }
-            case CO:
-                List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
-                        extensions.stream()
-                                .filter(ext ->
-                                        !ext.equals(e)
-                                                && (ext.stream().anyMatch(
-                                                arg -> ranking.get(arg).doubleValue() == 1
-                                                        && !e.contains(arg))
-                                                || e.stream().allMatch(ext::contains)
-                                                && ext.size() > e.size())).collect(Collectors.toList()));
-                System.out.println("Extension:" + e);
-                System.out.println("BESSERE Extensions:" + bessereExtensions);
+            case CO: {
 
-                return bessereExtensions.size() == 0;
+
+                return ranking.keySet().stream().
+                        filter(arg -> !e.contains(arg)).
+                        allMatch(arg ->
+                                        bbase.getAttackers(arg).stream().anyMatch(
+                                                e::contains
+                                        ));
+
+            }
 
             default: {
                 System.out.println("Default");
@@ -261,7 +262,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                         .forEach(ext -> {
                             var list = new ArrayList<>(extensions.stream().filter(e ->
                                     !e.equals(ext) && e.stream().anyMatch(arg ->
-                                            ranking.get(arg).doubleValue() != 1 && ext.contains(arg))
+                                            ranking.get(arg) != 1 && ext.contains(arg))
                             ).collect(Collectors.toList()));
                             alledoppelteExtensions.put(ext, list);
                         });
@@ -291,18 +292,18 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             }
             case GR: {
                 //nur Extensions, die in allen gültigen preferredExtensions enthalten
-                Collection<Extension<DungTheory>> finalExtensions = new HashSet<>();
+                Collection<Extension<DungTheory>> finalExtensions;
 
                 //ermittle preferred extensions
                 //rausfiltern schlechterer Extensions mit gleichen Elementen
                 Collection<Extension<DungTheory>> preferredExtensions = new HashSet<>();
                 Map<Extension<DungTheory>, List<Extension<DungTheory>>> alledoppelteExtensions = new HashMap<>();
 
-                extensions.stream()
+                extensions
                         .forEach(ext -> {
                             var list = new ArrayList<>(extensions.stream().filter(e ->
                                     !e.equals(ext) && e.stream().anyMatch(arg ->
-                                            ranking.get(arg).doubleValue() != 1 && ext.contains(arg))
+                                            ranking.get(arg) != 1 && ext.contains(arg))
                             ).collect(Collectors.toList()));
                             alledoppelteExtensions.put(ext, list);
                         });
@@ -327,10 +328,10 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                 }
                 finalExtensions = conflictfreeExtensions.stream().filter(ext ->
                                 preferredExtensions.stream().allMatch(extpr ->
-                                        ext.stream().allMatch(arg -> extpr.contains(arg)))
+                                        extpr.containsAll(ext))
                         && preferredExtensions.stream().noneMatch(extpr ->
                                         extpr.stream().anyMatch(arg ->
-                                                ranking.get(arg).doubleValue() == 1 && !ext.contains(arg))))
+                                                ranking.get(arg) == 1 && !ext.contains(arg))))
                         .collect(Collectors.toSet());
 
                 Collection<Extension<DungTheory>> finalExtensions1 = finalExtensions;
@@ -346,7 +347,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                                     ))
                             .collect(Collectors.toSet());
             }
-            default: return List.of();
+            default: return extensions;
         }
     }
 
@@ -371,6 +372,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case TRUST -> {
                 return 0.2;
             }
+            case SERIALIZABLE -> { return 0.0;}
             default -> {
                 return 0.5;
             }

@@ -49,8 +49,8 @@ public class TrustBasedRategorizerRankingReasoner extends AbstractRankingReasone
         NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<>();
         ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
 
-        WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 1); // Stores values of the current iteration
-        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 1); // Stores values of the last iteration
+        WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 0.5); // Stores values of the current iteration
+        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 0.5); // Stores values of the last iteration
         double distanceOld;
         double distanceNew;
         do {
