@@ -18,13 +18,17 @@
  */
 package org.tweetyproject.arg.rankings.reasoner;
 
-import org.apache.commons.math3.util.CombinatoricsUtils;
+import org.tweetyproject.arg.dung.reasoner.serialisable.SerialisableExtensionReasoner;
 import org.tweetyproject.arg.dung.semantics.Extension;
+import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.comparator.NumericalPartialOrder;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +42,13 @@ import java.util.stream.Collectors;
 public class SerialisabilityRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
 
+
+    private final Semantics semantics;
+    public SerialisabilityRankingReasoner(Semantics s)
+
+    {
+        this.semantics = s;
+    }
 
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
@@ -53,7 +64,7 @@ public class SerialisabilityRankingReasoner extends AbstractRankingReasoner<Nume
 
         WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 0.0); // Stores values of the current iteration
 
-        var minimalinitialesetsValuations = getMinimalInitialSetRanking(kb, valuations);
+        var minimalinitialesetsValuations = getMinimalInitialSetRanking(kb, semantics, valuations);
 
             for (Argument arg : (minimalinitialesetsValuations)) {
                 System.out.println("minsets"+minimalinitialesetsValuations.getWeight(arg));
@@ -78,79 +89,27 @@ public class SerialisabilityRankingReasoner extends AbstractRankingReasoner<Nume
 
 
 
-    private WeightedDungTheoryWithSelfWeight getMinimalInitialSetRanking(DungTheory bbase, WeightedDungTheoryWithSelfWeight valuations) {
+    private WeightedDungTheoryWithSelfWeight getMinimalInitialSetRanking(DungTheory bbase, Semantics s, WeightedDungTheoryWithSelfWeight valuations) {
 
-        Collection<Extension<DungTheory>> minimalextensions = new HashSet<>();
-
-        var initialarguments = bbase.stream()
-                .filter(arg -> bbase.getAttackers(arg).isEmpty() ||
-                        bbase.getAttackers(arg).stream().allMatch(
-                                att -> bbase.getAttackers(att).contains(arg)
-                        )).collect(Collectors.toList());
-
-        initialarguments.forEach(arg -> minimalextensions.add(new Extension<>(List.of(arg))));
-        System.out.println("initial"+initialarguments);
-
-        var potentialArguments = bbase.stream()
-                .filter(arg -> !initialarguments.contains(arg) &&
-                        bbase.getAttackers(arg).stream().noneMatch(att -> bbase
-                                .getAttackers(att).isEmpty())).collect(Collectors.toSet());
-        System.out.println("pot"+potentialArguments);
-        boolean allExtensionsFound = false;
-
-        for (int k = 0; k <potentialArguments.size(); k++) {
-
-            if (!allExtensionsFound) {
-
-                Iterator<int[]> iterator = CombinatoricsUtils.combinationsIterator(
-                        potentialArguments.size(),k);
-
-                while (iterator.hasNext()) {
-                    final int[] combination = iterator.next();
-                    Collection<Argument> arguments = new HashSet<>();
-                    for (int index : combination) {
-                        var argument = (Argument) (potentialArguments.toArray()[index]);
-                        arguments.add(argument);
-
-                    }
-                    arguments.addAll(initialarguments);
-                    var potentialextension = new Extension<DungTheory>(arguments);
-                    if (bbase.isConflictFree(potentialextension)
-                            && (bbase.getAttackers(potentialextension).isEmpty()) || bbase.getAttackers(potentialextension)
-                            .stream().allMatch(att ->
-                                    bbase.getAttackers(att).stream().anyMatch(potentialextension::contains))) {
-                        minimalextensions.add(potentialextension);
-                        System.out.println("ADD" + potentialextension);
-
-                    }
-                }
-
-                allExtensionsFound = potentialArguments.stream().allMatch(arg ->
-                        (minimalextensions.stream().anyMatch(ext -> ext.contains(arg))));
-            }
-        }
-
+        Collection<Extension<DungTheory>> minimalextensions = SerialisableExtensionReasoner.getSerialisableReasonerForSemantics(
+                s).getModels(bbase);
         System.out.println(minimalextensions);
+        List<Argument> arguments = new ArrayList<>();
 
-            if (!minimalextensions.isEmpty()) {
-                potentialArguments.stream().forEach(arg -> {
-                    List<Extension<DungTheory>> minext = new ArrayList<>(minimalextensions.stream().filter(
-                            ext -> ext.contains(arg) &&
-                                    minimalextensions.stream().noneMatch(ext2 -> ext2.contains(arg)
-                                            && ext2.size() <
-                                            ext.size())).collect(Collectors.toList()));
-                    System.out.println("minext"+minext);
 
-                    if (!minext.isEmpty() && minext.get(0).size()>0) {
-                        System.out.println("minext"+minext.get(0)+"weight" + minext.get(0).size());
-                        valuations.setWeight(arg, 1.0 / minext.get(0).size());
+                minimalextensions.stream().forEach(ext -> { arguments.addAll(ext);});
+
+                arguments.stream().forEach(arg -> {
+                    var min = minimalextensions.stream().filter(
+                            order -> order.contains(arg) &&
+                                    minimalextensions.stream().noneMatch(order2 -> order2.contains(arg)
+                                            && order2.size() <
+                                            order.size())).collect(Collectors.toList());
+                    if (!min.isEmpty()) {
+                        System.out.println("minext" + min.get(0) + "weight" + min.get(0).size());
+                        valuations.setWeight(arg, 1.0 / min.get(0).size());
                     }
                 });
-
-
-                initialarguments.forEach(arg2 ->
-                        valuations.setWeight(arg2, 1.0));
-            }
 
 
         return valuations;

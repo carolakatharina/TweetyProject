@@ -81,27 +81,17 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
             case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
             case TRUST -> new TrustBasedRategorizerRankingReasoner().getModel(bbase);
             case EULER_MB -> new EulerMaxBasedRankingReasoner().getModel(bbase);
-            case SERIALIZABLE -> new SerialisabilityRankingReasoner().getModel(bbase);
+            case SERIALIZABLE -> new SerialisabilityRankingReasoner(extensionSemantics).getModel(bbase);
         });
 
         Collection<Extension<DungTheory>> allExtensions = new HashSet<>();
 
 
         // nur Argumente über bestimmten Thresshold für Extensionen berücksichtigen
-        Map<Argument, Double> akzeptableArgumente = new HashMap<>();
-        for (Argument arg : ranking.keySet()) {
-            System.out.println(arg.getName() + ": " + ranking.get(arg));
-            System.out.println("Cycle" + bbase.containsCycle());
+        Map<Argument, Double> akzeptableArgumente = new HashMap<>(ranking
+                .entrySet().stream().filter(entry -> entry.getValue()> getThresholdSingle())
+                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())));
 
-
-
-
-            if (ranking.get(arg) > getThresholdSingle()) {
-                akzeptableArgumente.put(arg, ranking.get(arg));
-            }
-        }
-
-        //TODO: bei Serialisability anders umgehen
 
         Map<Extension<DungTheory>, Double> allSums = new HashMap<>();
 
@@ -124,7 +114,7 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
 
                 Extension<DungTheory> e = new Extension<>(arguments);
 
-                if (bbase.isConflictFree(e)) {
+                if (bbase.isAdmissable(e)) {
 
 
                     allExtensions.add(e);
@@ -139,6 +129,7 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
         }
 
 
+
         return getExtensionsForSemantics(ranking, allSums, allExtensions, bbase);
     }
 
@@ -148,7 +139,10 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
 
 
         Collection<Extension<DungTheory>> allExtensionsFinal = new HashSet<>();
-        System.out.println("Konfliktfreie Extensions:" + extensions);
+        var printext = extensions.stream().map(
+                ext -> ext+ " "+allSums.get(ext)).collect(Collectors.toList());
+        System.out.println("alle admissible Extensions mit Summe: " + printext
+        );
 
         for (Extension<DungTheory> e : extensions) {
 
@@ -174,9 +168,19 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
         AtomicReference<Double> sumGesamt = new AtomicReference<>(0.0);
         allSums.values().stream().forEach(value -> sumGesamt.set(sumGesamt.get() + value));
 
+        System.out.println("Alle Attacker"+bbase.getAttackers(e));
+        System.out.println("Alle Attackierten"+bbase.getAttacked(e));
+        System.out.println("Alle bidirektionalen Attacken"+bbase.getBidirectionalAttacks());
+        System.out.println("Attackiert alle Argumente"+bbase.isAttackingAllOtherArguments(e));
+
+        System.out.println("Alle scc"+bbase.getStronglyConnectedComponents());
+        System.out.println("cycle"+bbase.containsCycle());
+
         switch (extensionSemantics) {
             case PR: {
-
+                System.out.println("preferred"+e+" weights");
+                e.stream().forEach(arg ->
+                        System.out.println(ranking.get(arg)));
 
                 List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
                         extensions.stream()
@@ -192,20 +196,20 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
 
                 return bessereExtensions.size() == 0;
 
+
             }
             case ST: {
 
-
-                return
-                        ranking.keySet().stream().
-                                filter(arg -> !e.contains(arg)).
-                                allMatch(arg ->
-                                        bbase.getAttackers(arg).stream().anyMatch(
-                                                e::contains
-                                        ));
+                System.out.println("stable"+e+" weights");
+                e.stream().forEach(arg ->
+                        System.out.println(ranking.get(arg)));
+                return bbase.isAttackingAllOtherArguments(e);
 
             }
             case GR: {
+                System.out.println("grounded"+e+" weights");
+                e.stream().forEach(arg ->
+                        System.out.println(ranking.get(arg)));
 
                 System.out.println("IN"+e.getArgumentsOfStatus(ArgumentStatus.IN));
 
@@ -227,14 +231,26 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
 
             }
             case CO: {
-
-
-                return ranking.keySet().stream().
-                        filter(arg -> !e.contains(arg)).
-                        allMatch(arg ->
-                                        bbase.getAttackers(arg).stream().anyMatch(
-                                                e::contains
-                                        ));
+                // Extension ist konfliktfrei und verteidigt alle seine Elemente (=admissible) und es gibt kein Argument,
+                // dass es verteidigt, aber dass nicht in E ist
+                System.out.println("complete"+e+" weights");
+                e.stream().forEach(arg ->
+                        System.out.println(ranking.get(arg)));
+                List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
+                                extensions.stream()
+                                .filter(ext ->
+                                            !ext.equals(e)
+                                                    && (ext.stream().anyMatch(
+                                                    arg ->  !e.contains(arg)
+                                                    && (ranking.get(arg) == 1
+                                                            || bbase.getAttackers(arg).stream()
+                                                            .allMatch(attacker ->
+                                                                    bbase.getAttacked(e).contains(attacker)))
+                                                           )))
+                                .collect(Collectors.toList()));
+                System.out.println("BESSERE Extensions:" + bessereExtensions);
+               return
+                       bessereExtensions.size()==0;
 
             }
 
@@ -371,6 +387,10 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
             }
             case TRUST -> {
                 return 0.2;
+            }
+
+            case COUNTING -> {
+                return 0.1;
             }
             case SERIALIZABLE -> { return 0.0;}
             default -> {
