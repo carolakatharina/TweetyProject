@@ -22,7 +22,6 @@ package org.tweetyproject.arg.rankings.rankingbasedextension;
 
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.tweetyproject.arg.dung.reasoner.AbstractExtensionReasoner;
-import org.tweetyproject.arg.dung.semantics.ArgumentStatus;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
@@ -34,13 +33,17 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-// vermutlich so eher für gradual semantics, noch einen fuer reine ranking-semantics bauen
+import static java.lang.StrictMath.exp;
+
 public class RankingBasedExtensionReasonerWeightedRankingSemantics extends AbstractExtensionReasoner {
     RankingSemantics rankingSemantics;
     Semantics extensionSemantics;
 
+    //TODO fragen klären: GIBT ES eine Moeglichkeit, die admissible sets über die Werte zu identifizieren?
+    // dann wie complete set herausfinden über Werte
 
     public enum RankingSemantics {
+        //TODO: gibt es Strategien, die nicht so komplex/rekursiv, die funktionieren?
 
         CATEGORIZER,
         STRATEGY,
@@ -85,12 +88,40 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
         });
 
         Collection<Extension<DungTheory>> allExtensions = new HashSet<>();
+        Collection<Extension<DungTheory>> potenzielleExtensions = new HashSet<>();
+        System.out.println("Gewichte aller "+ranking.entrySet());
+        System.out.println("Zahl aller Attacker gesamt "+bbase.getAttackers(bbase.getNodes()).size());
+        System.out.println("Zahl aller Attacken gesamt "+bbase.getAttacks().size());
+        System.out.println("Zahl aller Attackierten gesamt "+bbase.getAttacked(bbase.getNodes()).size());
+
+        System.out.println("Zahl aller Knoten gesamt "+bbase.getNodes().size());
+
+        AtomicReference<Double> weightAttackersAll = new AtomicReference<>(0.);
+        AtomicReference<Double> weightAll = new AtomicReference<>(0.);
+        AtomicReference<Double> weightAttacked = new AtomicReference<>(0.);
+        ranking.entrySet().stream().forEach(
+                entry ->{
+                    if (bbase.getAttackers(bbase.getNodes()).contains(entry.getKey())
+                    ) {
+                        weightAttackersAll.set(weightAttackersAll.get() + entry.getValue());
+                    }
+                    if (bbase.getAttacked(bbase.getNodes()).contains(entry.getKey())
+                    ) {
+                        weightAttacked.set(weightAttacked.get() + entry.getValue());
+                    }
+
+                        weightAll.set(weightAll.get()+entry.getValue());
+                    });
 
 
-        // nur Argumente über bestimmten Thresshold für Extensionen berücksichtigen
+        // nur Argumente über bestimmten Threshold für Extensionen berücksichtigen
         Map<Argument, Double> akzeptableArgumente = new HashMap<>(ranking
-                .entrySet().stream().filter(entry -> entry.getValue()> getThresholdSingle())
+                .entrySet().stream().filter(entry -> entry.getValue()> getThresholdSingle(weightAll.get(), weightAttackersAll.get(), weightAttacked.get(), bbase.getNodes().size(),
+                        bbase.getAttackers(bbase.getNodes()).size(), bbase.getAttacks().size(), bbase.getAttacked(bbase.getNodes()).size()))
                 .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())));
+
+        System.out.println("akzeptable Argumente" + akzeptableArgumente + " mit Threshold "+getThresholdSingle(weightAll.get(), weightAttackersAll.get(), weightAttacked.get(), bbase.getNodes().size(),
+                bbase.getAttackers(bbase.getNodes()).size(),bbase.getAttacks().size(), bbase.getAttacked(bbase.getNodes()).size()));
 
 
         Map<Extension<DungTheory>, Double> allSums = new HashMap<>();
@@ -113,7 +144,7 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
                 }
 
                 Extension<DungTheory> e = new Extension<>(arguments);
-
+                potenzielleExtensions.add(e);
                 if (bbase.isAdmissable(e)) {
 
 
@@ -128,6 +159,8 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
 
         }
 
+        //System.out.println("potenzielle Extensions:"+potenzielleExtensions);
+
 
 
         return getExtensionsForSemantics(ranking, allSums, allExtensions, bbase);
@@ -141,8 +174,7 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
         Collection<Extension<DungTheory>> allExtensionsFinal = new HashSet<>();
         var printext = extensions.stream().map(
                 ext -> ext+ " "+allSums.get(ext)).collect(Collectors.toList());
-        System.out.println("alle admissible Extensions mit Summe: " + printext
-        );
+        //System.out.println("alle admissible Extensions mit Summe: " + printext);
 
         for (Extension<DungTheory> e : extensions) {
 
@@ -153,11 +185,9 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
         }
         Collection<Extension<DungTheory>> finalAllExtensionsFinalTemp = allExtensionsFinal;
 
-        System.out.println("extensionen nach 1. Filter: " + allExtensionsFinal);
 
         allExtensionsFinal = getFinalExtensions(ranking, allSums,
                 finalAllExtensionsFinalTemp, extensions);
-        System.out.println("extensionen nach 2. Filter: " + allExtensionsFinal);
 
         return allExtensionsFinal;
     }
@@ -168,17 +198,20 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
         AtomicReference<Double> sumGesamt = new AtomicReference<>(0.0);
         allSums.values().stream().forEach(value -> sumGesamt.set(sumGesamt.get() + value));
 
-        System.out.println("Alle Attacker"+bbase.getAttackers(e));
-        System.out.println("Alle Attackierten"+bbase.getAttacked(e));
-        System.out.println("Alle bidirektionalen Attacken"+bbase.getBidirectionalAttacks());
-        System.out.println("Attackiert alle Argumente"+bbase.isAttackingAllOtherArguments(e));
+        //System.out.println("Alle Attacker"+bbase.getAttackers(e));
+        //System.out.println("Alle Attackierten"+bbase.getAttacked(e));
+        //System.out.println("Alle bidirektionalen Attacken"+bbase.getBidirectionalAttacks());
+        //System.out.println("Attackiert alle Argumente"+bbase.isAttackingAllOtherArguments(e));
 
-        System.out.println("Alle scc"+bbase.getStronglyConnectedComponents());
-        System.out.println("cycle"+bbase.containsCycle());
+
+
+        //System.out.println("Alle scc"+bbase.getStronglyConnectedComponents());
+        //System.out.println("cycle"+bbase.containsCycle());
 
         switch (extensionSemantics) {
+            //maximale complete extensions
             case PR: {
-                System.out.println("preferred"+e+" weights");
+                //System.out.println("preferred"+e+" weights");
                 e.stream().forEach(arg ->
                         System.out.println(ranking.get(arg)));
 
@@ -191,13 +224,14 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
                                                         && !e.contains(arg))
                                                 || ext.containsAll(e)
                                                 && ext.size() > e.size())).collect(Collectors.toList()));
-                System.out.println("Extension:" + e);
-                System.out.println("BESSERE Extensions:" + bessereExtensions);
+                //System.out.println("Extension:" + e);
+                //System.out.println("BESSERE Extensions:" + bessereExtensions);
 
                 return bessereExtensions.size() == 0;
 
 
             }
+            // preferred extensions, die alle Argumente, die nicht dazugehören attackieren
             case ST: {
 
                 System.out.println("stable"+e+" weights");
@@ -207,11 +241,12 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
 
             }
             case GR: {
-                System.out.println("grounded"+e+" weights");
+                //minimale complete extensions
+                /*System.out.println("grounded"+e+" weights");
                 e.stream().forEach(arg ->
-                        System.out.println(ranking.get(arg)));
+                        System.out.println(ranking.get(arg)));*/
 
-                System.out.println("IN"+e.getArgumentsOfStatus(ArgumentStatus.IN));
+                //System.out.println("IN"+e.getArgumentsOfStatus(ArgumentStatus.IN));
 
                 //nur eine, miminales Subset von complete
                 List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
@@ -223,8 +258,8 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
                                                         && !e.contains(arg))
                                                 || ext.containsAll(e)
                                                 && ext.size() > e.size())).collect(Collectors.toList()));
-                System.out.println("Extension:" + e);
-                System.out.println("BESSERE Extensions:" + bessereExtensions);
+                //System.out.println("Extension:" + e);
+                //System.out.println("BESSERE Extensions:" + bessereExtensions);
 
                 return bessereExtensions.size() == 0;
 
@@ -233,7 +268,7 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
             case CO: {
                 // Extension ist konfliktfrei und verteidigt alle seine Elemente (=admissible) und es gibt kein Argument,
                 // dass es verteidigt, aber dass nicht in E ist
-                System.out.println("complete"+e+" weights");
+                //System.out.println("complete"+e+" weights");
                 e.stream().forEach(arg ->
                         System.out.println(ranking.get(arg)));
                 List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
@@ -248,7 +283,7 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
                                                                     bbase.getAttacked(e).contains(attacker)))
                                                            )))
                                 .collect(Collectors.toList()));
-                System.out.println("BESSERE Extensions:" + bessereExtensions);
+                //System.out.println("BESSERE Extensions:" + bessereExtensions);
                return
                        bessereExtensions.size()==0;
 
@@ -307,6 +342,9 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
                 return finalExtensions;
             }
             case GR: {
+                //minimale cmplete extensions
+
+
                 //nur Extensions, die in allen gültigen preferredExtensions enthalten
                 Collection<Extension<DungTheory>> finalExtensions;
 
@@ -352,7 +390,7 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
 
                 Collection<Extension<DungTheory>> finalExtensions1 = finalExtensions;
 
-                System.out.print("temp"+finalExtensions1);
+                //System.out.print("temp"+finalExtensions1);
                 return finalExtensions.stream()
                         .filter(ext ->
                             finalExtensions1.stream().noneMatch(e ->
@@ -370,26 +408,35 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
 
 
 
-    private double getThresholdSingle() {
+    private double getThresholdSingle(double weightAll, double weightAttacks, double weightAttacked, int numberAll, int numberAttacks,
+                                      int numberAttacked, int numberattackers) {
         switch (this.rankingSemantics) {
 
             case CATEGORIZER -> {
-                System.out.println("getThresholdSingle for CAT");
 
-                return 0.005;
+                return (weightAttacked/(1*numberAttacks+(weightAttacks*numberAttacks)))/numberAttacked;
             }
 
             case MAX -> {
-                return 0.1;
+                var gewichtAttackierten = (weightAttacked);
+                var gewichtAttacke = (weightAttacks);
+                var attackenZahl = numberAttacks;
+                return ((gewichtAttackierten/numberAttacked)/(1+(gewichtAttacke/attackenZahl)));
             }
             case EULER_MB -> {
-                return 0.2;
+                var gewichtAttackierten = (weightAttacked);
+                var gewichtAttacke = (weightAttacks);
+                var attackenZahl = numberAttacks;
+                return ((gewichtAttackierten/numberAttacked) * exp(-(gewichtAttacke/attackenZahl)));
             }
+
             case TRUST -> {
+                //vermutlich löschen/anpassen funktioniert nicht richtig
                 return 0.2;
             }
 
             case COUNTING -> {
+                //vermutlich löschen/anpassen funktioniert nicht richtig
                 return 0.1;
             }
             case SERIALIZABLE -> { return 0.0;}
@@ -418,7 +465,6 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
                 min = newValue;
             }
         }
-        System.out.println("Diff: " + (max - min));
         return Math.abs(max - min);
 
     }

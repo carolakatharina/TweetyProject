@@ -82,9 +82,8 @@ public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<
             }
             var newWeight = getNewWeight(valuationsOld.getWeight(argument), sumAttacks);
             valuationsOld.setWeight(argument, valuations.getWeight(argument));
-            System.out.println("OldWeight:"+valuationsOld.getWeight(argument));
+
             valuations.setWeight(argument, newWeight);
-            System.out.println("nEWWeight:"+valuations.getWeight(argument));
 
 
         }
@@ -113,7 +112,6 @@ public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<
         for (int i = 0; i < v.length; i++) {
             sum += Math.pow(v[i]-vOld[i],2.0);
         }
-        System.out.println( Math.sqrt(sum));
         return Math.sqrt(sum);
     }
 
