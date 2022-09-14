@@ -23,6 +23,8 @@ import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.Attack;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
+import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 
 import java.util.List;
 
@@ -157,7 +159,8 @@ public class RankingBasedExtensionReasonerExampleCat {
         example5.add(new Attack(h, g));
         example5.add(new Attack(j, i));
 
-        var theories = List.of(example1, example2, example3, example4a, example4b, example4c, example5);
+        DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
+
 
         var semantics = List.of(Semantics.GROUNDED_SEMANTICS, Semantics.STABLE_SEMANTICS, Semantics.COMPLETE_SEMANTICS, Semantics.PREFERRED_SEMANTICS);
         for (Semantics semantic : semantics) {
@@ -165,9 +168,9 @@ public class RankingBasedExtensionReasonerExampleCat {
             System.out.println(semantic.description());
             System.out.println("-----------------------------");
 
-            for (DungTheory theory : theories) {
+            while(dg.hasNext()) {
+                var theory = dg.next();
 
-                System.out.println("Beispiel Nr." + theories.indexOf(theory));
                 var dungReasoner = getDungReasoner(semantic);
                 var dungExtensions = dungReasoner.getModels(theory);
 
@@ -179,8 +182,15 @@ public class RankingBasedExtensionReasonerExampleCat {
                 var catRankingBasedExtensions = rankingBasedExtensionReasonerWeightedRankingSemantics.getModels(theory);
                 System.out.println("RB-Extensions" + catRankingBasedExtensions);
                 System.out.println("DUNG-Extensions" + dungExtensions);
+                assertTrue(dungExtensions.stream().allMatch(ext -> ext.stream()
+                        .allMatch(arg -> rankingBasedExtensionReasonerWeightedRankingSemantics.getAkzeptableArgumenteCred(theory)
+                                .containsKey(arg))));
                 assertTrue(dungExtensions.containsAll(catRankingBasedExtensions));
+                assertTrue(catRankingBasedExtensions.containsAll(dungExtensions));
                 assertEquals(dungExtensions.size(), catRankingBasedExtensions.size());
+
+
+
 
 
 

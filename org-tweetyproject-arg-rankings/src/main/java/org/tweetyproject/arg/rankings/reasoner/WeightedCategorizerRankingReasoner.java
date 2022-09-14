@@ -21,6 +21,7 @@ package org.tweetyproject.arg.rankings.reasoner;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.comparator.NumericalPartialOrder;
+import org.tweetyproject.math.matrix.Matrix;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,87 +31,85 @@ import java.util.HashSet;
  * <p>
  * This approach ranks arguments iteratively by considering an argument's basic
  * strength as well as the strength of all its attackers.
+ * uses fix-point-algorithm to allow for cycles in graphs
  *
  * @author Carola Bauer
  */
 
 public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
-    private double epsilon=0.0001;
-
 
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<NumericalPartialOrder<Argument, DungTheory>>();
+        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
         ranks.add(this.getModel(bbase));
         return ranks;
     }
 
     @Override
     public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
-        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<Argument, DungTheory>();
-        ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
+             double distanceOld;
+        double distanceNew;
 
-        WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the current iteration
-        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the previous iteration
-       double distanceOld;
-       double distanceNew;
-        do {
-            distanceOld = getDistance(valuationsOld.getWeights(), valuations.getWeights())/ valuations.getNumberOfNodes();
-            for (var argument : valuations) {
-                setArgumentWeight(valuations, valuationsOld, argument);
-            }
-            distanceNew = getDistance(valuationsOld.getWeights(), valuations.getWeights())/valuations.getNumberOfNodes();
-        }while(Math.abs(distanceNew-distanceOld)>epsilon);
-
-        for (Argument arg : (valuations)) {
-            ranking.put(arg, valuations.getWeight(arg));
+        Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
+        int n = directAttackMatrix.getXDimension();
+        double[] valuations = new double[n];	 //Stores valuations of the current iteration
+        for (int i=0; i<n; i++) {
+            valuations[i]=1.;
         }
+        double[] valuationsOld; //Stores valuations of the last iteration
+
+        //Keep computing valuations until the values stop changing much or converge
+        double epsilon = 0.0001;
+        do {
+            valuationsOld = valuations.clone();
+            distanceOld = getDistance(valuationsOld, valuations) / kb.getNumberOfNodes();
+
+            for (int i = 0; i < n; i++)
+                valuations[i] = calculateCategorizerFunction(valuationsOld, directAttackMatrix, i);
+            distanceNew = (getDistance(valuationsOld, valuations) / kb.getNumberOfNodes());
+        } while (Math.abs(distanceNew - distanceOld) > epsilon);
+
+
+        //Use computed valuations as values for argument ranking
+        //Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
+        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<>();
+        ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
+        int i = 0;
+        for (Argument a : kb)
+            ranking.put(a, valuations[i++]);
         return ranking;
     }
 
-    private void setArgumentWeight(WeightedDungTheoryWithSelfWeight valuations, WeightedDungTheoryWithSelfWeight valuationsOld,
-                                   Argument argument) {
-        var attackers = valuationsOld.getAttackers(argument);
-        if (attackers.size() == 0) {
-            //donothing
-
-        } else {
-            double sumAttacks = 0;
-            for (var att : attackers) {
-                sumAttacks = sumAttacks + valuationsOld.getWeight(att);
-            }
-            var newWeight = getNewWeight(valuationsOld.getWeight(argument), sumAttacks);
-            valuationsOld.setWeight(argument, valuations.getWeight(argument));
-
-            valuations.setWeight(argument, newWeight);
-
-
-        }
-    }
-
-
     /**
-     * Calculates the new weight.
-     *
-     * @return new weight of the argument
+     * Computes the h-Categorizer function.
+     * @param vOld array of double valuations that were computed in the previous iteration
+     * @param directAttackMatrix complete matrix of direct attacks
+     * @param i row of the attack matrix that will be used in the calculation
+     * @return categorizer valuation
      */
-    private double getNewWeight(Double arg, Double sumAttacks) {
+    private double calculateCategorizerFunction(double[] vOld, Matrix directAttackMatrix, int i) {
+        double c = 1.0;
 
-        return arg / (1 + sumAttacks);
+        for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
+            c += vOld[j] * directAttackMatrix.getEntry(i,j).doubleValue();
+        }
+        return (vOld[i] / (c));
+
     }
 
 
     /**
      * Computes the Euclidean distance between to the given arrays.
+     *
      * @param vOld first array
-     * @param v second array
+     * @param v    second array
      * @return distance between v and vOld
      */
-    private double getDistance(Double[] vOld, Double[] v) {
+    private double getDistance(double[] vOld, double[] v) {
         double sum = 0.0;
         for (int i = 0; i < v.length; i++) {
-            sum += Math.pow(v[i]-vOld[i],2.0);
+            sum += Math.pow(v[i] - vOld[i], 2.0);
         }
         return Math.sqrt(sum);
     }

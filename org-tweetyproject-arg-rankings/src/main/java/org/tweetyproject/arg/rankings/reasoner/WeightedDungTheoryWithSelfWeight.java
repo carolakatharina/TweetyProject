@@ -24,6 +24,8 @@ import org.tweetyproject.arg.dung.syntax.DungTheory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Implementation of a weighted argumentation theory
@@ -42,29 +44,32 @@ public class WeightedDungTheoryWithSelfWeight extends DungTheory {
      * initialize a new weighted argumentation theory
      */
     public WeightedDungTheoryWithSelfWeight(DungTheory theory, double selfWeight) {
-        super();
         this.add(theory);
         weights = new HashMap<>();
         setInitialWeights(selfWeight);
     }
 
 
+    /**
+     * initialize a new weighted argumentation theory
+     */
+    public WeightedDungTheoryWithSelfWeight(DungTheory theory,Map<Argument, Double> weights) {
+        this.add(theory);
+        this.weights = weights;
+    }
+
+    public WeightedDungTheoryWithSelfWeight clone() {
+        return new WeightedDungTheoryWithSelfWeight(this, weights);
+    }
+
+
+
     private void setInitialWeights(double selfWeight) {
-        for (Argument arg: this.getDungTheory().getNodes()) {
-            weights.put(arg, selfWeight);
+        for (Argument arg: this) {
+            this.weights.put(arg, selfWeight);
         }
     }
 
-    /**
-     * compute Dung Theory only containing attacks with weights greater than zero
-     * @return computed Dung Theory
-     */
-    public DungTheory getDungTheory() {
-        DungTheory theory = new DungTheory();
-        theory.addAll(this);
-        theory.addAllAttacks(this.getAttacks());
-        return theory;
-    }
 
     /**
      * Adds all arguments and attacks of the given theory to
@@ -77,6 +82,11 @@ public class WeightedDungTheoryWithSelfWeight extends DungTheory {
         boolean b2 = this.addAllAttacks(theory.getAttacks());
         return b1 || b2 ;
     }
+
+    protected Set<Argument> instantiateSet() {
+        return new TreeSet<>();
+    }
+
 
 
     /**
@@ -97,14 +107,21 @@ public class WeightedDungTheoryWithSelfWeight extends DungTheory {
                         Double[]::new);
     }
 
+    /* (non-Javadoc)
+     * @see org.tweetyproject.graphs.Graph#isWeightedGraph()
+     */
+    @Override
+    public boolean isWeightedGraph() {
+        return true;
+    }
 
     /**
      * sets the weight of the given attack to the given value
+     *
      * @param weight new value for the weight
-     * @return null or the previously associated value of attack
      */
-    public Double setWeight(Argument arg, double weight) {
-        return this.weights.put(arg, weight);
+    public void setWeight(Argument arg, double weight) {
+        this.weights.put(arg, weight);
     }
 
 }
