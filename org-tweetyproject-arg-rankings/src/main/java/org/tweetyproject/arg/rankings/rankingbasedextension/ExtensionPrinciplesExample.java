@@ -23,7 +23,10 @@ import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.postulates.RankingPostulate;
-import org.tweetyproject.arg.rankings.reasoner.*;
+import org.tweetyproject.arg.rankings.reasoner.WeightedCategorizerRankingReasoner;
+import org.tweetyproject.arg.rankings.reasoner.EulerMaxBasedRankingReasoner;
+import org.tweetyproject.arg.rankings.reasoner.MaxBasedRankingReasoner;
+import org.tweetyproject.arg.rankings.reasoner.TrustBasedRankingReasoner;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
 
 import java.util.Collection;
@@ -36,7 +39,7 @@ import java.util.HashSet;
  * 
  * @author Carola Bauer
  */
-public class RankingPostulatesWeightedExample {
+public class ExtensionPrinciplesExample {
 	private static Collection<RankingPostulate> all_postulates;
 
 	public static void main(String[] args) {

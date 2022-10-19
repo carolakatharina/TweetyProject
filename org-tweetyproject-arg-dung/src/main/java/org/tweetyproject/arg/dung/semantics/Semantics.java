@@ -54,7 +54,8 @@ public enum Semantics {
 	/** N */
 	N ("Naive semantics", "N"),
 	/** diverse */
-	diverse ("diverse semantics", "div");
+	diverse ("diverse semantics", "div"),
+	RB("Ranking-based", "RB");
 	/**
 	 * all semantics
 	 */
@@ -73,6 +74,7 @@ public enum Semantics {
 		WEAKLY_ADMISSIBLE_SEMANTICS = WAD,
 		/** CONFLICTFREE_SEMANTICS */
 		CONFLICTFREE_SEMANTICS = CF,
+				RB_SEMANTICS = RB,
 		/** SEMISTABLE_SEMANTICS */
 		SEMISTABLE_SEMANTICS = SST,
 		/** IDEAL_SEMANTICS */

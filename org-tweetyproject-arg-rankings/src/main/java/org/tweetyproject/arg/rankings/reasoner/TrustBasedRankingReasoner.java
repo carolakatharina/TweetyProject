@@ -26,17 +26,16 @@ import org.tweetyproject.math.matrix.Matrix;
 import java.util.Collection;
 import java.util.HashSet;
 
+
 /**
- * This class implements the argument ranking approach of [Besnard, Hunter. A logic-based theory of deductive arguments. 2001]:.
+ * This class implements the argument ranking approach of [DaCosta. Changing One's Mind: Erase or Rewind, 2011]:.
  * <p>
  * This approach ranks arguments iteratively by considering an argument's basic
- * strength as well as the strength of all its attackers.
- * uses fix-point-algorithm to allow for cycles in graphs
+ * strength or the strength of its strongest attacker.
  *
  * @author Carola Bauer
  */
-
-public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
+public class TrustBasedRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
 
     @Override
@@ -54,19 +53,20 @@ public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<
         Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
         double[] valuations = new double[n];	 //Stores valuations of the current iteration
-
+        for (int i=0; i<n; i++) {
+            valuations[i]=0.5;
+        }
         double[] valuationsOld; //Stores valuations of the last iteration
 
-        //Keep computing valuations until the values stop changing much or converge
-        double epsilon = 0.001;
+        //Keep computing valuations until the values stop changing
         do {
             valuationsOld = valuations.clone();
             distanceOld = getDistance(valuationsOld, valuations) / kb.getNumberOfNodes();
 
             for (int i = 0; i < n; i++)
-                valuations[i] = calculateCategorizerFunction(valuationsOld, directAttackMatrix, i);
+                valuations[i] = calculateTrustBasedFunction(valuationsOld, directAttackMatrix, i);
             distanceNew = (getDistance(valuationsOld, valuations) / kb.getNumberOfNodes());
-        } while (getDistance(valuationsOld, valuations) > epsilon);
+        } while (distanceOld!=distanceNew);
 
 
         //Use computed valuations as values for argument ranking
@@ -74,30 +74,31 @@ public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<
         NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<>();
         ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
         int i = 0;
-        double sum =0.;
-        for (Argument a : kb) {
-            sum = sum+valuations[i];
+        for (Argument a : kb)
             ranking.put(a, valuations[i++]);
-
-        }
-
         return ranking;
     }
 
     /**
-     * Computes the h-Categorizer function.
+     * Computes the weightfunction.
      * @param vOld array of double valuations that were computed in the previous iteration
      * @param directAttackMatrix complete matrix of direct attacks
      * @param i row of the attack matrix that will be used in the calculation
-     * @return categorizer valuation
+     * @return value
      */
-    private double calculateCategorizerFunction(double[] vOld, Matrix directAttackMatrix, int i) {
-        double c = 1.0;
+    private double calculateTrustBasedFunction(double[] vOld, Matrix directAttackMatrix, int i) {
+        double max = 0.;
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            c += vOld[j] * directAttackMatrix.getEntry(i,j).doubleValue();
+            double attacker= vOld[j] * directAttackMatrix.getEntry(i,j).doubleValue();
+            if (attacker>max) {
+                max = attacker;
+            }
         }
-        return (1.0 / (c));
+        if (max ==0.) {
+            return 1.;
+        }
+        return Math.min(vOld[i], (1. - max));
 
     }
 

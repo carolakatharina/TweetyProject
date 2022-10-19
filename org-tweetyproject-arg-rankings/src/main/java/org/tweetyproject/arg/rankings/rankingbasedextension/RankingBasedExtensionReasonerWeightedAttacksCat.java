@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-public class RankingBasedExtensionReasonerWeightedRankingSemanticsCat extends AbstractExtensionReasoner {
+public class RankingBasedExtensionReasonerWeightedAttacksCat extends AbstractExtensionReasoner {
     RankingSemantics rankingSemantics;
     Semantics extensionSemantics;
 
@@ -46,8 +46,8 @@ public class RankingBasedExtensionReasonerWeightedRankingSemanticsCat extends Ab
 
     }
 
-    public RankingBasedExtensionReasonerWeightedRankingSemanticsCat(Semantics extensionSemantics,
-                                                                    RankingSemantics semantics) {
+    public RankingBasedExtensionReasonerWeightedAttacksCat(Semantics extensionSemantics,
+                                                           RankingSemantics semantics) {
 
         System.out.println(semantics);
         this.rankingSemantics = semantics;
@@ -101,16 +101,12 @@ public class RankingBasedExtensionReasonerWeightedRankingSemanticsCat extends Ab
         var thresholdOut = getThresholdOut(
         );
 
-        Map<Argument, Double> akzeptableArgumente = getAkzeptableArgumenteCred(bbase);
-
-        System.out.println("akzeptable Argumente" + akzeptableArgumente + " mit Threshold Out " + thresholdOut + " und Threshold In " + thresholdIn);
-
 
         Map<Extension<DungTheory>, Double> allSums = new HashMap<>();
 
-        for (int k = akzeptableArgumente.size(); k > 0; k--) {
+        for (int k = ranking.size(); k > 0; k--) {
 
-            Iterator<int[]> iterator = CombinatoricsUtils.combinationsIterator(akzeptableArgumente.size(), k);
+            Iterator<int[]> iterator = CombinatoricsUtils.combinationsIterator(ranking.size(), k);
 
 
             while (iterator.hasNext()) {
@@ -119,8 +115,8 @@ public class RankingBasedExtensionReasonerWeightedRankingSemanticsCat extends Ab
                 double sum = 0;
                 for (int index : combination) {
 
-                    var argument = (Argument) (akzeptableArgumente.keySet().toArray()[index]);
-                    sum = sum + (Double) (akzeptableArgumente.values().toArray()[index]);
+                    var argument = (Argument) (ranking.keySet().toArray()[index]);
+                    sum = sum + (Double) (ranking.values().toArray()[index]);
                     arguments.add(argument);
 
                 }
@@ -168,12 +164,29 @@ public class RankingBasedExtensionReasonerWeightedRankingSemanticsCat extends Ab
         return ranking;
     }
 
+
+    //TODO: hier schon versuchen die Werte anzuwenden, nach Semantik unterschiedlich, verschiedenes ausprobieren
     public Map<Argument, Double> getAkzeptableArgumenteCred(DungTheory bbase) {
         var ranking = getRanking(bbase);
         return new HashMap<>(ranking
-                .entrySet().stream().filter(entry -> bbase.getAttackers(entry.getKey()).stream().allMatch(att ->
-                        ranking.get(att)<0.5))
+                .entrySet().stream().filter(entry -> getThresholdForSemantics(bbase, entry, ranking))
                 .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())));
+    }
+
+    private boolean getThresholdForSemantics(DungTheory bbase, Map.Entry<Argument, Double> entry, Map<Argument, Double> ranking) {
+        return switch(this.extensionSemantics) {
+            case CO->  bbase.getAttackers(entry.getKey()).stream().mapToDouble(att ->
+                    getContributionMeasure(bbase, entry.getKey(), att, ranking)).max().orElse(0.) <0.5;
+            case ST-> bbase.getAttackers(entry.getKey()).stream().mapToDouble(att ->
+                    getContributionMeasure(bbase, entry.getKey(), att, ranking)).max().orElse(0.) <0.5;
+            case GR-> bbase.getAttackers(entry.getKey()).stream().mapToDouble(att ->
+                    getContributionMeasure(bbase, entry.getKey(), att, ranking)).max().orElse(0.) <0.5;
+            case PR->  bbase.getAttackers(entry.getKey()).stream().mapToDouble(att ->
+                    getContributionMeasure(bbase, entry.getKey(), att, ranking)).max().orElse(0.) <0.5;
+            case RB -> bbase.getAttackers(entry.getKey()).stream().mapToDouble(att ->
+                    ranking.get(att)).sum() < ;
+            default-> false;
+        };
     }
 
     public boolean getAttacks(DungTheory bbase, Collection<Extension<DungTheory>> extensions) {
@@ -184,6 +197,40 @@ public class RankingBasedExtensionReasonerWeightedRankingSemanticsCat extends Ab
             getRanking(bbase).get(att)).sum());
 
         return true;
+    }
+
+
+    public double getAttackerWeightsSumMax(DungTheory bbase, Collection<Extension<DungTheory>> extensions) {
+        var attackSumMax = extensions.stream()
+                .map(ext -> bbase.getAttackers(ext).stream().mapToDouble(att ->
+                        getRanking(bbase).get(att)).sum()).mapToDouble(Double::doubleValue).max();
+               return attackSumMax.orElse(0.);
+    }
+
+
+    public double getAttackerWeightsMax(DungTheory bbase, Collection<Extension<DungTheory>> extensions) {
+        var attackMax = extensions.stream()
+                .map(ext -> bbase.getAttackers(ext).stream().mapToDouble(att ->
+                        getRanking(bbase).get(att)).max()).mapToDouble(max -> max.orElse(0.)).max();
+        return attackMax.orElse(0.);
+
+    }
+
+
+
+    public double getAttackerWeightsMin(DungTheory bbase, Collection<Extension<DungTheory>> extensions) {
+        var attackmin = extensions.stream()
+                .map(ext -> bbase.getAttackers(ext).stream().mapToDouble(att ->
+                        getRanking(bbase).get(att)).min()).mapToDouble(min -> min.orElse(1.)).min();
+        return attackmin.orElse(1.);
+
+    }
+    public double getContributionMeasure(DungTheory bbase, Argument arg, Argument att, Map<Argument, Double> ranking) {
+        var attackers = bbase.getAttackers(arg);
+        attackers.remove(att);
+
+        return (ranking.get(arg) - 1./(1+attackers.stream().mapToDouble(att1 -> ranking.get(att1)).sum()));
+
     }
 
 
@@ -230,6 +277,8 @@ public class RankingBasedExtensionReasonerWeightedRankingSemanticsCat extends Ab
         // eventuell hier auch mit Gewichten!
 
         return e.stream().allMatch(arg -> defendcounts.get().get(arg) >= bbase.getAttackers(arg).size());
+
+        //w-admissible: Bistarelli etc
 
 
 
@@ -309,7 +358,7 @@ public class RankingBasedExtensionReasonerWeightedRankingSemanticsCat extends Ab
             }
             // preferred extensions, die alle Argumente, die nicht dazugehören attackieren
             case ST: {
-
+                
                 List<Extension<DungTheory>> bessereExtensions = new ArrayList<>(
                         extensions.stream()
                                 .filter(ext ->
@@ -381,6 +430,11 @@ public class RankingBasedExtensionReasonerWeightedRankingSemanticsCat extends Ab
                 return
                         bessereExtensions.size() == 0 &&
                                 alleCompleteExtensions.contains(e);
+            }
+
+
+            case RB: {
+                //Summe Verteidiger kleiner als Summe Defender
             }
 
             default: {

@@ -39,12 +39,8 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
     RankingSemantics rankingSemantics;
     Semantics extensionSemantics;
 
-    //TODO fragen klären: GIBT ES eine Moeglichkeit, die admissible sets über die Werte zu identifizieren?
-    // dann wie complete set herausfinden über Werte
 
     public enum RankingSemantics {
-        //TODO: gibt es Strategien, die nicht so komplex/rekursiv, die funktionieren?
-
         CATEGORIZER,
         STRATEGY,
         SAF,
@@ -75,14 +71,14 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
     public Collection<Extension<DungTheory>> getModels(DungTheory bbase) {
         Map<Argument, Double> ranking;
         ranking = new HashMap<>(switch (this.rankingSemantics) {
-            case CATEGORIZER -> new WeightedCategorizerRankingReasoner().getModel(bbase);
+            case CATEGORIZER -> new CategorizerRankingReasoner().getModel(bbase);
             case STRATEGY -> new StrategyBasedRankingReasoner().getModel(bbase);
             case SAF -> new SAFRankingReasoner().getModel(bbase);
             case COUNTING -> new CountingRankingReasoner().getModel(bbase);
             case PROBABILISTIC ->
                     new ProbabilisticRankingReasoner(extensionSemantics, new Probability(0.5), false).getModel(bbase);
             case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
-            case TRUST -> new TrustBasedRategorizerRankingReasoner().getModel(bbase);
+            case TRUST -> new TrustBasedRankingReasoner().getModel(bbase);
             case EULER_MB -> new EulerMaxBasedRankingReasoner().getModel(bbase);
             case SERIALIZABLE -> new SerialisabilityRankingReasoner(extensionSemantics).getModel(bbase);
         });
@@ -446,28 +442,6 @@ public class RankingBasedExtensionReasonerWeightedRankingSemantics extends Abstr
         }
     }
 
-    private double getMaxDiff(Map<Argument, Double> ranking, Extension<DungTheory> e) {
-        if (e.size() == 1 || e.stream().allMatch(arg -> ranking.get(arg) == null)) {
-            return 0;
-        }
-        var werteListe = ranking.entrySet().stream().filter(entry -> e.contains(entry.getKey()))
-                .collect(Collectors.toList());
-
-        double max = 0.;
-        double min = 10.;
-
-        for (var entry : werteListe) {
-            var newValue = entry.getValue();
-            if (newValue > max) {
-                max = newValue;
-            }
-            if (newValue < min) {
-                min = newValue;
-            }
-        }
-        return Math.abs(max - min);
-
-    }
 
 
 }

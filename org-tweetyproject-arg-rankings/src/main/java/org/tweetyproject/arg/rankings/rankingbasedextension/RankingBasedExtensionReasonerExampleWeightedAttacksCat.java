@@ -28,7 +28,6 @@ import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -52,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 
 
-public class RankingBasedExtensionReasonerExampleCat {
+public class RankingBasedExtensionReasonerExampleWeightedAttacksCat {
     public static void main(String[] args) {
         // Example 1, taken from [Bonzon, Delobelle, Konieczny, Maudet. A Comparative
         // Study of Ranking-Based Semantics for Abstract Argumentation. AAAI 2016]
@@ -162,13 +161,19 @@ public class RankingBasedExtensionReasonerExampleCat {
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 
 
-        var semantics = List.of(Semantics.STABLE_SEMANTICS);
+        var semantics = List.of(Semantics.RB_SEMANTICS);
         for (Semantics semantic : semantics) {
+            var count=0;
+            var attackSumsAbsoluteMax = 0.;
+            var attackAbsoluteMax = 0.;
+            var attackAbsoluteMin = 1.;
+
 
             System.out.println(semantic.description());
             System.out.println("-----------------------------");
 
-            while(dg.hasNext()) {
+            while(dg.hasNext() && count<500) {
+                count = count+1;
                 var theory = dg.next();
 
                 var dungReasoner = getDungReasoner(semantic);
@@ -176,27 +181,45 @@ public class RankingBasedExtensionReasonerExampleCat {
 
 
                 // Cat-Ranking-Based Extension semantics
-                RankingBasedExtensionReasonerWeightedRankingSemanticsCat rankingBasedExtensionReasonerWeightedRankingSemantics = new RankingBasedExtensionReasonerWeightedRankingSemanticsCat(semantic,
-                        RankingBasedExtensionReasonerWeightedRankingSemanticsCat.RankingSemantics.CATEGORIZER);
+                RankingBasedExtensionReasonerWeightedAttacksCat rankingBasedExtensionReasonerWeightedRankingSemantics = new RankingBasedExtensionReasonerWeightedAttacksCat(semantic,
+                        RankingBasedExtensionReasonerWeightedAttacksCat.RankingSemantics.CATEGORIZER);
                 System.out.println(rankingBasedExtensionReasonerWeightedRankingSemantics.getClass().getSimpleName());
                 var catRankingBasedExtensions = rankingBasedExtensionReasonerWeightedRankingSemantics.getModels(theory);
                 System.out.println("RB-Extensions" + catRankingBasedExtensions);
                 System.out.println("DUNG-Extensions" + dungExtensions);
-                assertTrue(dungExtensions.stream().allMatch(ext -> ext.stream()
+                assertTrue(dungExtensions.stream().allMatch(ext -> ext
+                        .stream()
                         .allMatch(arg -> rankingBasedExtensionReasonerWeightedRankingSemantics.getAkzeptableArgumenteCred(theory)
                                 .containsKey(arg))));
 
                 System.out.println("Alle Tolerable Attacken für "+semantic);
-                rankingBasedExtensionReasonerWeightedRankingSemantics.getAttacks(theory, dungExtensions);
+                double attackerWeightsMaxSum = rankingBasedExtensionReasonerWeightedRankingSemantics.getAttackerWeightsSumMax(theory, dungExtensions);
+                if (attackerWeightsMaxSum > attackSumsAbsoluteMax) {
+                    attackSumsAbsoluteMax= attackerWeightsMaxSum;
+                }
+
+                double attackerWeightsMax = rankingBasedExtensionReasonerWeightedRankingSemantics.getAttackerWeightsMax(theory, dungExtensions);
+                if (attackerWeightsMax > attackAbsoluteMax) {
+                    attackAbsoluteMax= attackerWeightsMax;
+                }
                 //assertTrue(dungExtensions.containsAll(catRankingBasedExtensions));
                 //assertTrue(catRankingBasedExtensions.containsAll(dungExtensions));
                 //assertEquals(dungExtensions.size(), catRankingBasedExtensions.size());
 
+                double attackerWeightsMin = rankingBasedExtensionReasonerWeightedRankingSemantics.getAttackerWeightsMin(theory, dungExtensions);
+                if (attackerWeightsMin < attackAbsoluteMin) {
+                    attackAbsoluteMin= attackerWeightsMin;
+                }
+
 
             }
+            System.out.println("AbsoluteGrößteSumme"+ semantic+":"+attackSumsAbsoluteMax);
+            System.out.println("AbsoluteMinAttacker"+ semantic+":"+attackAbsoluteMin);
+            System.out.println("AbsoluteGrößtesMaxttacker"+ semantic+":"+attackAbsoluteMax);
 
 
         }
+
 
 
     }

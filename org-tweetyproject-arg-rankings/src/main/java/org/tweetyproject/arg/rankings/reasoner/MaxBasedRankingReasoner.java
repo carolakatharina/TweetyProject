@@ -21,6 +21,7 @@ package org.tweetyproject.arg.rankings.reasoner;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.comparator.NumericalPartialOrder;
+import org.tweetyproject.math.matrix.Matrix;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,69 +36,85 @@ import java.util.HashSet;
  *
  * @author Carola Bauer
  */
-public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
-    private double epsilon=0.0001;
+public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
 
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<NumericalPartialOrder<Argument, DungTheory>>();
+        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
         ranks.add(this.getModel(bbase));
         return ranks;
     }
 
     @Override
     public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
-        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<Argument, DungTheory>();
-        ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
-
-        WeightedDungTheoryWithSelfWeight valuations = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the current iteration
-        WeightedDungTheoryWithSelfWeight valuationsOld = new WeightedDungTheoryWithSelfWeight(kb, 1.0); // Stores values of the last iteration
-        double distanceOld;
+             double distanceOld;
         double distanceNew;
+
+        Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
+        int n = directAttackMatrix.getXDimension();
+        double[] valuations = new double[n];	 //Stores valuations of the current iteration
+        for (int i=0; i<n; i++) {
+            valuations[i]=1.;
+        }
+        double[] valuationsOld; //Stores valuations of the last iteration
+
+        //Keep computing valuations until the values stop changing much or converge
+        double epsilon = 0.001;
         do {
-            distanceOld = getDistance(valuationsOld.getWeights(), valuations.getWeights())/ valuations.getNumberOfNodes();
+            valuationsOld = valuations.clone();
+            distanceOld = getDistance(valuationsOld, valuations) / kb.getNumberOfNodes();
+
+            for (int i = 0; i < n; i++)
+                valuations[i] = calculateMaxBasedFunction(valuationsOld, directAttackMatrix, i);
+            distanceNew = (getDistance(valuationsOld, valuations) / kb.getNumberOfNodes());
+        } while (Math.abs(distanceNew - distanceOld) > epsilon);
 
 
-            for (var argument : valuations) {
-                var attackers = valuationsOld.getAttackers(argument);
-                if (attackers.size() == 0) {
-                    //donothing
+        //Use computed valuations as values for argument ranking
+        //Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
+        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<>();
+        ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
+        int i = 0;
+        for (Argument a : kb)
+            ranking.put(a, valuations[i++]);
+        return ranking;
+    }
 
-                } else {
-                    Argument max = attackers.iterator().next();
-                    //find the strongest attacker of argument
-                    for (var att : attackers) {
-                        if (valuationsOld.getWeight(att) > valuationsOld.getWeight(max)) {
-                            max = att;
-                        }
-                    }
-                    var oldNewMax = valuations.getWeight(argument);
-                    var newNewMax = getNewWeight(valuationsOld.getWeight(argument), valuationsOld.getWeight(max));
-                    valuations.setWeight(argument, newNewMax);
-                    valuationsOld.setWeight(argument, oldNewMax);
+    /**
+     * Computes the maxbased function.
+     * @param vOld array of double valuations that were computed in the previous iteration
+     * @param directAttackMatrix complete matrix of direct attacks
+     * @param i row of the attack matrix that will be used in the calculation
+     * @return categorizer valuation
+     */
+    private double calculateMaxBasedFunction(double[] vOld, Matrix directAttackMatrix, int i) {
+        double max = 0.;
 
-                }
-            }   distanceNew = getDistance(valuationsOld.getWeights(), valuations.getWeights())/ valuations.getNumberOfNodes();
-        }while(Math.abs(distanceNew-distanceOld)>epsilon);
-
-            for (Argument arg : (valuations)) {
-                ranking.put(arg, valuations.getWeight(arg));
+        for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
+            double attacker= vOld[j] * directAttackMatrix.getEntry(i,j).doubleValue();
+            if (attacker>max) {
+                max = attacker;
             }
+        }
 
-            return ranking;
+        return (vOld[i] / (1+max));
 
     }
 
     /**
-     * Calculates the new weight.
-     *
-     * @return new weight of the argument
+     * Computes the Euclidean distance between to the given arrays.
+     * @param vOld first array
+     * @param v second array
+     * @return distance between v and vOld
      */
-    private double getNewWeight(Double arg, Double max) {
-
-        return arg / (1 + max);
+    private double getDistance(double[] vOld, double[] v) {
+        double sum = 0.0;
+        for (int i = 0; i < v.length; i++) {
+            sum += Math.pow(v[i]-vOld[i],2.0);
+        }
+        return Math.sqrt(sum);
     }
 
 
@@ -108,21 +125,6 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
     public boolean isInstalled() {
         return true;
     }
-
-    /**
-     * Computes the Euclidean distance between to the given arrays.
-     * @param vOld first array
-     * @param v second array
-     * @return distance between v and vOld
-     */
-    private double getDistance(Double[] vOld, Double[] v) {
-        double sum = 0.0;
-        for (int i = 0; i < v.length; i++) {
-            sum += Math.pow(v[i]-vOld[i],2.0);
-        }
-        return Math.sqrt(sum);
-    }
-
 
 
 }
