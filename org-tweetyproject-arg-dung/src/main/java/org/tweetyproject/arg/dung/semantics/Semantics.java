@@ -55,6 +55,9 @@ public enum Semantics {
 	N ("Naive semantics", "N"),
 	/** diverse */
 	diverse ("diverse semantics", "div"),
+	RB_ARG_ABS_STRENGTH("Ranking-based_Argument_Absolute_Strength", "RB_ARG_ABS_STRENGTH"),
+	RB_ARG_STRENGTH("Ranking-based_Argument_Strength", "RB_ARG_STRENGTH"),
+	RB_ATT_STRENGTH("Ranking-based_Attacker_Strength", "RB_ATT_STRENGTH"),
 	RB("Ranking-based", "RB");
 	/**
 	 * all semantics

@@ -174,10 +174,10 @@ public class RankingBasedExtensionReasonerExampleWeighted {
 
 
                 // Cat-Ranking-Based Extension semantics
-                RankingBasedExtensionReasonerWeightedRankingSemantics rankingBasedExtensionReasonerWeightedRankingSemantics = new RankingBasedExtensionReasonerWeightedRankingSemantics(semantic,
-                        RankingBasedExtensionReasonerWeightedRankingSemantics.RankingSemantics.CATEGORIZER);
-                System.out.println(rankingBasedExtensionReasonerWeightedRankingSemantics.getClass().getSimpleName());
-                var catRankingBasedExtensions = rankingBasedExtensionReasonerWeightedRankingSemantics.getModels(theory);
+                RankingBasedExtensionReasoner rankingBasedExtensionReasoner = new RankingBasedExtensionReasoner(semantic,
+                        RankingBasedExtensionReasoner.RankingSemantics.CATEGORIZER);
+                System.out.println(rankingBasedExtensionReasoner.getClass().getSimpleName());
+                var catRankingBasedExtensions = rankingBasedExtensionReasoner.getModels(theory);
                 System.out.println("RB-Extensions" + catRankingBasedExtensions);
                 System.out.println("DUNG-Extensions" + dungExtensions);
                 assertTrue(dungExtensions.containsAll(catRankingBasedExtensions));
@@ -186,8 +186,8 @@ public class RankingBasedExtensionReasonerExampleWeighted {
 
 
                 //MaxBased-Ranking Extension semantics
-                RankingBasedExtensionReasonerWeightedRankingSemantics maxRankingReasoner = new RankingBasedExtensionReasonerWeightedRankingSemantics(semantic,
-                        RankingBasedExtensionReasonerWeightedRankingSemantics.RankingSemantics.MAX);
+                RankingBasedExtensionReasoner maxRankingReasoner = new RankingBasedExtensionReasoner(semantic,
+                        RankingBasedExtensionReasoner.RankingSemantics.MAX);
                 System.out.println(maxRankingReasoner.getClass().getSimpleName());
                 var maxExtensions = maxRankingReasoner.getModels(theory);
                 System.out.println("RB-Extensions" + maxExtensions);
@@ -200,8 +200,8 @@ public class RankingBasedExtensionReasonerExampleWeighted {
 
                 //TrustBased-Ranking Extension semantics
 
-                RankingBasedExtensionReasonerWeightedRankingSemantics trustRankingReasoner = new RankingBasedExtensionReasonerWeightedRankingSemantics(semantic,
-                        RankingBasedExtensionReasonerWeightedRankingSemantics.RankingSemantics.TRUST);
+                RankingBasedExtensionReasoner trustRankingReasoner = new RankingBasedExtensionReasoner(semantic,
+                        RankingBasedExtensionReasoner.RankingSemantics.TRUST);
                 System.out.println(trustRankingReasoner.getClass().getSimpleName());
                 var trustExtensions = trustRankingReasoner.getModels(theory);
                 System.out.println("RB-Extensions" + trustExtensions);
@@ -215,8 +215,8 @@ public class RankingBasedExtensionReasonerExampleWeighted {
 
                 //Euler-MaxBased-Ranking Extension semantics
 
-                RankingBasedExtensionReasonerWeightedRankingSemantics eulermaxRankingReasoner = new RankingBasedExtensionReasonerWeightedRankingSemantics( semantic,
-                        RankingBasedExtensionReasonerWeightedRankingSemantics. RankingSemantics.EULER_MB);
+                RankingBasedExtensionReasoner eulermaxRankingReasoner = new RankingBasedExtensionReasoner( semantic,
+                        RankingBasedExtensionReasoner. RankingSemantics.EULER_MB);
                 System.out.println(eulermaxRankingReasoner.getClass().getSimpleName());
                 var eulermaxExtensions = eulermaxRankingReasoner.getModels(theory);
                 System.out.println("RB-Extensions" + eulermaxExtensions);
@@ -227,20 +227,20 @@ public class RankingBasedExtensionReasonerExampleWeighted {
               
 
                 // Serializable-Ranking-Based Extension semantics
-                RankingBasedExtensionReasonerWeightedRankingSemantics rankingBasedExtensionReasonerSemanticsMixedSer = new RankingBasedExtensionReasonerWeightedRankingSemantics(semantic,
-                        RankingBasedExtensionReasonerWeightedRankingSemantics.RankingSemantics.SERIALIZABLE);
-                System.out.println(rankingBasedExtensionReasonerSemanticsMixedSer.getClass().getSimpleName());
-                var serializableRankingBasedExtensions = rankingBasedExtensionReasonerSemanticsMixedSer.getModels(theory);
+                RankingBasedExtensionReasoner rankingBasedExtensionReasonerMixedSer = new RankingBasedExtensionReasoner(semantic,
+                        RankingBasedExtensionReasoner.RankingSemantics.SERIALIZABLE);
+                System.out.println(rankingBasedExtensionReasonerMixedSer.getClass().getSimpleName());
+                var serializableRankingBasedExtensions = rankingBasedExtensionReasonerMixedSer.getModels(theory);
                 System.out.println("RB-Extensions" + serializableRankingBasedExtensions);
                 System.out.println("DUNG-Extensions" + dungExtensions);
                 assertTrue(serializableRankingBasedExtensions.containsAll(dungExtensions));
 
 
                  // Counting-Ranking-Based Extension semantics
-                RankingBasedExtensionReasonerWeightedRankingSemantics rankingBasedExtensionReasonerSemanticsMixedCount = new RankingBasedExtensionReasonerWeightedRankingSemantics(semantic,
-                        RankingBasedExtensionReasonerWeightedRankingSemantics.RankingSemantics.COUNTING);
-                System.out.println(rankingBasedExtensionReasonerSemanticsMixedCount.getClass().getSimpleName());
-                var countRankingBasedExtensions = rankingBasedExtensionReasonerSemanticsMixedCount.getModels(theory);
+                RankingBasedExtensionReasoner rankingBasedExtensionReasonerMixedCount = new RankingBasedExtensionReasoner(semantic,
+                        RankingBasedExtensionReasoner.RankingSemantics.COUNTING);
+                System.out.println(rankingBasedExtensionReasonerMixedCount.getClass().getSimpleName());
+                var countRankingBasedExtensions = rankingBasedExtensionReasonerMixedCount.getModels(theory);
                 System.out.println("RB-Extensions" + countRankingBasedExtensions);
                 System.out.println("DUNG-Extensions" + dungExtensions);
                 assertTrue(countRankingBasedExtensions.containsAll(dungExtensions));

@@ -50,6 +50,12 @@ public class BurdenBasedRankingReasoner extends AbstractRankingReasoner<LatticeP
 	public LatticePartialOrder<Argument, DungTheory> getModel(DungTheory base) {
 		// Map for storing burden numbers of previous steps
 		Map<Argument, double[]> burdenNumbers = getBurdenNumbers(base);
+		burdenNumbers.entrySet().forEach(entry ->
+		{for (int i=0; i<entry.getValue().length;i++) {
+			System.out.println(entry.getKey()+" "+entry.getValue()[i]);
+		}
+		}
+		);
 
 		// Use the lexicographical order of the burden numbers as ranking
 		LatticePartialOrder<Argument, DungTheory> ranking 

@@ -14,91 +14,114 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
- *  Copyright 2016 The TweetyProject Team <http://tweetyproject.org/contact/>
+ *  Copyright 2018 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
 package org.tweetyproject.arg.rankings.reasoner;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.comparator.NumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 /**
- * This class implements the argument ranking approach of [Besnard, Hunter. A logic-based theory of deductive arguments. 2001]:.
- * <p>
- * This approach ranks arguments iteratively by considering an argument's basic
- * strength as well as the strength of all its attackers.
- * uses fix-point-algorithm to allow for cycles in graphs
+ * This class implements the "alpha-Bbs" argument ranking approach that was
+ * originally proposed by [Amgoud et.al., Ranking arguments with compensation-based semantics, 2016.]
+ * for deductive logics.
  *
  * @author Carola Bauer
  */
+public class AlphaBurdenBasedRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
-public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
+    private double epsilon;
+    private double alpha;
 
+    /**
+     * Create a new CountingRankingReasoner with default
+     * parameters.
+     */
+    public AlphaBurdenBasedRankingReasoner() {
+        this.epsilon = 0.001;
+        this.alpha = 0.5;
+    }
+
+    /**
+     * Create a new AlphaBurdenBasedRankingReasoner with the given
+     * parameters.
+     *
+     * @param epsilon TODO add description
+     * @param alpha   TODO add description
+     */
+    public AlphaBurdenBasedRankingReasoner(double epsilon, double alpha) {
+        this.epsilon = epsilon;
+        this.alpha = alpha;
+    }
 
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
+        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks
+                = new HashSet<NumericalPartialOrder<Argument, DungTheory>>();
         ranks.add(this.getModel(bbase));
         return ranks;
     }
 
     @Override
-    public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
-        double distanceOld;
-        double distanceNew;
-
-        Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
+    public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory base) {
+        Matrix directAttackMatrix = ((DungTheory) base).getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
-        double[] valuations = new double[n];     //Stores valuations of the current iteration
-
-        double[] valuationsOld; //Stores valuations of the last iteration
+        double valuations[] = new double[n];     //Stores valuations of the current iteration
+        double valuationsOld[] = new double[n]; //Stores valuations of the last iteration
 
         //Keep computing valuations until the values stop changing much or converge
-        double epsilon = 0.001;
         do {
             valuationsOld = valuations.clone();
-            distanceOld = getDistance(valuationsOld, valuations) / kb.getNumberOfNodes();
+            for (int i = 0; i < n; i++) {
+				valuations[i] = calculateBurdenBasedFunction(valuationsOld, directAttackMatrix, i);
 
-            for (int i = 0; i < n; i++)
-                valuations[i] = calculateCategorizerFunction(valuationsOld, directAttackMatrix, i);
-            distanceNew = (getDistance(valuationsOld, valuations) / kb.getNumberOfNodes());
-        } while (getDistance(valuationsOld, valuations) > epsilon);
+			}
 
+		} while (getDistance(valuationsOld, valuations) > this.epsilon);
 
         //Use computed valuations as values for argument ranking
         //Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
-        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<>();
+        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<Argument, DungTheory>();
         ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
         int i = 0;
-        double sum = 0.;
-        for (Argument a : kb) {
-            sum = sum + valuations[i];
-            ranking.put(a, valuations[i++]);
-
+        for (Argument a : ((DungTheory) base)) {
+			if (valuations[i]==0.0) {
+				ranking.put(a, 0.0);
+			} else {
+				ranking.put(a, (1.0 / valuations[i]));
+			}
+			i++;
         }
+        System.out.println(ranking);
 
         return ranking;
     }
 
     /**
-     * Computes the h-Categorizer function.
+     * Computes the alpha-burdenbased function.
      *
      * @param vOld               array of double valuations that were computed in the previous iteration
      * @param directAttackMatrix complete matrix of direct attacks
      * @param i                  row of the attack matrix that will be used in the calculation
      * @return categorizer valuation
      */
-    private double calculateCategorizerFunction(double[] vOld, Matrix directAttackMatrix, int i) {
-        double c = 1.0;
-
-        for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            c += vOld[j] * directAttackMatrix.getEntry(i, j).doubleValue();
+    private double calculateBurdenBasedFunction(double[] vOld, Matrix directAttackMatrix, int i) {
+        double c = 0.0;
+        if (directAttackMatrix.getXDimension() == 0) {
+            return 1.0;
         }
-        return (1.0 / (c));
+        for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
+            var zaehler = Math.pow(vOld[j] * directAttackMatrix.getEntry(i, j).doubleValue(), alpha);
+            if (zaehler!=0) {
+                c += (1.0 / zaehler);
+            }
+        }
+        return (1.0 + Math.pow(c, (1.0 / alpha)));
 
     }
 
@@ -112,11 +135,10 @@ public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<
     private double getDistance(double[] vOld, double[] v) {
         double sum = 0.0;
         for (int i = 0; i < v.length; i++) {
-            sum += Math.pow(v[i] - vOld[i], 2.0);
+            sum += Math.pow(1.0/v[i] - 1.0/vOld[i], 2.0);
         }
         return Math.sqrt(sum);
     }
-
 
     /**
      * natively installed
@@ -125,6 +147,5 @@ public class WeightedCategorizerRankingReasoner extends AbstractRankingReasoner<
     public boolean isInstalled() {
         return true;
     }
-
 
 }

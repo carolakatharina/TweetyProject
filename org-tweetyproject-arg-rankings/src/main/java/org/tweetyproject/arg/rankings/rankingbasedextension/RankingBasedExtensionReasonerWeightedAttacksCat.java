@@ -184,7 +184,7 @@ public class RankingBasedExtensionReasonerWeightedAttacksCat extends AbstractExt
             case PR->  bbase.getAttackers(entry.getKey()).stream().mapToDouble(att ->
                     getContributionMeasure(bbase, entry.getKey(), att, ranking)).max().orElse(0.) <0.5;
             case RB -> bbase.getAttackers(entry.getKey()).stream().mapToDouble(att ->
-                    ranking.get(att)).sum() < ;
+                    ranking.get(att)).sum() < 0.5;
             default-> false;
         };
     }

@@ -18,6 +18,7 @@
  */
 package org.tweetyproject.arg.rankings.rankingbasedextension;
 
+import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
@@ -36,13 +37,12 @@ import java.util.HashSet;
  * 
  * @author Carola Bauer
  */
-public class RankingPostulatesWeightedExample {
+public class RankingPostulatesExample {
 	private static Collection<RankingPostulate> all_postulates;
 
 	public static void main(String[] args) {
 		all_postulates = new HashSet<>();
 		all_postulates.add(RankingPostulate.ABSTRACTION);
-
 		all_postulates.add(RankingPostulate.ADDITIONOFATTACKBRANCH);
 		all_postulates.add(RankingPostulate.ADDITIONOFDEFENSEBRANCH);
 		all_postulates.add(RankingPostulate.ATTACKVSFULLDEFENSE);
@@ -60,26 +60,46 @@ public class RankingPostulatesWeightedExample {
 		all_postulates.add(RankingPostulate.STRICTCOUNTERTRANSITIVITY);
 		all_postulates.add(RankingPostulate.TOTAL);
 		all_postulates.add(RankingPostulate.VOIDPRECEDENCE);
-		
-		 
 
-		WeightedCategorizerExample();
-		WeightedMaxBasedExample();
-		WeightedEulerMaxBasedExample();
-		WeightedTrustBasedExample();
+
+
+
+
+		//MaxExample();
+
+
+		AlphaBbsExample();
+
+
+
+
+		//CategorizerExample();
+		//CountingExample();
+
 
 	}
 
-	public static void WeightedCategorizerExample() {
+	public static void CategorizerExample() {
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new WeightedCategorizerRankingReasoner());
+				new CategorizerRankingReasoner());
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
 
 	}
 
-	public static void WeightedMaxBasedExample() {
+
+	public static void CountingExample() {
+		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
+		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
+				new CountingRankingReasoner());
+		evaluator.addAllPostulates(all_postulates);
+		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
+
+	}
+
+
+	public static void MaxExample() {
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
 				new MaxBasedRankingReasoner());
@@ -89,24 +109,15 @@ public class RankingPostulatesWeightedExample {
 	}
 
 
-	public static void WeightedEulerMaxBasedExample() {
+	public static void AlphaBbsExample() {
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new EulerMaxBasedRankingReasoner());
+				new AlphaBurdenBasedRankingReasoner());
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
 
 	}
 
-
-	public static void WeightedTrustBasedExample() {
-		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
-		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new TrustBasedRankingReasoner());
-		evaluator.addAllPostulates(all_postulates);
-		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
-
-	}
 
 
 }

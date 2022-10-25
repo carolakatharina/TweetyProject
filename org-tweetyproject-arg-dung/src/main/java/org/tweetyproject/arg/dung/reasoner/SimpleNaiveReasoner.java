@@ -58,6 +58,7 @@ public class SimpleNaiveReasoner extends AbstractExtensionReasoner {
             cfSubsets.add(new Extension<DungTheory>());
         } else {
             for (Argument element: candidates) {
+
                 DungTheory remainingTheory = new DungTheory(bbase);
                 remainingTheory.remove(element);
                 remainingTheory.removeAll(bbase.getAttacked(element));
