@@ -24,7 +24,6 @@ import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
-import org.tweetyproject.arg.rankings.reasoner.*;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
 
 import java.util.Collection;
@@ -58,25 +57,31 @@ public class ExtensionPrinciplesExample {
 		all_principles.add(Principle.SCC_DECOMPOSABILITY);
 
 
-		//CountingExample_RB_ARG_ABS_STRENGTH();
-		//CountingExample_RB_ARG_STRENGTH();
-		//CountingExample_RB_ATT_STRENGTH();
+		System.out.println("COUNTING---------------------------------------------------------");
+		CountingExample_RB_ARG_ABS_STRENGTH();
+		CountingExample_RB_ARG_STRENGTH();
+		CountingExample_RB_ATT_STRENGTH();
 
 
-		//MaxExample_RB_ARG_ABS_STRENGTH();
-		//MaxExample_RB_ARG_STRENGTH();
-		//MaxExample_RB_ATT_STRENGTH();
+		System.out.println("MAX----------------------------------------------------------");
 
+		MaxExample_RB_ARG_ABS_STRENGTH();
+		MaxExample_RB_ARG_STRENGTH();
+		MaxExample_RB_ATT_STRENGTH();
+
+
+		System.out.println("ALPHA-BBS---------------------------------------------------------");
 
 		AlphaBbsExample_RB_ARG_ABS_STRENGTH();
 		AlphaBbsExample_RB_ARG_STRENGTH();
 		AlphaBbsExample_RB_ATT_STRENGTH();
 
 
+		System.out.println("CATEGORIZER---------------------------------------------------------");
 
-		//CategorizerExample_RB_ARG_ABS_STRENGTH();
-		//CategorizerExample_RB_ARG_STRENGTH();
-		//CategorizerExample_RB_ATT_STRENGTH();
+		CategorizerExample_RB_ARG_ABS_STRENGTH();
+		CategorizerExample_RB_ARG_STRENGTH();
+		CategorizerExample_RB_ATT_STRENGTH();
 
 
 	}

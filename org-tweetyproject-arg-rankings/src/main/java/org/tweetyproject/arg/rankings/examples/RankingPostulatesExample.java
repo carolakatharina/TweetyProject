@@ -26,14 +26,7 @@ import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.postulates.RankingPostulate;
-import org.tweetyproject.arg.rankings.reasoner.BurdenBasedRankingReasoner;
-import org.tweetyproject.arg.rankings.reasoner.CategorizerRankingReasoner;
-import org.tweetyproject.arg.rankings.reasoner.CountingRankingReasoner;
-import org.tweetyproject.arg.rankings.reasoner.DiscussionBasedRankingReasoner;
-import org.tweetyproject.arg.rankings.reasoner.PropagationRankingReasoner;
-import org.tweetyproject.arg.rankings.reasoner.SAFRankingReasoner;
-import org.tweetyproject.arg.rankings.reasoner.StrategyBasedRankingReasoner;
-import org.tweetyproject.arg.rankings.reasoner.TuplesRankingReasoner;
+import org.tweetyproject.arg.rankings.reasoner.*;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
 
 /**
@@ -67,20 +60,21 @@ public class RankingPostulatesExample {
 		all_postulates.add(RankingPostulate.TOTAL);
 		all_postulates.add(RankingPostulate.VOIDPRECEDENCE);
 
-		CategorizerExample();
-		BurdenExample();
-		DiscussionExample();
-		TuplesExample();
-		StrategyBasedExample();
-		SAFExample();
-		CountingExample();
-		PropagationExample();
+		TrustBasedExample();
 	}
 
 	public static void CategorizerExample() {
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
 				new CategorizerRankingReasoner());
+		evaluator.addAllPostulates(all_postulates);
+		System.out.println(evaluator.evaluate(4000, false).prettyPrint());
+	}
+
+	public static void TrustBasedExample() {
+		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
+		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
+				new TrustBasedRankingReasoner());
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(4000, false).prettyPrint());
 	}

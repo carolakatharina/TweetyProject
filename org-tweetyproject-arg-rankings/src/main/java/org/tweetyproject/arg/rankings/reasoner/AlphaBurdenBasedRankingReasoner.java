@@ -97,7 +97,6 @@ public class AlphaBurdenBasedRankingReasoner extends AbstractRankingReasoner<Num
 			}
 			i++;
         }
-        System.out.println(ranking);
 
         return ranking;
     }

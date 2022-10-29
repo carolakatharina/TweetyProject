@@ -184,7 +184,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
             case CATEGORIZER -> {
 
-                return 0.2;
+                return 0.5;
             }
 
             case MAX -> {
@@ -200,15 +200,15 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
             case TRUST -> {
                 //vermutlich löschen/anpassen funktioniert nicht richtig
-                return 0.2;
+                return 0.5;
             }
 
             case COUNTING -> {
                 //vermutlich löschen/anpassen funktioniert nicht richtig
-                return 0.6;
+                return 0.5;
             }
             case SERIALIZABLE -> {
-                return 0.0;
+                return 0.5;
             }
             default -> {
                 return 0.5;

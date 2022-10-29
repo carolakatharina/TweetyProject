@@ -37,7 +37,7 @@ import java.util.HashSet;
  */
 public class TrustBasedRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
-
+    private double epsilon=0.001;
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
         Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
@@ -47,26 +47,22 @@ public class TrustBasedRankingReasoner extends AbstractRankingReasoner<Numerical
 
     @Override
     public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
-             double distanceOld;
-        double distanceNew;
 
         Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
         double[] valuations = new double[n];	 //Stores valuations of the current iteration
         for (int i=0; i<n; i++) {
-            valuations[i]=0.5;
+            valuations[i]=1.;
         }
         double[] valuationsOld; //Stores valuations of the last iteration
 
         //Keep computing valuations until the values stop changing
         do {
             valuationsOld = valuations.clone();
-            distanceOld = getDistance(valuationsOld, valuations) / kb.getNumberOfNodes();
 
             for (int i = 0; i < n; i++)
                 valuations[i] = calculateTrustBasedFunction(valuationsOld, directAttackMatrix, i);
-            distanceNew = (getDistance(valuationsOld, valuations) / kb.getNumberOfNodes());
-        } while (distanceOld!=distanceNew);
+        } while (getDistance(valuationsOld, valuations) > this.epsilon);
 
 
         //Use computed valuations as values for argument ranking
@@ -95,10 +91,9 @@ public class TrustBasedRankingReasoner extends AbstractRankingReasoner<Numerical
                 max = attacker;
             }
         }
-        if (max ==0.) {
-            return 1.;
-        }
-        return Math.min(vOld[i], (1. - max));
+
+
+        return ((0.5*vOld[i])+0.5*Math.min(vOld[i], (1. - max)));
 
     }
 
