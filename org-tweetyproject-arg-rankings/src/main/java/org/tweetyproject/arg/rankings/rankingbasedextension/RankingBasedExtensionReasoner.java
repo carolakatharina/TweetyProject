@@ -44,7 +44,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         COUNTING,
         PROBABILISTIC,
         MAX,
-        EULER_MB, TRUST, BURDEN, SERIALIZABLE
+        EULER_MB, TRUST, BURDEN, SERIALIZABLE, ITS
 
     }
 
@@ -78,6 +78,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case EULER_MB -> new EulerMaxBasedRankingReasoner().getModel(bbase);
             case SERIALIZABLE -> new SerialisabilityRankingReasoner(extensionSemantics).getModel(bbase);
             case BURDEN -> new AlphaBurdenBasedRankingReasoner().getModel(bbase);
+            case ITS -> new IterativeSchemaRankingReasoner().getModel(bbase);
         });
 
         return getExtensionsForSemantics(ranking, bbase, this.extensionSemantics);
@@ -167,9 +168,86 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                     var attackers = bbase.getAttackers(arg);
                     return attackers.stream().allMatch(att -> ranking.get(att) < getThresholdSingle());
                 }).collect(Collectors.toList()));
-
-
             }
+
+                case RB_ATT_STRENGTH_ARG_STRENGTH:
+                {
+                    return new Extension<>(e.stream().filter(arg -> {
+                        var attackers = bbase.getAttackers(arg);
+                        return ranking.get(arg) > getThresholdSingle() &&
+                                attackers.stream().allMatch(att -> ranking.get(att) < getThresholdSingle());
+                    }).collect(Collectors.toList()));
+
+                }
+
+            case RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH: {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return ranking.get(arg) > getThresholdSingle() &&
+                            attackers.stream().allMatch(att -> ranking.get(att) < getThresholdSingle()
+                            && ranking.get(att) < ranking.get(arg)
+                            );
+                }).collect(Collectors.toList()));
+            }
+
+            case RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH: {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return ranking.get(arg) > getThresholdSingle() &&
+                            attackers.stream().allMatch(att ->
+                                    ranking.get(att) < ranking.get(arg)
+                            );
+                }).collect(Collectors.toList()));
+            }
+            case RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH: {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return
+                            attackers.stream().allMatch(att -> ranking.get(att) < getThresholdSingle()
+                                    && ranking.get(att) < ranking.get(arg)
+                            );
+                }).collect(Collectors.toList()));
+            }
+
+            case RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH: {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return
+                            attackers.stream().allMatch(att -> ranking.get(att) < getThresholdSingle()
+                                    || ranking.get(att) < ranking.get(arg)
+                            );
+                }).collect(Collectors.toList()));
+            }
+
+            case RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH: {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return ranking.get(arg) > getThresholdSingle() ||
+                            attackers.stream().allMatch(att -> ranking.get(att) < getThresholdSingle()
+                                    || ranking.get(att) < ranking.get(arg)
+                            );
+                }).collect(Collectors.toList()));
+            }
+
+            case RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH: {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return ranking.get(arg) > getThresholdSingle() ||
+                            attackers.stream().allMatch(att ->  ranking.get(att) < ranking.get(arg)
+                            );
+                }).collect(Collectors.toList()));
+            }
+
+            case RB_ATT_STRENGTH_OR_ARG_STRENGTH: {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return ranking.get(arg) > getThresholdSingle() ||
+                            attackers.stream().allMatch(att -> ranking.get(att) < getThresholdSingle()
+
+                            );
+                }).collect(Collectors.toList()));
+            }
+
             default: {
                 System.out.println("Default");
                 return new Extension<>();
@@ -180,40 +258,11 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
     private double getThresholdSingle() {
-        switch (this.rankingSemantics) {
 
-            case CATEGORIZER -> {
 
-                return 0.5;
-            }
+                return 0.6;
 
-            case MAX -> {
-                return 0.5;
-            }
 
-            case BURDEN -> {
-                return 0.5;
-            }
-            case EULER_MB -> {
-                return 0.5;
-            }
-
-            case TRUST -> {
-                //vermutlich löschen/anpassen funktioniert nicht richtig
-                return 0.5;
-            }
-
-            case COUNTING -> {
-                //vermutlich löschen/anpassen funktioniert nicht richtig
-                return 0.5;
-            }
-            case SERIALIZABLE -> {
-                return 0.5;
-            }
-            default -> {
-                return 0.5;
-            }
-        }
     }
 
 

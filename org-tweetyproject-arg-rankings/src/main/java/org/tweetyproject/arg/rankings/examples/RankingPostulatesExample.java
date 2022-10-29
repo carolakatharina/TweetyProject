@@ -21,6 +21,7 @@ package org.tweetyproject.arg.rankings.examples;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
@@ -60,7 +61,7 @@ public class RankingPostulatesExample {
 		all_postulates.add(RankingPostulate.TOTAL);
 		all_postulates.add(RankingPostulate.VOIDPRECEDENCE);
 
-		TrustBasedExample();
+		SerializabilityExample();
 	}
 
 	public static void CategorizerExample() {
@@ -71,10 +72,36 @@ public class RankingPostulatesExample {
 		System.out.println(evaluator.evaluate(4000, false).prettyPrint());
 	}
 
+
+	public static void EulerMaxBasedExample() {
+		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
+		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
+				new EulerMaxBasedRankingReasoner());
+		evaluator.addAllPostulates(all_postulates);
+		System.out.println(evaluator.evaluate(4000, false).prettyPrint());
+	}
+
+
+	public static void MaxBasedExample() {
+		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
+		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
+				new MaxBasedRankingReasoner());
+		evaluator.addAllPostulates(all_postulates);
+		System.out.println(evaluator.evaluate(4000, false).prettyPrint());
+	}
 	public static void TrustBasedExample() {
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
 				new TrustBasedRankingReasoner());
+		evaluator.addAllPostulates(all_postulates);
+		System.out.println(evaluator.evaluate(4000, false).prettyPrint());
+	}
+
+
+	public static void  IterativeSchemaExample() {
+		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
+		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
+				new IterativeSchemaRankingReasoner());
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(4000, false).prettyPrint());
 	}
@@ -132,6 +159,14 @@ public class RankingPostulatesExample {
 		PropagationRankingReasoner propagation_reasoner = new PropagationRankingReasoner(0.75, false, PropagationRankingReasoner.PropagationSemantics.PROPAGATION1);
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
 				propagation_reasoner);
+		evaluator.addAllPostulates(all_postulates);
+		System.out.println(evaluator.evaluate(2000, false).prettyPrint());
+	}
+
+	public static void SerializabilityExample() {
+		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
+		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
+				new SerialisabilityRankingReasoner(Semantics.GROUNDED_SEMANTICS));
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(2000, false).prettyPrint());
 	}

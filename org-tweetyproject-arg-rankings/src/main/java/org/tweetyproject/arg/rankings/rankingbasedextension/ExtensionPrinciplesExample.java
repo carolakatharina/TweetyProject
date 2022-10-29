@@ -56,117 +56,136 @@ public class ExtensionPrinciplesExample {
 		all_principles.add(Principle.SEMIQUAL_ADM);
 		all_principles.add(Principle.SCC_DECOMPOSABILITY);
 
-
+		/*
 		System.out.println("COUNTING---------------------------------------------------------");
-		CountingExample_RB_ARG_ABS_STRENGTH();
-		CountingExample_RB_ARG_STRENGTH();
-		CountingExample_RB_ATT_STRENGTH();
+		CountingExample(Semantics.RB_ARG_STRENGTH);
+		CountingExample(Semantics.RB_ATT_STRENGTH);
+		CountingExample(Semantics.RB_ARG_ABS_STRENGTH);
+		CountingExample(Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH);
+		CountingExample(Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH);
+		CountingExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH);
+		CountingExample(Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH);
+		CountingExample(Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH);
+		CountingExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH);
+		CountingExample(Semantics.RB_ATT_STRENGTH_OR_ARG_STRENGTH);
 
+		 */
 
 		System.out.println("MAX----------------------------------------------------------");
+		MaxExample(Semantics.RB_ARG_STRENGTH);
+		MaxExample(Semantics.RB_ATT_STRENGTH);
+		MaxExample(Semantics.RB_ARG_ABS_STRENGTH);
+		MaxExample(Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH);
+		MaxExample(Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH);
+		MaxExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH);
+		MaxExample(Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH);
+		MaxExample(Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH);
+		MaxExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH);
+		MaxExample(Semantics.RB_ATT_STRENGTH_OR_ARG_STRENGTH);
 
-		MaxExample_RB_ARG_ABS_STRENGTH();
-		MaxExample_RB_ARG_STRENGTH();
-		MaxExample_RB_ATT_STRENGTH();
-
-
+		/*
 		System.out.println("ALPHA-BBS---------------------------------------------------------");
-
-		AlphaBbsExample_RB_ARG_ABS_STRENGTH();
-		AlphaBbsExample_RB_ARG_STRENGTH();
-		AlphaBbsExample_RB_ATT_STRENGTH();
+		AlphaBbsExample(Semantics.RB_ARG_STRENGTH);
+		AlphaBbsExample(Semantics.RB_ATT_STRENGTH);
+		AlphaBbsExample(Semantics.RB_ARG_ABS_STRENGTH);
+		AlphaBbsExample(Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH);
+		AlphaBbsExample(Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH);
+		AlphaBbsExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH);
+		AlphaBbsExample(Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH);
+		AlphaBbsExample(Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH);
+		AlphaBbsExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH);
+		AlphaBbsExample(Semantics.RB_ATT_STRENGTH_OR_ARG_STRENGTH);
 
 
 		System.out.println("CATEGORIZER---------------------------------------------------------");
 
-		CategorizerExample_RB_ARG_ABS_STRENGTH();
-		CategorizerExample_RB_ARG_STRENGTH();
-		CategorizerExample_RB_ATT_STRENGTH();
+		CategorizerExample(Semantics.RB_ARG_STRENGTH);
+		CategorizerExample(Semantics.RB_ATT_STRENGTH);
+		CategorizerExample(Semantics.RB_ARG_ABS_STRENGTH);
+		CategorizerExample(Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH);
+		CategorizerExample(Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH);
+		CategorizerExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH);
+		CategorizerExample(Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH);
+		CategorizerExample(Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH);
+		CategorizerExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH);
+		CategorizerExample(Semantics.RB_ATT_STRENGTH_OR_ARG_STRENGTH);
+
+
+		 */
+
+		System.out.println("TBS---------------------------------------------------------");
+
+		TbsExample(Semantics.RB_ARG_STRENGTH);
+		TbsExample(Semantics.RB_ATT_STRENGTH);
+		TbsExample(Semantics.RB_ARG_ABS_STRENGTH);
+		TbsExample(Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH);
+		TbsExample(Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH);
+		TbsExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH);
+		TbsExample(Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH);
+		TbsExample(Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH);
+		TbsExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH);
+		TbsExample(Semantics.RB_ATT_STRENGTH_OR_ARG_STRENGTH);
+
+		System.out.println("EMBS---------------------------------------------------------");
+
+		EmbsExample(Semantics.RB_ARG_STRENGTH);
+		EmbsExample(Semantics.RB_ATT_STRENGTH);
+		EmbsExample(Semantics.RB_ARG_ABS_STRENGTH);
+		EmbsExample(Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH);
+		EmbsExample(Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH);
+		EmbsExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH);
+		EmbsExample(Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH);
+		EmbsExample(Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH);
+		EmbsExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH);
+		EmbsExample(Semantics.RB_ATT_STRENGTH_OR_ARG_STRENGTH);
+
+		System.out.println("ITS---------------------------------------------------------");
+
+		ITSExample(Semantics.RB_ARG_STRENGTH);
+		ITSExample(Semantics.RB_ATT_STRENGTH);
+		ITSExample(Semantics.RB_ARG_ABS_STRENGTH);
+		ITSExample(Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH);
+		ITSExample(Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH);
+		ITSExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH);
+		ITSExample(Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH);
+		ITSExample(Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH);
+		ITSExample(Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH);
+		ITSExample(Semantics.RB_ATT_STRENGTH_OR_ARG_STRENGTH);
+
 
 
 	}
 
-	public static void CategorizerExample_RB_ARG_ABS_STRENGTH() {
+	public static void CategorizerExample(Semantics semantics) {
+		System.out.println(semantics);
+
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ARG_ABS_STRENGTH,
+				new RankingBasedExtensionReasoner(semantics,
 						RankingBasedExtensionReasoner.RankingSemantics.CATEGORIZER));
 		evaluator.addAllPostulates(all_principles);
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
 
 	}
 
-	public static void CategorizerExample_RB_ARG_STRENGTH() {
+	public static void CountingExample(Semantics semantics) {
+		System.out.println(semantics);
+
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ARG_STRENGTH,
-						RankingBasedExtensionReasoner.RankingSemantics.CATEGORIZER));
-		evaluator.addAllPostulates(all_principles);
-		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
-
-	}
-	public static void CategorizerExample_RB_ATT_STRENGTH() {
-		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
-		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ATT_STRENGTH,
-						RankingBasedExtensionReasoner.RankingSemantics.CATEGORIZER));
-		evaluator.addAllPostulates(all_principles);
-		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
-
-	}
-
-	public static void CountingExample_RB_ARG_ABS_STRENGTH() {
-		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
-		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ARG_ABS_STRENGTH,
+				new RankingBasedExtensionReasoner(semantics,
 						RankingBasedExtensionReasoner.RankingSemantics.COUNTING));
 		evaluator.addAllPostulates(all_principles);
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
 
 	}
 
-	public static void CountingExample_RB_ARG_STRENGTH() {
+	public static void MaxExample(Semantics semantics) {
+		System.out.println(semantics);
+
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ARG_STRENGTH,
-						RankingBasedExtensionReasoner.RankingSemantics.COUNTING));
-		evaluator.addAllPostulates(all_principles);
-		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
-
-	}
-	public static void CountingExample_RB_ATT_STRENGTH() {
-		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
-		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ATT_STRENGTH,
-						RankingBasedExtensionReasoner.RankingSemantics.COUNTING));
-		evaluator.addAllPostulates(all_principles);
-		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
-
-	}
-
-	public static void MaxExample_RB_ARG_ABS_STRENGTH() {
-		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
-		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ARG_ABS_STRENGTH,
-						RankingBasedExtensionReasoner.RankingSemantics.MAX));
-		evaluator.addAllPostulates(all_principles);
-		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
-
-	}
-
-	public static void MaxExample_RB_ARG_STRENGTH() {
-		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
-		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ARG_STRENGTH,
-						RankingBasedExtensionReasoner.RankingSemantics.MAX));
-		evaluator.addAllPostulates(all_principles);
-		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
-
-	}
-	public static void MaxExample_RB_ATT_STRENGTH() {
-		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
-		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ATT_STRENGTH,
+				new RankingBasedExtensionReasoner(semantics,
 						RankingBasedExtensionReasoner.RankingSemantics.MAX));
 		evaluator.addAllPostulates(all_principles);
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
@@ -174,34 +193,55 @@ public class ExtensionPrinciplesExample {
 	}
 
 
-	public static void AlphaBbsExample_RB_ARG_ABS_STRENGTH() {
+	public static void AlphaBbsExample(Semantics semantics) {
+		System.out.println(semantics);
+
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ARG_ABS_STRENGTH,
+				new RankingBasedExtensionReasoner(semantics,
 						RankingBasedExtensionReasoner.RankingSemantics.BURDEN));
 		evaluator.addAllPostulates(all_principles);
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
 
 	}
+	public static void TbsExample(Semantics semantics) {
+		System.out.println(semantics);
 
-	public static void AlphaBbsExample_RB_ARG_STRENGTH() {
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ARG_STRENGTH,
-						RankingBasedExtensionReasoner.RankingSemantics.BURDEN));
+				new RankingBasedExtensionReasoner(semantics,
+						RankingBasedExtensionReasoner.RankingSemantics.TRUST));
 		evaluator.addAllPostulates(all_principles);
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
 
 	}
-	public static void AlphaBbsExample_RB_ATT_STRENGTH() {
+
+
+
+	public static void EmbsExample(Semantics semantics) {
+		System.out.println(semantics);
+
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-				new RankingBasedExtensionReasoner(Semantics.RB_ATT_STRENGTH,
-						RankingBasedExtensionReasoner.RankingSemantics.BURDEN));
+				new RankingBasedExtensionReasoner(semantics,
+						RankingBasedExtensionReasoner.RankingSemantics.EULER_MB));
 		evaluator.addAllPostulates(all_principles);
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
 
 	}
+
+
+	public static void ITSExample(Semantics semantics) {
+		System.out.println(semantics);
+		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
+		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
+				new RankingBasedExtensionReasoner(semantics,
+						RankingBasedExtensionReasoner.RankingSemantics.ITS));
+		evaluator.addAllPostulates(all_principles);
+		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
+
+	}
+
 
 
 

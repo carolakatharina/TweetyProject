@@ -1,3 +1,5 @@
+package org.tweetyproject.arg.rankings.reasoner;
+
 /*
  *  This file is part of "TweetyProject", a collection of Java libraries for
  *  logical aspects of artificial intelligence and knowledge representation.
@@ -16,7 +18,7 @@
  *
  *  Copyright 2016 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
-package org.tweetyproject.arg.rankings.reasoner;
+
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
@@ -28,14 +30,14 @@ import java.util.HashSet;
 
 
 /**
- * This class implements the argument ranking approach of [DaCosta. Changing One's Mind: Erase or Rewind, 2011]:.
+ * This class implements the argument ranking approach of [Gabbay, D. M., and Rodrigues, O. 2015. Equilibrium states
+ * in numerical argumentation networks, 2015]
  * <p>
- * This approach ranks arguments iteratively by considering an argument's basic
- * strength or the strength of its strongest attacker.
+ *
  *
  * @author Carola Bauer
  */
-public class TrustBasedRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
+public class IterativeSchemaRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
     private double epsilon=0.001;
     @Override
@@ -52,7 +54,7 @@ public class TrustBasedRankingReasoner extends AbstractRankingReasoner<Numerical
         int n = directAttackMatrix.getXDimension();
         double[] valuations = new double[n];	 //Stores valuations of the current iteration
         for (int i=0; i<n; i++) {
-            valuations[i]=0.5;
+            valuations[i]=1.;
         }
         double[] valuationsOld; //Stores valuations of the last iteration
 
@@ -61,7 +63,7 @@ public class TrustBasedRankingReasoner extends AbstractRankingReasoner<Numerical
             valuationsOld = valuations.clone();
 
             for (int i = 0; i < n; i++)
-                valuations[i] = calculateTrustBasedFunction(valuationsOld, directAttackMatrix, i);
+                valuations[i] = calculateFunction(valuationsOld, directAttackMatrix, i);
         } while (getDistance(valuationsOld, valuations) > this.epsilon);
 
 
@@ -82,7 +84,7 @@ public class TrustBasedRankingReasoner extends AbstractRankingReasoner<Numerical
      * @param i row of the attack matrix that will be used in the calculation
      * @return value
      */
-    private double calculateTrustBasedFunction(double[] vOld, Matrix directAttackMatrix, int i) {
+    private double calculateFunction(double[] vOld, Matrix directAttackMatrix, int i) {
         double max = 0.;
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
@@ -93,7 +95,7 @@ public class TrustBasedRankingReasoner extends AbstractRankingReasoner<Numerical
         }
 
 
-        return ((0.5*vOld[i])+0.5*Math.min(vOld[i], (1. - max)));
+        return ((1-vOld[i])*Math.min(0.5, (1. - max))+Math.max(0.5, (1. - max)));
 
     }
 
