@@ -46,7 +46,7 @@ public class CategorizerRankingReasoner extends AbstractRankingReasoner<Numerica
 	 * parameters.
 	 */
 	public CategorizerRankingReasoner() {
-		this.epsilon = 0.001;
+		this.epsilon = 0.1;
 	}
 	
 	/**
@@ -107,19 +107,18 @@ public class CategorizerRankingReasoner extends AbstractRankingReasoner<Numerica
 		
 	}
 
-	/**
-	 * Computes the Euclidean distance between to the given arrays.
-	 * @param vOld first array
-	 * @param v second array
-	 * @return distance between v and vOld
-	 */
+
 	private double getDistance(double[] vOld, double[] v) {
-		double sum = 0.0;
+		double maxdist = 0.0;
 		for (int i = 0; i < v.length; i++) {
-			sum += Math.pow(v[i]-vOld[i],2.0);
+			var dist= Math.pow(v[i]-vOld[i],2.0);
+			if (dist> maxdist) {
+				maxdist=dist;
+			}
 		}
-		return Math.sqrt(sum);
+		return Math.sqrt(maxdist);
 	}
+
 	
 	/**natively installed*/
 	@Override

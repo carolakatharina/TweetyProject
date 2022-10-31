@@ -61,7 +61,7 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
         double[] valuationsOld; //Stores valuations of the last iteration
 
         //Keep computing valuations until the values stop changing much or converge
-        double epsilon = 0.001;
+        double epsilon = 0.01;
         do {
             valuationsOld = valuations.clone();
             distanceOld = getDistance(valuationsOld, valuations) / kb.getNumberOfNodes();
@@ -69,8 +69,7 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
             for (int i = 0; i < n; i++)
                 valuations[i] = calculateMaxBasedFunction(valuationsOld, directAttackMatrix, i);
             distanceNew = (getDistance(valuationsOld, valuations) / kb.getNumberOfNodes());
-        } while (Math.abs(distanceNew - distanceOld) > epsilon);
-
+        } while (getDistance(valuationsOld, valuations) > epsilon);
 
         //Use computed valuations as values for argument ranking
         //Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
@@ -92,6 +91,7 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
     private double calculateMaxBasedFunction(double[] vOld, Matrix directAttackMatrix, int i) {
         double max = 0.;
 
+
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
             double attacker= vOld[j] * directAttackMatrix.getEntry(i,j).doubleValue();
             if (attacker>max) {
@@ -99,22 +99,25 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
             }
         }
 
-        return (vOld[i] / (1+max));
+        return (vOld[i] / (1.+max));
 
     }
 
     /**
-     * Computes the Euclidean distance between to the given arrays.
+     * Computes maxdist between to the given arrays.
      * @param vOld first array
      * @param v second array
      * @return distance between v and vOld
      */
     private double getDistance(double[] vOld, double[] v) {
-        double sum = 0.0;
+        double maxdist = 0.0;
         for (int i = 0; i < v.length; i++) {
-            sum += Math.pow(v[i]-vOld[i],2.0);
+            var dist= Math.pow(v[i]-vOld[i],2.0);
+            if (dist> maxdist) {
+                maxdist=dist;
+            }
         }
-        return Math.sqrt(sum);
+        return Math.sqrt(maxdist);
     }
 
 
