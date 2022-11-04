@@ -61,7 +61,7 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
         double[] valuationsOld; //Stores valuations of the last iteration
 
         //Keep computing valuations until the values stop changing much or converge
-        double epsilon = 0.01;
+        double epsilon = 0.1;
         do {
             valuationsOld = valuations.clone();
             distanceOld = getDistance(valuationsOld, valuations) / kb.getNumberOfNodes();

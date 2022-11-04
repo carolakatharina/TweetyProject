@@ -20,6 +20,7 @@ package org.tweetyproject.arg.rankings.postulates;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
@@ -59,19 +60,18 @@ public class RaAttackVsFullDefense extends RankingPostulate {
 		if (dt.containsCycle())
 			return true;
 
-		Iterator<Argument> it = dt.iterator();
-		Argument a = it.next();
-		Argument b = it.next();
-		
-		if (dt.getAttackers(b).size() != 1)
-			return true;
-		if (!dt.getAttackers(dt.getAttackers(b).iterator().next()).isEmpty())
-			return true;
-		if (dt.hasAttackBranch(a))
-			return true;
+
+		//arguments without any attackbranch
+		var argWithoutAttB = dt.stream().filter(arg -> dt.hasAttackBranch(arg)).collect(Collectors.toList());
+
+		//arguments only attacked by one non-attacked argument
+		var argWithOneNaAtt = dt.stream().filter(arg -> dt.getAttackers(arg).size() == 1
+		&& dt.getAttackers(arg).stream().allMatch(att -> dt.getAttackers(att).isEmpty())).collect(Collectors.toList());
+
 
 		GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
-		return ranking.isStrictlyMoreAcceptableThan(a, b);
+		return argWithoutAttB.stream().allMatch(arg -> argWithOneNaAtt.stream().allMatch(
+				att -> ranking.isStrictlyMoreAcceptableThan(arg, att)));
 	}
 
 }

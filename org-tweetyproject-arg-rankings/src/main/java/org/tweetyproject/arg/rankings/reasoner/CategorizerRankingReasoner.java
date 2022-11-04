@@ -46,7 +46,7 @@ public class CategorizerRankingReasoner extends AbstractRankingReasoner<Numerica
 	 * parameters.
 	 */
 	public CategorizerRankingReasoner() {
-		this.epsilon = 0.1;
+		this.epsilon = 0.001;
 	}
 	
 	/**

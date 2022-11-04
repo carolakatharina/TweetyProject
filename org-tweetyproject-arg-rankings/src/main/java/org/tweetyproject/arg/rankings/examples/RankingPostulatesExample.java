@@ -24,8 +24,7 @@ import java.util.HashSet;
 import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
-import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
+import org.tweetyproject.arg.dung.util.*;
 import org.tweetyproject.arg.rankings.postulates.RankingPostulate;
 import org.tweetyproject.arg.rankings.reasoner.*;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
@@ -42,14 +41,18 @@ public class RankingPostulatesExample {
 
 	public static void main(String[] args) {
 		all_postulates = new HashSet<RankingPostulate>();
+		/*
 		all_postulates.add(RankingPostulate.ABSTRACTION);
 		all_postulates.add(RankingPostulate.ADDITIONOFATTACKBRANCH);
 		all_postulates.add(RankingPostulate.ADDITIONOFDEFENSEBRANCH);
 		all_postulates.add(RankingPostulate.ATTACKVSFULLDEFENSE);
 		all_postulates.add(RankingPostulate.CARDINALITYPRECEDENCE);
 		all_postulates.add(RankingPostulate.COUNTERTRANSITIVITY);
+
+		 */
 		all_postulates.add(RankingPostulate.DEFENSEPRECEDENCE);
 		all_postulates.add(RankingPostulate.DISTDEFENSEPRECEDENCE);
+
 		all_postulates.add(RankingPostulate.INCREASEOFATTACKBRANCH);
 		all_postulates.add(RankingPostulate.INCREASEOFDEFENSEBRANCH);
 		all_postulates.add(RankingPostulate.INDEPENDENCE);
@@ -61,15 +64,22 @@ public class RankingPostulatesExample {
 		all_postulates.add(RankingPostulate.TOTAL);
 		all_postulates.add(RankingPostulate.VOIDPRECEDENCE);
 
-		SerializabilityExample();
+		CategorizerExample();
+		/*
+		EulerMaxBasedExample();
+		MaxBasedExample();
+		TrustBasedExample();
+
+		 */
+
 	}
 
 	public static void CategorizerExample() {
-		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
+		DungTheoryGenerator dg = new DefaultDungTheoryGenerator(new DungTheoryGenerationParameters());
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
 				new CategorizerRankingReasoner());
 		evaluator.addAllPostulates(all_postulates);
-		System.out.println(evaluator.evaluate(4000, false).prettyPrint());
+		System.out.println(evaluator.evaluate(20, false).prettyPrint());
 	}
 
 
@@ -109,7 +119,7 @@ public class RankingPostulatesExample {
 	public static void BurdenExample() {
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
-				new BurdenBasedRankingReasoner());
+				new AlphaBurdenBasedRankingReasoner());
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(100, false).prettyPrint());
 	}
@@ -163,6 +173,7 @@ public class RankingPostulatesExample {
 		System.out.println(evaluator.evaluate(2000, false).prettyPrint());
 	}
 
+	/*
 	public static void SerializabilityExample() {
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
@@ -170,5 +181,7 @@ public class RankingPostulatesExample {
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(2000, false).prettyPrint());
 	}
+
+	 */
 
 }

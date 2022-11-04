@@ -44,7 +44,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         COUNTING,
         PROBABILISTIC,
         MAX,
-        EULER_MB, TRUST, BURDEN, SERIALIZABLE, ITS
+        EULER_MB, TRUST, BURDEN, DISCUSSION, TUPLES, ALPHABBS, ITS
 
     }
 
@@ -85,9 +85,9 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
             case TRUST -> new TrustBasedRankingReasoner().getModel(bbase);
             case EULER_MB -> new EulerMaxBasedRankingReasoner().getModel(bbase);
-            case SERIALIZABLE -> new SerialisabilityRankingReasoner(extensionSemantics).getModel(bbase);
             case BURDEN -> new AlphaBurdenBasedRankingReasoner().getModel(bbase);
             case ITS -> new IterativeSchemaRankingReasoner().getModel(bbase);
+            default -> null;
         });
         return ranking;
     }

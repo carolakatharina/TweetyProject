@@ -31,7 +31,7 @@ public class DungTheoryGenerationParameters{
 	/** Whether to avoid self-attacks. */
 	public boolean avoidSelfAttacks = true;
 	/** Whether the generated theory must have a tree shape. */
-	public boolean enforceTreeShape = false;
+	public boolean enforceTreeShape = true;
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()

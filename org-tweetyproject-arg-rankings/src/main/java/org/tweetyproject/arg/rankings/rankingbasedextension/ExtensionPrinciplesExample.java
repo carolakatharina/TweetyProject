@@ -43,8 +43,8 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedE
 public class ExtensionPrinciplesExample {
     private static Collection<Principle> all_principles;
     private static final Collection<Semantics> ext_semantics = new ArrayList<>(List.of(Semantics.RB_ARG_ABS_STRENGTH,
-            Semantics.RB_ATT_STRENGTH,
-            Semantics.RB_ARG_ABS_STRENGTH,
+            Semantics.RB_ARG_STRENGTH,
+            Semantics.RB_ATT_STRENGTH_ARG_STRENGTH,
             Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
             Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH,
             Semantics.RB_ATT_STRENGTH_ARG_STRENGTH,
@@ -73,6 +73,7 @@ public class ExtensionPrinciplesExample {
         all_principles.add(Principle.MODULARIZATION);
         all_principles.add(Principle.REDUCT_ADM);
         all_principles.add(Principle.SEMIQUAL_ADM);
+        all_principles.add(Principle.SCC_DECOMPOSABILITY);
         all_principles.add(Principle.SCC_DECOMPOSABILITY);
 
         for (var rank: rank_semantics) {
