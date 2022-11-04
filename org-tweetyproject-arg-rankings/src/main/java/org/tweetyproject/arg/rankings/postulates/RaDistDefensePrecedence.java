@@ -62,16 +62,13 @@ public class RaDistDefensePrecedence extends RankingPostulate {
 		var satisfied=true;
 		for (var a: dt) {
 
-			List<Argument> potentialBs = dt.stream().filter(arg -> dt.getAttackers(arg).size()==dt.getAttackers(a).size())
+			List<Argument> potentialBs = dt.stream().filter(arg -> dt.getAttackers(arg).size()==dt.getAttackers(a).size() && !arg.equals(a))
 					.collect(Collectors.toList());
 			for (var b: potentialBs) {
-				if (dt.getAttackers(a).size() != dt.getAttackers(b).size())
-					break;
 				if (defenseIsDistributed(a, dt) && defenseIsSimple(a, dt) &&
 						!defenseIsDistributed(b, dt) && defenseIsSimple(b, dt)) {
 					GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
-					satisfied= ranking.isStrictlyMoreAcceptableThan(a, b);
-					if(!satisfied) {
+					if(!ranking.isStrictlyMoreAcceptableThan(a, b)) {
 						return false;
 					}
 				}
@@ -88,7 +85,7 @@ public class RaDistDefensePrecedence extends RankingPostulate {
 	private boolean defenseIsSimple(Argument x, DungTheory kb) {
 		var defenders= kb.getAttackers(kb.getAttackers(x));
 		return defenders.stream().allMatch(def ->
-				kb.getAttackers(x).stream().filter(att -> kb.isAttackedBy(x, def)).collect(Collectors.toList()).size()==1);
+				kb.getAttackers(x).stream().filter(att -> kb.isAttackedBy(att, def)).collect(Collectors.toList()).size()==1);
 	}
 
 	/*The defense of an argument x is distributed iff every attacker of x is attacked by at least

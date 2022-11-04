@@ -92,7 +92,7 @@ public class RankingPostulatesExample {
 
 	public static void Example(RankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
 
-		/*
+
 		var params = new DungTheoryGenerationParameters();
 		params.attackProbability=0.5;
 		params.enforceTreeShape=true;
@@ -142,15 +142,16 @@ public class RankingPostulatesExample {
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
 
-		 */
 
+
+		//Tests für DP/DDP
 		File[] apxFiles = new File("C:\\Users\\Carola\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension").listFiles(new ApxFilenameFilter());
 
 
-		var dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
+		dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
 
 
-		var evaluator = new PostulateEvaluator<>(dg,
+		evaluator = new PostulateEvaluator<>(dg,
 				getReasoner(
 						rankingSemantics));
 		evaluator.addAllPostulates(all_postulates);
