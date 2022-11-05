@@ -59,7 +59,7 @@ public class CountingRankingReasoner extends AbstractRankingReasoner<NumericalPa
 	 */
 	public CountingRankingReasoner() {
 		this.dampingFactor = 0.9;
-		this.epsilon = 0.1;
+		this.epsilon = 0.001;
 	}
 
 	/**

@@ -43,7 +43,7 @@ public class AlphaBurdenBasedRankingReasoner extends AbstractRankingReasoner<Num
      * parameters.
      */
     public AlphaBurdenBasedRankingReasoner() {
-        this.epsilon = 0.1;
+        this.epsilon = 0.001;
         this.alpha = 0.5;
     }
 
@@ -90,11 +90,9 @@ public class AlphaBurdenBasedRankingReasoner extends AbstractRankingReasoner<Num
         ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
         int i = 0;
         for (Argument a : ((DungTheory) base)) {
-			if (valuations[i]==0.0) {
-				ranking.put(a, 0.0);
-			} else {
+
 				ranking.put(a, (1.0 / valuations[i]));
-			}
+
 			i++;
         }
 

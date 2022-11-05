@@ -49,12 +49,12 @@ public class RankingPostulatesExample {
 	private static Collection<RankingPostulate> all_postulates;
 
 	private static final Collection<RankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-			SAF, COUNTING, CATEGORIZER, DISCUSSION, TUPLES, ALPHABBS
+			TRUST
 	));
 
 	public static void main(String[] args) {
 		all_postulates = new HashSet<>();
-		/*
+
 		all_postulates.add(RankingPostulate.ABSTRACTION);
 		all_postulates.add(RankingPostulate.ADDITIONOFATTACKBRANCH);
 		all_postulates.add(RankingPostulate.ADDITIONOFDEFENSEBRANCH);
@@ -62,13 +62,16 @@ public class RankingPostulatesExample {
 		all_postulates.add(RankingPostulate.CARDINALITYPRECEDENCE);
 		all_postulates.add(RankingPostulate.COUNTERTRANSITIVITY);
 
-		 */
+
 		all_postulates.add(RankingPostulate.DEFENSEPRECEDENCE);
 		all_postulates.add(RankingPostulate.DISTDEFENSEPRECEDENCE);
-		/*
+
 		all_postulates.add(RankingPostulate.INCREASEOFATTACKBRANCH);
 		all_postulates.add(RankingPostulate.INCREASEOFDEFENSEBRANCH);
+
+
 		all_postulates.add(RankingPostulate.INDEPENDENCE);
+
 		all_postulates.add(RankingPostulate.NONATTACKEDEQUIVALENCE);
 		all_postulates.add(RankingPostulate.QUALITYPRECEDENCE);
 		all_postulates.add(RankingPostulate.SELFCONTRADICTION);
@@ -77,7 +80,7 @@ public class RankingPostulatesExample {
 		all_postulates.add(RankingPostulate.TOTAL);
 		all_postulates.add(RankingPostulate.VOIDPRECEDENCE);
 
-		 */
+
 
 
 		for (var rank: rank_semantics) {
@@ -94,10 +97,10 @@ public class RankingPostulatesExample {
 
 
 		var params = new DungTheoryGenerationParameters();
-		params.attackProbability=0.5;
+		params.attackProbability=0.9;
 		params.enforceTreeShape=true;
 		params.avoidSelfAttacks=false;
-		params.numberOfArguments=25;
+		params.numberOfArguments=4;
 		DungTheoryGenerator dg = new DefaultDungTheoryGenerator(params);
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
 				getReasoner(
@@ -105,11 +108,12 @@ public class RankingPostulatesExample {
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
 
+
 		params = new DungTheoryGenerationParameters();
 		params.attackProbability=0.5;
 		params.enforceTreeShape=false;
 		params.avoidSelfAttacks=false;
-		params.numberOfArguments=25;
+		params.numberOfArguments=5;
 		dg = new DefaultDungTheoryGenerator(params);
 		evaluator = new PostulateEvaluator<>(dg,
 				getReasoner(
@@ -121,7 +125,7 @@ public class RankingPostulatesExample {
 		params.attackProbability=0.5;
 		params.enforceTreeShape=false;
 		params.avoidSelfAttacks=true;
-		params.numberOfArguments=25;
+		params.numberOfArguments=10;
 		dg = new DefaultDungTheoryGenerator(params);
 		evaluator = new PostulateEvaluator<>(dg,
 				getReasoner(
@@ -143,7 +147,6 @@ public class RankingPostulatesExample {
 		System.out.println(evaluator.evaluate(4000, true).prettyPrint());
 
 
-
 		//Tests für DP/DDP
 		File[] apxFiles = new File("C:\\Users\\Carola\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension").listFiles(new ApxFilenameFilter());
 
@@ -161,7 +164,7 @@ public class RankingPostulatesExample {
 
 	}
 
-	public static AbstractRankingReasoner getReasoner(RankingBasedExtensionReasoner.RankingSemantics sem) {
+	public static AbstractRankingReasoner getReasoner(RankingBasedExtensionReasoner.RankingSemantics sem)  {
 		return switch (sem) {
 			case CATEGORIZER -> new CategorizerRankingReasoner();
 			case STRATEGY -> new StrategyBasedRankingReasoner();
@@ -175,7 +178,10 @@ public class RankingPostulatesExample {
 			case TUPLES -> new TuplesRankingReasoner();
 			case ITS -> new IterativeSchemaRankingReasoner();
 			case DISCUSSION -> new DiscussionBasedRankingReasoner();
-			default -> null;
+			default -> {
+				System.out.println(sem);
+				throw new RuntimeException();
+			}
 		};
 	}
 
