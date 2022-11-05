@@ -62,9 +62,18 @@ public class RaDistDefensePrecedence extends RankingPostulate {
 		var satisfied=true;
 		for (var a: dt) {
 
-			List<Argument> potentialBs = dt.stream().filter(arg -> dt.getAttackers(arg).size()==dt.getAttackers(a).size() && !arg.equals(a))
+			List<Argument> potentialBs = dt.stream().filter(arg ->
+							dt.getAttackers(arg).size()==dt.getAttackers(a).size() && !arg.equals(a))
 					.collect(Collectors.toList());
 			for (var b: potentialBs) {
+				Set<Argument> defendersA = new HashSet<Argument>();
+				Set<Argument> defendersB = new HashSet<Argument>();
+				for (Argument at : dt.getAttackers(a))
+					defendersA.addAll(dt.getAttackers(at));
+				for (Argument bt : dt.getAttackers(b))
+					defendersB.addAll(dt.getAttackers(bt));
+				if (defendersA.size() != defendersB.size())
+					break;
 				if (defenseIsDistributed(a, dt) && defenseIsSimple(a, dt) &&
 						!defenseIsDistributed(b, dt) && defenseIsSimple(b, dt)) {
 					GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
