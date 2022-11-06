@@ -18,14 +18,18 @@
  */
 package org.tweetyproject.arg.rankings.rankingbasedextension;
 
+import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
+import org.tweetyproject.arg.dung.parser.ApxParser;
 import org.tweetyproject.arg.dung.principles.Principle;
 import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
+import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -42,20 +46,15 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedE
  */
 public class ExtensionPrinciplesExample {
     private static Collection<Principle> all_principles;
-    private static final Collection<Semantics> ext_semantics = new ArrayList<>(List.of(Semantics.RB_ARG_ABS_STRENGTH,
-            Semantics.RB_ARG_STRENGTH,
-            Semantics.RB_ATT_STRENGTH_ARG_STRENGTH,
-            Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
-            Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH,
-            Semantics.RB_ATT_STRENGTH_ARG_STRENGTH,
-            Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH,
-            Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH,
-            Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH,
-            Semantics.RB_ATT_STRENGTH_OR_ARG_STRENGTH,
-            Semantics.RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS,
-            Semantics.RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS));
+
+    private static final Collection<RankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
+            List.of(RankingBasedExtensionReasoner.Vorgehensweise.SCC
+            //, RankingBasedExtensionReasoner.Vorgehensweise.CONFLICTFREE
+            ));
+
+    private static final Collection<Semantics> ext_semantics = new ArrayList<>(List.of(Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH));
     private static final Collection<RankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX, COUNTING, ITS, BURDEN, CATEGORIZER, TRUST, EULER_MB
+            MAX, COUNTING, ITS,  CATEGORIZER, TRUST, EULER_MB, ALPHABBS, SAF
     ));
 
     public static void main(String[] args) {
@@ -89,11 +88,32 @@ public class ExtensionPrinciplesExample {
         System.out.println(semantics);
 
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
-        PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-                new RankingBasedExtensionReasoner(semantics,
-                        rankingSemantics));
-        evaluator.addAllPostulates(all_principles);
-        System.out.println(evaluator.evaluate(4000, true).prettyPrint());
+        for (var vorg: vorgehen) {
+            PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
+                    new RankingBasedExtensionReasoner(semantics,
+                            rankingSemantics, vorg));
+            evaluator.addAllPostulates(all_principles);
+            System.out.println(evaluator.evaluate(4000, true).prettyPrint());
+        }
+
+
+
+        //Tests für DP/DDP
+        File[] apxFiles = new File("C:\\Users\\Carola\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension")
+                .listFiles(new ApxFilenameFilter());
+
+
+        dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
+
+        for (var vorg: vorgehen) {
+            PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
+                    new RankingBasedExtensionReasoner(semantics,
+                            rankingSemantics, vorg));
+            evaluator.addAllPostulates(all_principles);
+            System.out.println(evaluator.evaluate(apxFiles.length, true).prettyPrint());
+        }
+
+
 
     }
 }

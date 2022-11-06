@@ -34,6 +34,13 @@ import java.util.stream.Collectors;
 public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     RankingSemantics rankingSemantics;
     Semantics extensionSemantics;
+    Vorgehensweise vorgehensweise;
+
+    public enum Vorgehensweise {
+        SCC,
+        CONFLICTFREE
+
+    }
 
 
     public enum RankingSemantics {
@@ -49,11 +56,12 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     }
 
     public RankingBasedExtensionReasoner(Semantics extensionSemantics,
-                                         RankingSemantics semantics) {
+                                         RankingSemantics semantics, Vorgehensweise vorgehensweise) {
 
         System.out.println(semantics);
         this.rankingSemantics = semantics;
         this.extensionSemantics = extensionSemantics;
+        this.vorgehensweise=vorgehensweise;
     }
 
     @Override
@@ -68,8 +76,10 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         Map<Argument, Double> ranking;
         ranking = getRanking(bbase);
 
-        return getExtensionsForSemantics_withSCCs(ranking, bbase, this.extensionSemantics);
-
+        return switch(this.vorgehensweise) {
+            case SCC -> getExtensionsForSemantics_withSCCs(ranking, bbase, this.extensionSemantics);
+            case CONFLICTFREE -> getExtensionsForSemantics_Conflictfree(ranking, bbase, this.extensionSemantics);
+        };
 
     }
 
@@ -85,7 +95,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
             case TRUST -> new TrustBasedRankingReasoner().getModel(bbase);
             case EULER_MB -> new EulerMaxBasedRankingReasoner().getModel(bbase);
-            case BURDEN -> new AlphaBurdenBasedRankingReasoner().getModel(bbase);
+            case ALPHABBS -> new AlphaBurdenBasedRankingReasoner().getModel(bbase);
             case ITS -> new IterativeSchemaRankingReasoner().getModel(bbase);
             default -> null;
         });
@@ -133,7 +143,6 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         Collection<Extension<DungTheory>> finalAllExtensions = new ArrayList<>();
         DungTheory restrictedTheory = new DungTheory((DungTheory) bbase);
         // remove all self-attacking arguments
-        /*
         for (Argument argument: (DungTheory)bbase) {
             if (restrictedTheory.isAttackedBy(argument, argument)) {
                 var min = ranking.values().stream().min(Double::compare);
@@ -142,7 +151,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             }
         }
 
-         */
+
         Collection<Extension<DungTheory>> allMaximalConflictFreeSets = this.getMaximalConflictFreeSets(bbase, restrictedTheory);
         for (Extension<DungTheory> e : allMaximalConflictFreeSets) {
             var extneu = getSetForSemantics(ranking, e.stream().collect(Collectors.toList()), bbase, extensionsemantic);
