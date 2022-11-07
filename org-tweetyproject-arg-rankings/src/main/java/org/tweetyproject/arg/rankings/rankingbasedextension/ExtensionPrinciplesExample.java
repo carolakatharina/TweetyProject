@@ -48,13 +48,14 @@ public class ExtensionPrinciplesExample {
     private static Collection<Principle> all_principles;
 
     private static final Collection<RankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
-            List.of(RankingBasedExtensionReasoner.Vorgehensweise.SCC
-            //, RankingBasedExtensionReasoner.Vorgehensweise.CONFLICTFREE
+            List.of(RankingBasedExtensionReasoner.Vorgehensweise.SCC,
+                    RankingBasedExtensionReasoner.Vorgehensweise.CONFLICTFREE
             ));
 
-    private static final Collection<Semantics> ext_semantics = new ArrayList<>(List.of(Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH));
+    private static final Collection<Semantics> ext_semantics = new ArrayList<>(List.of(Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
+            Semantics.RB_ARG_ABS_STRENGTH));
     private static final Collection<RankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX, COUNTING, ITS,  CATEGORIZER, TRUST, EULER_MB, ALPHABBS, SAF
+            MAX, COUNTING, ITS, CATEGORIZER, TRUST, EULER_MB, ALPHABBS, SAF
     ));
 
     public static void main(String[] args) {
@@ -75,8 +76,8 @@ public class ExtensionPrinciplesExample {
         all_principles.add(Principle.SCC_DECOMPOSABILITY);
         all_principles.add(Principle.SCC_DECOMPOSABILITY);
 
-        for (var rank: rank_semantics) {
-            for (var sem: ext_semantics) {
+        for (var rank : rank_semantics) {
+            for (var sem : ext_semantics) {
                 Example(sem, rank);
             }
         }
@@ -88,14 +89,13 @@ public class ExtensionPrinciplesExample {
         System.out.println(semantics);
 
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
-        for (var vorg: vorgehen) {
+        for (var vorg : vorgehen) {
             PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
                     new RankingBasedExtensionReasoner(semantics,
                             rankingSemantics, vorg));
             evaluator.addAllPostulates(all_principles);
             System.out.println(evaluator.evaluate(4000, true).prettyPrint());
         }
-
 
 
         //Tests für DP/DDP
@@ -105,14 +105,13 @@ public class ExtensionPrinciplesExample {
 
         dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
 
-        for (var vorg: vorgehen) {
+        for (var vorg : vorgehen) {
             PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
                     new RankingBasedExtensionReasoner(semantics,
                             rankingSemantics, vorg));
             evaluator.addAllPostulates(all_principles);
             System.out.println(evaluator.evaluate(apxFiles.length, true).prettyPrint());
         }
-
 
 
     }

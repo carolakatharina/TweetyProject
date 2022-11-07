@@ -80,7 +80,7 @@ public class CountingRankingReasoner extends AbstractRankingReasoner<NumericalPa
 	 */
 	public CountingRankingReasoner(double damping_factor) {
 		this.dampingFactor = damping_factor;
-		this.epsilon = 0.1;
+		this.epsilon = 0.001;
 	}
 
 	@Override
@@ -144,17 +144,20 @@ public class CountingRankingReasoner extends AbstractRankingReasoner<NumericalPa
 		return maxSum;
 	}
 
+	/**
+	 * Computes the Euclidean distance between to the given column vectors.
+	 *
+	 * @param vOld first column vector
+	 * @param v     second column vector
+	 * @return distance between v and v_old
+	 */
 	private double getDistance(Matrix vOld, Matrix v) {
-		double maxdist = 0.0;
+		double sum = 0.0;
 		for (int i = 0; i < v.getYDimension(); i++) {
-			var dist= Math.pow(v.getEntry(0,i).doubleValue()-vOld.getEntry(0,i).doubleValue(),2.0);
-			if (dist> maxdist) {
-				maxdist=dist;
-			}
+			sum += Math.pow(v.getEntry(0, i).doubleValue() - vOld.getEntry(0, i).doubleValue(), 2.0);
 		}
-		return Math.sqrt(maxdist);
+		return Math.sqrt(sum);
 	}
-
 	
 	/**natively installed*/
 	@Override

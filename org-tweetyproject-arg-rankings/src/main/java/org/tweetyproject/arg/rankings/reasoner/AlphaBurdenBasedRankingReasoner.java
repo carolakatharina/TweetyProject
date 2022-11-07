@@ -43,7 +43,7 @@ public class AlphaBurdenBasedRankingReasoner extends AbstractRankingReasoner<Num
      * parameters.
      */
     public AlphaBurdenBasedRankingReasoner() {
-        this.epsilon = 0.1;
+        this.epsilon = 0.001;
         this.alpha = 0.5;
     }
 
@@ -123,16 +123,22 @@ public class AlphaBurdenBasedRankingReasoner extends AbstractRankingReasoner<Num
     }
 
 
+
+    /**
+     * Computes the Euclidean distance between to the given arrays.
+     * @param vOld first array
+     * @param v second array
+     * @return distance between v and vOld
+     */
     private double getDistance(double[] vOld, double[] v) {
-        double maxdist = 0.0;
+        double sum = 0.0;
         for (int i = 0; i < v.length; i++) {
-            var dist= Math.pow(v[i]-vOld[i],2.0);
-            if (dist> maxdist) {
-                maxdist=dist;
-            }
+            sum += Math.pow(v[i]-vOld[i],2.0);
         }
-        return Math.sqrt(maxdist);
+        return Math.sqrt(sum);
     }
+
+
 
     /**
      * natively installed

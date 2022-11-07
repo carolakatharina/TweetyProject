@@ -61,7 +61,7 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
         double[] valuationsOld; //Stores valuations of the last iteration
 
         //Keep computing valuations until the values stop changing much or converge
-        double epsilon = 0.1;
+        double epsilon = 0.001;
         do {
             valuationsOld = valuations.clone();
             distanceOld = getDistance(valuationsOld, valuations) / kb.getNumberOfNodes();
@@ -99,25 +99,22 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
             }
         }
 
-        return (vOld[i] / (1.+max));
+        return (1. / (1.+max));
 
     }
 
     /**
-     * Computes maxdist between to the given arrays.
+     * Computes the Euclidean distance between to the given arrays.
      * @param vOld first array
      * @param v second array
      * @return distance between v and vOld
      */
     private double getDistance(double[] vOld, double[] v) {
-        double maxdist = 0.0;
+        double sum = 0.0;
         for (int i = 0; i < v.length; i++) {
-            var dist= Math.pow(v[i]-vOld[i],2.0);
-            if (dist> maxdist) {
-                maxdist=dist;
-            }
+            sum += Math.pow(v[i]-vOld[i],2.0);
         }
-        return Math.sqrt(maxdist);
+        return Math.sqrt(sum);
     }
 
 

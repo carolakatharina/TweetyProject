@@ -37,7 +37,7 @@ import java.util.HashSet;
  */
 public class TrustBasedRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
-    private double epsilon=0.1;
+    private double epsilon=0.001;
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
         Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
@@ -93,7 +93,7 @@ public class TrustBasedRankingReasoner extends AbstractRankingReasoner<Numerical
         }
 
 
-        return ((0.5*vOld[i])+0.5*Math.min(vOld[i], (1. - max)));
+        return ((0.5*1.)+0.5*Math.min(1., (1. - max)));
 
     }
 
