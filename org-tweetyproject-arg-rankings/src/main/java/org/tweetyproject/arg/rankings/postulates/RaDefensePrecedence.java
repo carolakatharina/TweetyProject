@@ -20,7 +20,9 @@ package org.tweetyproject.arg.rankings.postulates;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.comparator.GeneralComparator;
@@ -55,22 +57,26 @@ public class RaDefensePrecedence extends RankingPostulate {
 			return true;
 		if (ev.getModel((DungTheory) kb) == null)
 			return true;
-		
-		DungTheory dt = new DungTheory((DungTheory) kb);
-		Iterator<Argument> it = dt.iterator();
-		Argument a = it.next();
-		Argument b = it.next();
-		Set<Argument> attackersA = dt.getAttackers(a);
-		Set<Argument> attackersB = dt.getAttackers(b);
-		if (attackersA.size() != attackersB.size())
-			return true;
 
-		if (dt.isAttacked(new Extension(dt.getAttackers(a)), new Extension(kb))
-				&& !dt.isAttacked(new Extension(dt.getAttackers(b)), new Extension(kb))) {
-			GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
-			return ranking.isStrictlyMoreAcceptableThan(a, b);
-		}
-		return true;
+		DungTheory dt = new DungTheory((DungTheory) kb);
+
+		for (var a : dt) {
+			var potentialbs = dt.stream()
+					.filter(b ->
+							dt.getAttackers(a).size() == dt.getAttackers(b).size()
+									&& !b.equals(a))
+					.collect(Collectors.toList());
+			for (var b : potentialbs) {
+				if (dt.isAttacked(new Extension(dt.getAttackers(a)), new Extension(kb))
+						&& !dt.isAttacked(new Extension(dt.getAttackers(b)), new Extension(kb))) {
+					GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
+					if (!ranking.isStrictlyMoreAcceptableThan(a, b)) {
+						return false;
+					}
+				}
+			}
+
+		}return true;
 	}
 
 }

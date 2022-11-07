@@ -40,46 +40,24 @@ public class BurdenBasedRankingReasoner extends AbstractRankingReasoner<LatticeP
 
 	@Override
 	public Collection<LatticePartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-		Collection<LatticePartialOrder<Argument, DungTheory>> ranks = new HashSet<LatticePartialOrder<Argument, DungTheory>>();
+		Collection<LatticePartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
 		ranks.add(this.getModel(bbase));
 		return ranks;
 	}
 
+
 	@Override
 	public LatticePartialOrder<Argument, DungTheory> getModel(DungTheory base) {
-		// Number of steps
-		int iMax = 6;
 		// Map for storing burden numbers of previous steps
-		Map<Argument, double[]> burdenNumbers = new HashMap<Argument, double[]>();
+		Map<Argument, double[]> burdenNumbers = getBurdenNumbers(base);
 
-		// Initialize burden numbers array
-		for (Argument a : (DungTheory) base) {
-			double[] initialNumbers = new double[iMax + 1];
-			initialNumbers[0] = 1.0; // burden number for step 0 is 1.0 for all arguments
-			burdenNumbers.put(a, initialNumbers);
-		}
-
-		// Compute burden numbers for all steps i
-		for (int i = 1; i <= iMax; i++) {
-			for (Argument a : (DungTheory) base) {
-				Set<Argument> attackers = ( (DungTheory) base).getAttackers(a);
-				double newBurden = 1.0;
-				for (Argument b : attackers) {
-					double[] attackerBurdenNumbers = burdenNumbers.get(b);
-					newBurden += 1.0 / (attackerBurdenNumbers[i - 1]);
-				}
-				double[] burdenNumbersTemp = burdenNumbers.get(a);
-				burdenNumbersTemp[i] = newBurden;
-				burdenNumbers.put(a, burdenNumbersTemp);
-			}
-		}
 
 		// Use the lexicographical order of the burden numbers as ranking
 		LatticePartialOrder<Argument, DungTheory> ranking 
-			= new LatticePartialOrder<Argument, DungTheory>( ((DungTheory) base).getNodes());
+			= new LatticePartialOrder<>(base.getNodes());
 		LexicographicDoubleTupleComparator c = new LexicographicDoubleTupleComparator();
-		for (Argument a :  (DungTheory) base) {
-			for (Argument b :  (DungTheory) base) {
+		for (Argument a : base) {
+			for (Argument b : base) {
 				double[] burdensA = burdenNumbers.get(a);
 				double[] burdensB = burdenNumbers.get(b);
 				int res = c.compare(burdensA, burdensB);
@@ -95,7 +73,39 @@ public class BurdenBasedRankingReasoner extends AbstractRankingReasoner<LatticeP
 		}
 		return ranking;
 	}
-	
+
+	public Map<Argument, double[]> getBurdenNumbers(DungTheory base) {
+		Map<Argument, double[]> burdenNumbers = new HashMap<>();
+
+		// Number of steps
+		int iMax = 6;
+
+		// Initialize burden numbers array
+		for (Argument a : base) {
+			double[] initialNumbers = new double[iMax + 1];
+			initialNumbers[0] = 1.0; // burden number for step 0 is 1.0 for all arguments
+			burdenNumbers.put(a, initialNumbers);
+		}
+
+		// Compute burden numbers for all steps i
+		for (int i = 1; i <= iMax; i++) {
+			for (Argument a : base) {
+				Set<Argument> attackers = base.getAttackers(a);
+				double newBurden = 1.0;
+				for (Argument b : attackers) {
+					double[] attackerBurdenNumbers = burdenNumbers.get(b);
+					newBurden += 1.0 / (attackerBurdenNumbers[i - 1]);
+				}
+				double[] burdenNumbersTemp = burdenNumbers.get(a);
+				burdenNumbersTemp[i] = newBurden;
+				burdenNumbers.put(a, burdenNumbersTemp);
+			}
+		}
+		return burdenNumbers;
+	}
+
+
+
 	/**natively installed*/
 	@Override
 	public boolean isInstalled() {

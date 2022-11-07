@@ -20,6 +20,7 @@
 package org.tweetyproject.arg.dung.syntax;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Minimalistic Implementation of a weighted argumentation theory
@@ -41,6 +42,7 @@ public class WeightedDungTheory extends DungTheory {
         super();
         weights = new HashMap<>();
     }
+
 
     /**
      * return weight of the attack between the given arguments

@@ -27,7 +27,7 @@ import org.tweetyproject.logics.pl.syntax.*;
 
 
 /**
- * A ranking function (or ordinal conditional function, OCF) that maps possible worlds
+ * A ranking function (or ordinal conditional function, OCF) that maps possible words
  * of a propositional language to integers. 
  * 
  * <br><br>See W. Spohn. Ordinal conditional functions: a dynamic theory of epistemic states.

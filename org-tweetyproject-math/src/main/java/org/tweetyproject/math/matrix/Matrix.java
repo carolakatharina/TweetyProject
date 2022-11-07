@@ -74,7 +74,7 @@ public class Matrix {
 	 * @return the y dimension of this matrix.
 	 */
 	public int getYDimension(){
-		return this.entries[0].length;
+		return this.entries.length!=0?this.entries[0].length:0;
 	}
 	
 	/**
