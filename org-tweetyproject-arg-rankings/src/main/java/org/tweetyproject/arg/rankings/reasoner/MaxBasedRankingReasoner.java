@@ -49,8 +49,7 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
 
     @Override
     public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
-             double distanceOld;
-        double distanceNew;
+
 
         Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
@@ -64,11 +63,9 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
         double epsilon = 0.001;
         do {
             valuationsOld = valuations.clone();
-            distanceOld = getDistance(valuationsOld, valuations) / kb.getNumberOfNodes();
 
             for (int i = 0; i < n; i++)
                 valuations[i] = calculateMaxBasedFunction(valuationsOld, directAttackMatrix, i);
-            distanceNew = (getDistance(valuationsOld, valuations) / kb.getNumberOfNodes());
         } while (getDistance(valuationsOld, valuations) > epsilon);
 
         //Use computed valuations as values for argument ranking

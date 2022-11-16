@@ -41,6 +41,9 @@ public abstract class Principle implements Postulate<Argument> {
     /** The admissibility principle **/
     public static final Principle ADMISSIBILITY = new AdmissibilityPrinciple();
     /** The strong admissibility principle **/
+
+    public static final Principle WEAK_ADMISSIBILITY = new WeakAdmissibilityPrinciple();
+    /** The strong admissibility principle **/
     public static final Principle STRONG_ADMISSIBILITY = new StrongAdmissibilityPrinciple();
     /** The reinstatement principle **/
     public static final Principle REINSTATEMENT = new ReinstatementPrinciple();
