@@ -346,6 +346,19 @@ public class DungTheory extends BeliefSet<Argument,DungSignature> implements Gra
 	}
 	
 	/**
+	 * Checks whether the given extension is complete wrt. this theory.
+	 * @param e some extension
+	 * @return "true" iff the extension is complete.
+	 */
+	public boolean isComplete(Extension<DungTheory> e) {
+		for(Argument a: this)
+			if(!e.contains(a))
+				if(this.isAcceptable(a, e))
+					return false;
+		return true;				
+	}
+	
+	/**
 	 * The characteristic function of an abstract argumentation framework: F_AF(S) = {A|A is acceptable wrt. S}.
 	 * @param extension an extension (a set of arguments).
 	 * @return an extension (a set of arguments).
@@ -727,6 +740,22 @@ public class DungTheory extends BeliefSet<Argument,DungSignature> implements Gra
 				theory.add(attack);
 		return theory;
 	}
+	
+	/**
+     * computes the reduct of bbase wrt. ext
+     * ie. removes all arguments from bbase which are either in ext or are attacked by any element of ext
+     * @param bbase an argumentation framework
+     * @param ext an extension
+     * @return the reduct of bbase wrt. ext
+     */
+    public DungTheory getReduct(Collection<Argument> arguments) {
+    	Collection<Argument> restriction = new HashSet<>();
+    	Extension<DungTheory> ext = new Extension<>(arguments);
+    	for(Argument a: this)
+    		if(!arguments.contains(a) && !this.isAttacked(a, ext))
+    			restriction.add(a);        
+        return (DungTheory) this.getRestriction(restriction);
+    }
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
