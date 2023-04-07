@@ -67,6 +67,12 @@ public abstract class Principle implements Postulate<Argument> {
     public static final Principle SCC_DECOMPOSABILITY = new SccDecomposabilityPrinciple();
     /** The naivety principle **/
     public static final Principle NAIVETY = new NaivetyPrinciple();
+    public static final Principle DEFENCE = new DefencePrinciple();
+
+
+    public static final Principle SCC_RECURSIVENESS = new SccDecomposabilityPrinciple();
+
+
 
     /* (non-Javadoc)
      * @see org.tweetyproject.commons.postulates.Postulate#isApplicable(java.util.Collection)

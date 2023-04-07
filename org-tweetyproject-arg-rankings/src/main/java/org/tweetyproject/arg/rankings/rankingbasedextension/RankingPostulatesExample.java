@@ -46,8 +46,8 @@ public class RankingPostulatesExample {
     private static Collection<RankingPostulate> all_postulates;
 
     private static final Collection<RankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX, ITS, CATEGORIZER,
-            EULER_MB, ALPHABBS
+            MAX, CATEGORIZER,
+            NSA, MATT_TONI, COUNTING, TRUST, ALPHABBS_1, ALPHABBS_2
 
     ));
 
@@ -97,7 +97,7 @@ public class RankingPostulatesExample {
 
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
         PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-                withoutSA?getReasoner_WithoutSelfattacking(rankingSemantics):getReasoner(
+                getReasoner(
                         rankingSemantics));
         evaluator.addAllPostulates(all_postulates);
         System.out.println(evaluator.evaluate(50, true).prettyPrint());
@@ -139,39 +139,17 @@ public class RankingPostulatesExample {
     public static AbstractRankingReasoner getReasoner(RankingBasedExtensionReasoner.RankingSemantics sem) {
         return switch (sem) {
             case CATEGORIZER -> new CategorizerRankingReasoner();
-            case STRATEGY -> new StrategyBasedRankingReasoner();
-            case SAF -> new SAFRankingReasoner();
+            case MATT_TONI -> new StrategyBasedRankingReasoner();
             case COUNTING -> new CountingRankingReasoner();
             case MAX -> new MaxBasedRankingReasoner();
             case TRUST -> new TrustBasedRankingReasoner();
-            case EULER_MB -> new EulerMaxBasedRankingReasoner();
-            case BURDEN -> new BurdenBasedRankingReasoner();
-            case ALPHABBS -> new AlphaBurdenBasedRankingReasoner();
-            case TUPLES -> new TuplesRankingReasoner();
-            case ITS -> new IterativeSchemaRankingReasoner();
-            case DISCUSSION -> new DiscussionBasedRankingReasoner();
-            default -> {
-                System.out.println(sem);
-                throw new RuntimeException();
-            }
+            case ALPHABBS_1 -> new AlphaBurdenBasedRankingReasoner(0.3);
+            case ALPHABBS_2 -> new AlphaBurdenBasedRankingReasoner(10.);
+            case NSA -> new CategorizerRankingReasoner_Without_SelfAttacking();
         };
     }
 
 
-    public static AbstractRankingReasoner getReasoner_WithoutSelfattacking(RankingBasedExtensionReasoner.RankingSemantics sem) {
-        return switch (sem) {
-            case CATEGORIZER -> new CategorizerRankingReasoner_Without_SelfAttacking();
-            case MAX -> new MaxBasedRankingReasoner_Without_SelfAttacking();
-            case TRUST -> new TrustBasedRankingReasoner_Without_Selfattacking();
-            case EULER_MB -> new EulerMaxBasedRankingReasoner_Without_SelfAttacking();
-            case ALPHABBS -> new AlphaBurdenBasedRankingReasoner_Without_Selfattacking();
-            case ITS -> new IterativeSchemaRankingReasoner_Without_Selfattacking();
-            default -> {
-                System.out.println(sem);
-                throw new RuntimeException();
-            }
-        };
-    }
 
 
 }

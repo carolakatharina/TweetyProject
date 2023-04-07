@@ -18,24 +18,19 @@
  */
 package org.tweetyproject.arg.rankings.rankingbasedextension;
 
-import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
-import org.tweetyproject.arg.dung.parser.ApxParser;
 import org.tweetyproject.arg.dung.principles.Principle;
 import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
-import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.tweetyproject.arg.dung.semantics.Semantics.*;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.RankingSemantics.*;
 
 /**
@@ -47,62 +42,64 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedE
  */
 public class ExtensionPrinciplesExample {
     private static Collection<Principle> all_principles;
-    private static boolean withoutSA=true;
+
 
     private static final Collection<RankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
-            List.of(RankingBasedExtensionReasoner.Vorgehensweise.CONFLICTFREE
-                    /*RankingBasedExtensionReasoner.Vorgehensweise.SIMPLE,
-                    RankingBasedExtensionReasoner.Vorgehensweise.SCC ,
-                    RankingBasedExtensionReasoner.Vorgehensweise.SIMPLE,
-
-                    RankingBasedExtensionReasoner.Vorgehensweise.CONFLICTFREE*/
-
+            List.of(RankingBasedExtensionReasoner.Vorgehensweise.SIMPLE,
+                    /*
+                    RankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF,
+                    RankingBasedExtensionReasoner.Vorgehensweise.INC_BUDGET,
+                     */
+                    RankingBasedExtensionReasoner.Vorgehensweise.MAX_CF,
+                    RankingBasedExtensionReasoner.Vorgehensweise.CF
             ));
 
     private static final Collection<Semantics> ext_semantics = new ArrayList<>(List.of(
-            RB_ARG_ABS_STRENGTH
-            //Semantics.RB_ARG_ABS_STRENGTH
-            /*Semantics.RB_ARG_STRENGTH,
-            Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
-            Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH,
-            Semantics.RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS,
-            Semantics.RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS,
-            Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
-            Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH,
-            Semantics.RB_ATT_STRENGTH,
-            Semantics.RB_ATT_STRENGTH_ARG_STRENGTH,
-            Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH,
-            Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH
+            Semantics.RB_ARG_ABS_STRENGTH,
+            Semantics.RB_ARG_STRENGTH,
+            //Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
+            //Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH,
+            //Semantics.RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS,
+            //Semantics.RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS,
+            //Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
+            //Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH,
+            Semantics.RB_ATT_STRENGTH
+            //Semantics.RB_ATT_STRENGTH_ARG_STRENGTH,
+            //Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH,
+            //Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH
 
-
-             */
-
-
-
-             ));
+    ));
     private static final Collection<RankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX, ITS, CATEGORIZER, TRUST,
-            EULER_MB,  ALPHABBS,
-            ITS
+            MAX,
+            CATEGORIZER,
+            NSA,
+            TRUST,
+            COUNTING
+            //ALPHABBS_1,
+            //ALPHABBS_2,
+            //MATT_TONI
 
     ));
 
     public static void main(String[] args) {
         all_principles = new HashSet<>();
-        all_principles.add(Principle.CONFLICT_FREE);
         all_principles.add(Principle.ADMISSIBILITY);
-        all_principles.add(Principle.WEAK_ADMISSIBILITY);
-        all_principles.add(Principle.NAIVETY);
         all_principles.add(Principle.STRONG_ADMISSIBILITY);
+        all_principles.add(Principle.REDUCT_ADM);
+        all_principles.add(Principle.SEMIQUAL_ADM);
+        all_principles.add(Principle.WEAK_ADMISSIBILITY);
+        all_principles.add(Principle.CONFLICT_FREE);
+        all_principles.add(Principle.DEFENCE);
+        all_principles.add(Principle.NAIVETY);
         all_principles.add(Principle.I_MAXIMALITY);
         all_principles.add(Principle.REINSTATEMENT);
         all_principles.add(Principle.WEAK_REINSTATEMENT);
         all_principles.add(Principle.CF_REINSTATEMENT);
         all_principles.add(Principle.DIRECTIONALITY);
+        all_principles.add(Principle.DIRECTIONALITY);
         all_principles.add(Principle.INRA);
         all_principles.add(Principle.MODULARIZATION);
-        all_principles.add(Principle.REDUCT_ADM);
-        all_principles.add(Principle.SEMIQUAL_ADM);
+        all_principles.add(Principle.SCC_RECURSIVENESS);
         all_principles.add(Principle.SCC_DECOMPOSABILITY);
 
         for (var rank : rank_semantics) {
@@ -118,23 +115,37 @@ public class ExtensionPrinciplesExample {
         System.out.println(semantics);
 
 
-
-
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
         for (var vorg : vorgehen) {
             System.out.println(vorg);
-            PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-                    new RankingBasedExtensionReasoner(semantics,
-                            rankingSemantics, vorg, withoutSA));
-            evaluator.addAllPostulates(all_principles);
-            System.out.println(evaluator.evaluate(100, true).prettyPrint());
+            for (double thresh : getThresholds(rankingSemantics)) {
+                System.out.println(thresh);
+                PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
+                        new RankingBasedExtensionReasoner(semantics,
+                                rankingSemantics, vorg, thresh));
+                evaluator.addAllPostulates(all_principles);
+                System.out.println(evaluator.evaluate(100, true).prettyPrint());
+            }
         }
 
 
+    }
 
 
+    private static double[] getThresholds(RankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
 
 
+        return switch (rankingSemantics) {
+            case MAX, NSA, CATEGORIZER -> new double[]{0.5, (1. / ((1. + Math.sqrt(5.)) / 2.))};
+            case ALPHABBS_1 -> new double[]{10.};
+            case ALPHABBS_2 -> new double[]{2.};
+            case MATT_TONI, COUNTING, TRUST -> new double[]{0.5};
+
+
+        };
+
+
+    }
 
 
 
@@ -164,9 +175,4 @@ public class ExtensionPrinciplesExample {
          */
 
 
-
-
-
-
-    }
 }
