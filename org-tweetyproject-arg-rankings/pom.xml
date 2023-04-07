@@ -3,21 +3,16 @@
   
   <groupId>org.tweetyproject.arg</groupId>
   <artifactId>rankings</artifactId>
-
+  
   <name>TweetyProject (Ranking Semantics for Argumentation Library)</name>
 
   <parent>
   <groupId>org.tweetyproject</groupId>
   <artifactId>parent-pom</artifactId>
-  	<version>1.22</version>
+  	<version>1.23-SNAPSHOT</version>
   	<relativePath>..</relativePath>
   </parent>
   <dependencies>
-	  <dependency>
-		  <groupId>org.apache.commons</groupId>
-		  <artifactId>commons-math3</artifactId>
-		  <version>3.6.1</version>
-	  </dependency>
   	<dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -27,37 +22,37 @@
   	<dependency>
   		<groupId>org.tweetyproject</groupId>
   		<artifactId>commons</artifactId>
-  		<version>1.22</version>
+  		<version>1.23-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>org.tweetyproject</groupId>
   		<artifactId>graphs</artifactId>
-  		<version>1.22</version>
+  		<version>1.23-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>org.tweetyproject</groupId>
   		<artifactId>math</artifactId>
-  		<version>1.22</version>
+  		<version>1.23-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>org.tweetyproject.arg</groupId>
   		<artifactId>dung</artifactId>
-  		<version>1.22</version>
+  		<version>1.23-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>org.tweetyproject.arg</groupId>
   		<artifactId>social</artifactId>
-  		<version>1.22</version>
+  		<version>1.23-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>org.tweetyproject.arg</groupId>
   		<artifactId>prob</artifactId>
-  		<version>1.22</version>
+  		<version>1.23-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>org.tweetyproject</groupId>
   		<artifactId>comparator</artifactId>
-  		<version>1.22</version>
+  		<version>1.23-SNAPSHOT</version>
   	</dependency>
   </dependencies>
 </project>
