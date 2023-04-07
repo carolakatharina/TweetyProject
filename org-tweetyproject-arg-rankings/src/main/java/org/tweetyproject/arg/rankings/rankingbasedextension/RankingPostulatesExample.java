@@ -22,10 +22,7 @@ import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
 import org.tweetyproject.arg.dung.parser.ApxParser;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.dung.util.DefaultDungTheoryGenerator;
-import org.tweetyproject.arg.dung.util.DungTheoryGenerationParameters;
-import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
-import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
+import org.tweetyproject.arg.dung.util.*;
 import org.tweetyproject.arg.rankings.postulates.RankingPostulate;
 import org.tweetyproject.arg.rankings.reasoner.*;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
@@ -49,9 +46,12 @@ public class RankingPostulatesExample {
     private static Collection<RankingPostulate> all_postulates;
 
     private static final Collection<RankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX, COUNTING, ITS, CATEGORIZER, TRUST, EULER_MB, ALPHABBS, SAF
+            MAX, ITS, CATEGORIZER,
+            EULER_MB, ALPHABBS
 
     ));
+
+    static boolean withoutSA=true;
 
     public static void main(String[] args) {
         all_postulates = new HashSet<>();
@@ -95,19 +95,13 @@ public class RankingPostulatesExample {
     public static void Example(RankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
 
 
-        var params = new DungTheoryGenerationParameters();
-        params.attackProbability = 0.9;
-        params.enforceTreeShape = true;
-        params.avoidSelfAttacks = false;
-        params.numberOfArguments = 4;
-        DungTheoryGenerator dg = new DefaultDungTheoryGenerator(params);
+        DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
         PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-                getReasoner(
+                withoutSA?getReasoner_WithoutSelfattacking(rankingSemantics):getReasoner(
                         rankingSemantics));
         evaluator.addAllPostulates(all_postulates);
-        System.out.println(evaluator.evaluate(4000, true).prettyPrint());
-
-
+        System.out.println(evaluator.evaluate(50, true).prettyPrint());
+        /*
         params = new DungTheoryGenerationParameters();
         params.attackProbability = 0.5;
         params.enforceTreeShape = false;
@@ -123,18 +117,21 @@ public class RankingPostulatesExample {
 
 
 
+
         //Tests für DP/DDP
         File[] apxFiles = new File("C:\\Users\\Carola\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\resources").listFiles(new ApxFilenameFilter());
 
 
-        dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
+        var dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), false);
 
 
-        evaluator = new PostulateEvaluator<>(dg,
+        var evaluator = new PostulateEvaluator<>(dg,
                 getReasoner(
                         rankingSemantics));
         evaluator.addAllPostulates(all_postulates);
         System.out.println(evaluator.evaluate(apxFiles.length, true).prettyPrint());
+
+         */
 
 
     }
@@ -153,6 +150,22 @@ public class RankingPostulatesExample {
             case TUPLES -> new TuplesRankingReasoner();
             case ITS -> new IterativeSchemaRankingReasoner();
             case DISCUSSION -> new DiscussionBasedRankingReasoner();
+            default -> {
+                System.out.println(sem);
+                throw new RuntimeException();
+            }
+        };
+    }
+
+
+    public static AbstractRankingReasoner getReasoner_WithoutSelfattacking(RankingBasedExtensionReasoner.RankingSemantics sem) {
+        return switch (sem) {
+            case CATEGORIZER -> new CategorizerRankingReasoner_Without_SelfAttacking();
+            case MAX -> new MaxBasedRankingReasoner_Without_SelfAttacking();
+            case TRUST -> new TrustBasedRankingReasoner_Without_Selfattacking();
+            case EULER_MB -> new EulerMaxBasedRankingReasoner_Without_SelfAttacking();
+            case ALPHABBS -> new AlphaBurdenBasedRankingReasoner_Without_Selfattacking();
+            case ITS -> new IterativeSchemaRankingReasoner_Without_Selfattacking();
             default -> {
                 System.out.println(sem);
                 throw new RuntimeException();

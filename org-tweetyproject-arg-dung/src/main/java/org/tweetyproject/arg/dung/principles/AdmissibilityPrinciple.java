@@ -23,6 +23,7 @@ import org.tweetyproject.arg.dung.reasoner.AbstractExtensionReasoner;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.math.matrix.Matrix;
 
 import java.util.Collection;
 
@@ -54,6 +55,8 @@ public class AdmissibilityPrinciple extends Principle {
 
         for (Extension<DungTheory> ext: exts) {
             if (!theory.isAdmissable(ext)) {
+                System.out.println(ev.getModels((DungTheory) kb));
+                System.out.println(kb+" "+ext+""+ ((DungTheory) kb).getAdjacencyMatrix().transpose()); //The matrix of direct attackers);
                 return false;
             }
         }

@@ -18,13 +18,13 @@
  */
 package org.tweetyproject.arg.rankings.reasoner;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.comparator.NumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * This class implements the "h-categorizer" argument ranking approach that was 
@@ -37,25 +37,25 @@ import org.tweetyproject.math.matrix.Matrix;
  * 
  * @author Anna Gessler
  */
-public class CategorizerRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
-	
+public class CategorizerRankingReasoner_Without_SelfAttacking extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
+
 	private double epsilon;
-	
+
 	/**
 	 * Create a new CountingRankingReasoner with default
 	 * parameters.
 	 */
-	public CategorizerRankingReasoner() {
+	public CategorizerRankingReasoner_Without_SelfAttacking() {
 		this.epsilon = 0.001;
 	}
-	
+
 	/**
 	 * Create a new CategorizerRankingReasoner with the given
 	 * parameters.
-	 * 
+	 *
 	 * @param epsilon TODO add description
 	 */
-	public CategorizerRankingReasoner(double epsilon) {
+	public CategorizerRankingReasoner_Without_SelfAttacking(double epsilon) {
 		this.epsilon = epsilon;
 	}
 	
@@ -86,8 +86,15 @@ public class CategorizerRankingReasoner extends AbstractRankingReasoner<Numerica
 		NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<Argument, DungTheory>();
 		ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
 		int i = 0;
-		for (Argument a : ((DungTheory)base)) 
-			ranking.put(a, valuations[i++]);
+		for (Argument a : ((DungTheory)base)) {
+			if (directAttackMatrix.getEntry(i,i).doubleValue()!=0.){
+				ranking.put(a, 0.);
+				i++;
+			} else {
+				ranking.put(a, valuations[i++]);
+			}
+		}
+
 		return ranking;
 	}
 
@@ -100,6 +107,7 @@ public class CategorizerRankingReasoner extends AbstractRankingReasoner<Numerica
 	 */
 	private double calculateCategorizerFunction(double[] vOld, Matrix directAttackMatrix, int i) {
 		double c = 1.0;
+
 
 		for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
 			c += vOld[j] * directAttackMatrix.getEntry(i,j).doubleValue();

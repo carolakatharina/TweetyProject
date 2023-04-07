@@ -36,6 +36,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     RankingSemantics rankingSemantics;
     Semantics extensionSemantics;
     Vorgehensweise vorgehensweise;
+    boolean withoutSelfattacking = false;
 
     public enum Vorgehensweise {
         SCC,
@@ -66,6 +67,17 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         this.vorgehensweise=vorgehensweise;
     }
 
+
+    public RankingBasedExtensionReasoner(Semantics extensionSemantics,
+                                         RankingSemantics semantics, Vorgehensweise vorgehensweise, boolean withoutSelfattacking) {
+
+        System.out.println(semantics);
+        this.rankingSemantics = semantics;
+        this.extensionSemantics = extensionSemantics;
+        this.vorgehensweise=vorgehensweise;
+        this.withoutSelfattacking=withoutSelfattacking;
+    }
+
     @Override
     public Extension<DungTheory> getModel(DungTheory bbase) {
 
@@ -79,30 +91,43 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         ranking = getRanking(bbase);
 
         return switch(this.vorgehensweise) {
-            case SCC -> getExtensionsForSemantics_withSCCs(ranking, bbase, this.extensionSemantics);
-            case CONFLICTFREE -> getExtensionsForSemantics_Conflictfree(ranking, bbase, this.extensionSemantics);
+            case SCC -> getExtensionsForSemantics_withSCCs(ranking, bbase);
+            case CONFLICTFREE -> getExtensionsForSemantics_Conflictfree(ranking, bbase);
             case SIMPLE -> getExtensionsForSemantics_Simple(ranking, bbase, this.extensionSemantics);
         };
 
     }
 
     private Map<Argument, Double> getRanking(DungTheory bbase) {
-        Map<Argument, Double> ranking;
-        ranking = new HashMap<>(switch (this.rankingSemantics) {
-            case CATEGORIZER -> new CategorizerRankingReasoner().getModel(bbase);
-            case STRATEGY -> new StrategyBasedRankingReasoner().getModel(bbase);
-            case SAF -> new SAFRankingReasoner().getModel(bbase);
-            case COUNTING -> new CountingRankingReasoner().getModel(bbase);
-            case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
-            case TRUST -> new TrustBasedRankingReasoner().getModel(bbase);
-            case EULER_MB -> new EulerMaxBasedRankingReasoner().getModel(bbase);
-            case ALPHABBS -> new AlphaBurdenBasedRankingReasoner().getModel(bbase);
-            case ITS -> new IterativeSchemaRankingReasoner().getModel(bbase);
-            case PROBABILISTIC -> new ProbabilisticRankingReasoner(Semantics.GROUNDED_SEMANTICS,new Probability(0.5),true).getModel(bbase);
+
+        if (!this.withoutSelfattacking) {
+            return new HashMap<>(switch (this.rankingSemantics) {
+                case CATEGORIZER -> new CategorizerRankingReasoner().getModel(bbase);
+                case STRATEGY -> new StrategyBasedRankingReasoner().getModel(bbase);
+                case SAF -> new SAFRankingReasoner().getModel(bbase);
+                case COUNTING -> new CountingRankingReasoner().getModel(bbase);
+                case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
+                case TRUST -> new TrustBasedRankingReasoner().getModel(bbase);
+                case EULER_MB -> new EulerMaxBasedRankingReasoner().getModel(bbase);
+                case ALPHABBS -> new AlphaBurdenBasedRankingReasoner().getModel(bbase);
+                case ITS -> new IterativeSchemaRankingReasoner().getModel(bbase);
+                case PROBABILISTIC ->
+                        new ProbabilisticRankingReasoner(Semantics.GROUNDED_SEMANTICS, new Probability(0.5), true).getModel(bbase);
+                default -> null;
+            });
+        }
+
+
+        return new HashMap<>(switch (this.rankingSemantics) {
+            case CATEGORIZER -> new CategorizerRankingReasoner_Without_SelfAttacking().getModel(bbase);
+            //case COUNTING -> new CountingRankingReasoner().getModel(bbase);
+            case MAX -> new MaxBasedRankingReasoner_Without_SelfAttacking().getModel(bbase);
+            case TRUST -> new TrustBasedRankingReasoner_Without_Selfattacking().getModel(bbase);
+            case EULER_MB -> new EulerMaxBasedRankingReasoner_Without_SelfAttacking().getModel(bbase);
+            case ALPHABBS -> new AlphaBurdenBasedRankingReasoner_Without_Selfattacking().getModel(bbase);
+            case ITS -> new IterativeSchemaRankingReasoner_Without_Selfattacking().getModel(bbase);
             default -> null;
         });
-
-        return ranking;
     }
 
     /**
@@ -160,8 +185,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_Conflictfree(Map<Argument, Double> ranking,
-                                                                                     DungTheory bbase, Semantics extensionsemantic) {
-        Collection<Extension<DungTheory>> finalAllExtensions = new ArrayList<>();
+                                                                                     DungTheory bbase) {
 
 
         var restrictedtheory = new DungTheory(bbase);
@@ -185,8 +209,10 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
 
+
+
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_withSCCs(Map<Argument, Double> ranking,
-                                                                                 DungTheory bbase, Semantics extensionsemantic) {
+                                                                                 DungTheory bbase) {
 
 
         return this.computeExtensionsViaSccs(ranking, bbase, getSccOrdered(bbase), 0, new HashSet<>(), new HashSet<>(), new HashSet<>());
