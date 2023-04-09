@@ -73,7 +73,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         COUNTING,
 
         MAX,
-        TRUST, NSA, ALPHABBS_1, ALPHABBS_2, EULER, ITS, MATT_TONI
+        TRUST, NSA, ALPHABBS_0, ALPHABBS_1, ALPHABBS_2, EULER, ITS, MATT_TONI
 
     }
 
@@ -129,6 +129,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
             case TRUST -> new TrustBasedRankingReasoner().getModel(bbase);
             case NSA -> new CategorizerRankingReasoner_Without_SelfAttacking().getModel(bbase);
+            case ALPHABBS_0 -> new AlphaBurdenBasedRankingReasoner(1.).getModel(bbase);
             case ALPHABBS_1 -> new AlphaBurdenBasedRankingReasoner(0.3).getModel(bbase);
             case ALPHABBS_2 -> new AlphaBurdenBasedRankingReasoner(10).getModel(bbase);
             case MATT_TONI -> new StrategyBasedRankingReasoner().getModel(bbase);
@@ -399,9 +400,10 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
         return switch (this.rankingSemantics) {
-            case MATT_TONI, COUNTING, NSA, CATEGORIZER, TRUST, MAX, EULER, ITS->
+            case MATT_TONI, COUNTING, NSA, CATEGORIZER, TRUST, MAX, EULER, ITS, ALPHABBS_0->
                     vergleichsoperator == Vergleichsoperator.STRICT ? value > thresh : value >= thresh;
-            case ALPHABBS_1, ALPHABBS_2 -> value < thresh;
+            case ALPHABBS_1, ALPHABBS_2 -> vergleichsoperator == Vergleichsoperator.STRICT? value < thresh
+                    :value<=thresh;
 
 
         };
@@ -416,8 +418,8 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         return switch (this.rankingSemantics) {
             case NSA, CATEGORIZER, TRUST, MAX, MATT_TONI, COUNTING, EULER, ITS ->
                     vergleichsoperator == Vergleichsoperator.STRICT ? value <= thresh : value < thresh;
-            case ALPHABBS_1, ALPHABBS_2 -> value > thresh;
-
+            case ALPHABBS_1, ALPHABBS_2,  ALPHABBS_0 -> vergleichsoperator == Vergleichsoperator.STRICT? value >= thresh
+            :value>thresh;
 
         };
 

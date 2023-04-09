@@ -100,7 +100,6 @@ public class CategorizerRankingReasoner extends AbstractRankingReasoner<Numerica
 	 */
 	private double calculateCategorizerFunction(double[] vOld, Matrix directAttackMatrix, int i) {
 		double c = 1.0;
-
 		for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
 			c += vOld[j] * directAttackMatrix.getEntry(i,j).doubleValue();
 		}

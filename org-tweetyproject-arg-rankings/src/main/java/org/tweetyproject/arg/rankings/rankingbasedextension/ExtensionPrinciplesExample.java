@@ -57,7 +57,7 @@ public class ExtensionPrinciplesExample {
                     //RankingBasedExtensionReasoner.Vorgehensweise.CF
             ));
 
-    private static final Collection<RankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = new ArrayList<>(List.of(
+    private static final Collection<RankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = new ArrayList<RankingBasedExtensionReasoner.Akzeptanzbedingung>(List.of(
             RB_ARG_ABS_STRENGTH,
             //RB_ARG_STRENGTH,
             //RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
@@ -78,6 +78,7 @@ public class ExtensionPrinciplesExample {
             NSA,
             TRUST,
             COUNTING,
+            ALPHABBS_0,
             MATT_TONI,
             EULER,
             ITS
@@ -152,6 +153,7 @@ public class ExtensionPrinciplesExample {
             case MAX, NSA, CATEGORIZER, EULER, ITS -> new double[]{0.5, (1. / ((1. + Math.sqrt(5.)) / 2.))};
             case ALPHABBS_1 -> new double[]{10.};
             case ALPHABBS_2 -> new double[]{2.};
+            case ALPHABBS_0 -> new double[]{1.};
             case MATT_TONI, COUNTING, TRUST -> new double[]{0.5};
 
 

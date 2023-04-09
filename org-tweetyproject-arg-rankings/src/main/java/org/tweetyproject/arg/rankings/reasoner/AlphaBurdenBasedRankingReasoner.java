@@ -54,7 +54,7 @@ public class AlphaBurdenBasedRankingReasoner extends AbstractRankingReasoner<Num
      * @param alpha   TODO add description
      */
     public AlphaBurdenBasedRankingReasoner(double alpha) {
-        this.epsilon = epsilon;
+        this.epsilon = 0.001;
         this.alpha = alpha;
     }
 

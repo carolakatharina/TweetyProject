@@ -39,7 +39,7 @@ import java.util.HashSet;
  */
 public class IterativeSchemaRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
-    private double epsilon=0.1;
+    private double epsilon=0.001;
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
         Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();

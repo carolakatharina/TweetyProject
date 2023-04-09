@@ -146,6 +146,7 @@ public class RankingPostulatesExample {
             case EULER -> new EulerMaxBasedRankingReasoner();
             case ALPHABBS_1 -> new AlphaBurdenBasedRankingReasoner(0.3);
             case ALPHABBS_2 -> new AlphaBurdenBasedRankingReasoner(10.);
+            case ALPHABBS_0 -> new AlphaBurdenBasedRankingReasoner(1.);
             case NSA -> new CategorizerRankingReasoner_Without_SelfAttacking();
         };
     }
