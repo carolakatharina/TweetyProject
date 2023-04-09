@@ -19,7 +19,6 @@
 package org.tweetyproject.arg.rankings.rankingbasedextension;
 
 import org.tweetyproject.arg.dung.principles.Principle;
-import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
@@ -31,7 +30,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ATT_STRENGTH;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.RankingSemantics.*;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Vergleichsoperator.NOT_STRICT;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Vergleichsoperator.STRICT;
 
 /**
  * Example code for evaluating weighted ranking semantics in regard
@@ -45,28 +48,28 @@ public class ExtensionPrinciplesExample {
 
 
     private static final Collection<RankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
-            List.of(RankingBasedExtensionReasoner.Vorgehensweise.SIMPLE,
+            List.of(RankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
                     /*
                     RankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF,
                     RankingBasedExtensionReasoner.Vorgehensweise.INC_BUDGET,
                      */
-                    RankingBasedExtensionReasoner.Vorgehensweise.MAX_CF,
-                    RankingBasedExtensionReasoner.Vorgehensweise.CF
+                    //RankingBasedExtensionReasoner.Vorgehensweise.MAX_CF,
+                    //RankingBasedExtensionReasoner.Vorgehensweise.CF
             ));
 
-    private static final Collection<Semantics> ext_semantics = new ArrayList<>(List.of(
-            Semantics.RB_ARG_ABS_STRENGTH,
-            Semantics.RB_ARG_STRENGTH,
-            //Semantics.RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
-            //Semantics.RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH,
-            //Semantics.RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS,
-            //Semantics.RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS,
-            //Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
-            //Semantics.RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH,
-            Semantics.RB_ATT_STRENGTH
-            //Semantics.RB_ATT_STRENGTH_ARG_STRENGTH,
-            //Semantics.RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH,
-            //Semantics.RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH
+    private static final Collection<RankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = new ArrayList<>(List.of(
+            RB_ARG_ABS_STRENGTH,
+            //RB_ARG_STRENGTH,
+            //RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
+            //RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH,
+            //RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS,
+            //RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS,
+            //RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
+            //RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH,
+            RB_ATT_STRENGTH
+            //RB_ATT_STRENGTH_ARG_STRENGTH,
+            //RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH,
+            //RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH
 
     ));
     private static final Collection<RankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
@@ -74,10 +77,12 @@ public class ExtensionPrinciplesExample {
             CATEGORIZER,
             NSA,
             TRUST,
-            COUNTING
-            //ALPHABBS_1,
-            //ALPHABBS_2,
-            //MATT_TONI
+            COUNTING,
+            MATT_TONI,
+            EULER,
+            ITS
+            /*,ALPHABBS_1,
+            ALPHABBS_2*/
 
     ));
 
@@ -103,28 +108,36 @@ public class ExtensionPrinciplesExample {
         all_principles.add(Principle.SCC_DECOMPOSABILITY);
 
         for (var rank : rank_semantics) {
-            for (var sem : ext_semantics) {
-                Example(sem, rank);
+            for (var bed : akzeptanzbedingungen) {
+                Example(bed, rank);
             }
         }
 
     }
 
-    public static void Example(Semantics semantics, RankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
-        System.out.println(rankingSemantics);
-        System.out.println(semantics);
+    public static void Example(RankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung, RankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
+
 
 
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
         for (var vorg : vorgehen) {
-            System.out.println(vorg);
             for (double thresh : getThresholds(rankingSemantics)) {
-                System.out.println(thresh);
+
                 PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-                        new RankingBasedExtensionReasoner(semantics,
-                                rankingSemantics, vorg, thresh));
+                        new RankingBasedExtensionReasoner(akzeptanzbedingung,
+                                rankingSemantics, vorg, thresh, STRICT));
                 evaluator.addAllPostulates(all_principles);
-                System.out.println(evaluator.evaluate(100, true).prettyPrint());
+
+                System.out.println(evaluator.evaluate(10000, true).prettyPrint());
+
+
+                evaluator = new PostulateEvaluator<>(dg,
+                        new RankingBasedExtensionReasoner(akzeptanzbedingung,
+                                rankingSemantics, vorg, thresh, NOT_STRICT));
+                evaluator.addAllPostulates(all_principles);
+
+                System.out.println(evaluator.evaluate(10000, true).prettyPrint());
+
             }
         }
 
@@ -136,7 +149,7 @@ public class ExtensionPrinciplesExample {
 
 
         return switch (rankingSemantics) {
-            case MAX, NSA, CATEGORIZER -> new double[]{0.5, (1. / ((1. + Math.sqrt(5.)) / 2.))};
+            case MAX, NSA, CATEGORIZER, EULER, ITS -> new double[]{0.5, (1. / ((1. + Math.sqrt(5.)) / 2.))};
             case ALPHABBS_1 -> new double[]{10.};
             case ALPHABBS_2 -> new double[]{2.};
             case MATT_TONI, COUNTING, TRUST -> new double[]{0.5};

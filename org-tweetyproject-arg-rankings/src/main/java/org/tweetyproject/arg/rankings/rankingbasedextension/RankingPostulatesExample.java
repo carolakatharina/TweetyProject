@@ -18,16 +18,15 @@
  */
 package org.tweetyproject.arg.rankings.rankingbasedextension;
 
-import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
-import org.tweetyproject.arg.dung.parser.ApxParser;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.dung.util.*;
+import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
+import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.postulates.RankingPostulate;
 import org.tweetyproject.arg.rankings.reasoner.*;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
+import org.tweetyproject.comparator.NumericalPartialOrder;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -51,7 +50,6 @@ public class RankingPostulatesExample {
 
     ));
 
-    static boolean withoutSA=true;
 
     public static void main(String[] args) {
         all_postulates = new HashSet<>();
@@ -96,7 +94,8 @@ public class RankingPostulatesExample {
 
 
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
-        PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
+        PostulateEvaluator<Argument, DungTheory> evaluator;
+        evaluator = new PostulateEvaluator<>(dg,
                 getReasoner(
                         rankingSemantics));
         evaluator.addAllPostulates(all_postulates);
@@ -136,13 +135,15 @@ public class RankingPostulatesExample {
 
     }
 
-    public static AbstractRankingReasoner getReasoner(RankingBasedExtensionReasoner.RankingSemantics sem) {
+    public static AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> getReasoner(RankingBasedExtensionReasoner.RankingSemantics sem) {
         return switch (sem) {
             case CATEGORIZER -> new CategorizerRankingReasoner();
             case MATT_TONI -> new StrategyBasedRankingReasoner();
             case COUNTING -> new CountingRankingReasoner();
             case MAX -> new MaxBasedRankingReasoner();
             case TRUST -> new TrustBasedRankingReasoner();
+            case ITS -> new IterativeSchemaRankingReasoner();
+            case EULER -> new EulerMaxBasedRankingReasoner();
             case ALPHABBS_1 -> new AlphaBurdenBasedRankingReasoner(0.3);
             case ALPHABBS_2 -> new AlphaBurdenBasedRankingReasoner(10.);
             case NSA -> new CategorizerRankingReasoner_Without_SelfAttacking();

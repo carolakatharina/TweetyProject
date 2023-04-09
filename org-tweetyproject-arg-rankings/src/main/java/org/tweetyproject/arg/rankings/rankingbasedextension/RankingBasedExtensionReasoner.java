@@ -22,7 +22,6 @@ package org.tweetyproject.arg.rankings.rankingbasedextension;
 
 import org.tweetyproject.arg.dung.reasoner.AbstractExtensionReasoner;
 import org.tweetyproject.arg.dung.semantics.Extension;
-import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.rankings.reasoner.*;
@@ -33,14 +32,38 @@ import java.util.stream.Collectors;
 
 public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     RankingSemantics rankingSemantics;
-    Semantics extensionSemantics;
+
     Vorgehensweise vorgehensweise;
     double thresh;
+
+    Vergleichsoperator vergleichsoperator;
+
+    Akzeptanzbedingung akzeptanzbedingung;
 
 
     public enum Vorgehensweise {
         STRONGEST_CF, MAX_CF, CF, INC_BUDGET, SIMPLE
 
+    }
+
+    public enum Vergleichsoperator {
+        STRICT, NOT_STRICT
+    }
+
+    public enum Akzeptanzbedingung {
+        RB_ARG_ABS_STRENGTH,
+        RB_ARG_STRENGTH,
+        RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
+        RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH,
+        RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS,
+        RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS,
+        RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
+        RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH,
+        RB_ATT_STRENGTH,
+        RB_ATT_STRENGTH_ARG_STRENGTH,
+        RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH,
+        RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH,
+        RB_ATT_STRENGTH_OR_ARG_STRENGTH
     }
 
 
@@ -50,18 +73,26 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         COUNTING,
 
         MAX,
-        TRUST, NSA, ALPHABBS_1, ALPHABBS_2, MATT_TONI
+        TRUST, NSA, ALPHABBS_1, ALPHABBS_2, EULER, ITS, MATT_TONI
 
     }
 
-    public RankingBasedExtensionReasoner(Semantics extensionSemantics,
-                                         RankingSemantics semantics, Vorgehensweise vorgehensweise, double thresh) {
+    public RankingBasedExtensionReasoner(Akzeptanzbedingung akzeptanzbedingung,
+                                         RankingSemantics semantics, Vorgehensweise vorgehensweise, double thresh,
+                                         Vergleichsoperator vergleichsoperator) {
 
-        System.out.println(semantics);
+
         this.rankingSemantics = semantics;
-        this.extensionSemantics = extensionSemantics;
+        this.akzeptanzbedingung=akzeptanzbedingung;
         this.vorgehensweise = vorgehensweise;
-        this.thresh=thresh;
+        this.thresh = thresh;
+        this.vergleichsoperator=vergleichsoperator;
+
+        System.out.println("Ranking Semantic: "+this.rankingSemantics);
+        System.out.println("Vorgehen: "+this.vorgehensweise);
+        System.out.println("Akzeptanzbedingung: "+this.akzeptanzbedingung);
+        System.out.println("Schwellwert: "+this.thresh);
+        System.out.println("Vergleichsoperator: "+this.vergleichsoperator);
     }
 
 
@@ -79,10 +110,9 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
         //TODO: Carola implement missing branches
         return switch (this.vorgehensweise) {
-            case STRONGEST_CF -> null;
+            case STRONGEST_CF, INC_BUDGET -> null;
             case MAX_CF -> getExtensionsForSemantics_MaxConflictfree(ranking, bbase);
             case CF -> getExtensionsForSemantics_Conflictfree(ranking, bbase);
-            case INC_BUDGET -> null;
             case SIMPLE -> getExtensionsForSemantics_Simple(ranking, bbase);
         };
 
@@ -93,6 +123,8 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
         return new HashMap<>(switch (this.rankingSemantics) {
             case CATEGORIZER -> new CategorizerRankingReasoner().getModel(bbase);
+            case EULER -> new EulerMaxBasedRankingReasoner().getModel(bbase);
+            case ITS -> new IterativeSchemaRankingReasoner().getModel(bbase);
             case COUNTING -> new CountingRankingReasoner().getModel(bbase);
             case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
             case TRUST -> new TrustBasedRankingReasoner().getModel(bbase);
@@ -112,17 +144,23 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
      * @return conflict-free sets in bbase
      */
     public Collection<Extension<DungTheory>> getMaximalConflictFreeSets(DungTheory bbase, Collection<Argument> candidates) {
+        Set<Argument> candidatesWithouSA = new HashSet<>(candidates);
+        for (Argument argument : bbase) {
+            if (bbase.isAttackedBy(argument, argument)) {
+                candidatesWithouSA.remove(argument);
+            }
+        }
+
         Collection<Extension<DungTheory>> cfSubsets = new HashSet<>();
-        if (candidates.size() == 0 || bbase.size() == 0) {
+        if (candidatesWithouSA.size() == 0 || bbase.size() == 0) {
             cfSubsets.add(new Extension<>());
         } else {
-            for (Argument element : candidates) {
-
+            for (Argument element : candidatesWithouSA) {
                 DungTheory remainingTheory = new DungTheory(bbase);
                 remainingTheory.remove(element);
                 remainingTheory.removeAll(bbase.getAttacked(element));
 
-                Set<Argument> remainingCandidates = new HashSet<>(candidates);
+                Set<Argument> remainingCandidates = new HashSet<>(candidatesWithouSA);
                 remainingCandidates.remove(element);
                 remainingCandidates.removeAll(bbase.getAttacked(element));
                 remainingCandidates.removeAll(bbase.getAttackers(element));
@@ -130,9 +168,9 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                 Collection<Extension<DungTheory>> subsubsets = this.getMaximalConflictFreeSets(remainingTheory, remainingCandidates);
 
                 for (Extension<DungTheory> subsubset : subsubsets) {
-                    //cfSubsets.add(new Extension(subsubset));
                     subsubset.add(element);
                     cfSubsets.add(new Extension<>(subsubset));
+
                 }
             }
         }
@@ -145,31 +183,23 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
         Collection<Extension<DungTheory>> finalAllExtensions = new ArrayList<>();
 
 
+        var maxExtension = getSetForSemantics(ranking, bbase, bbase);
 
-        var maxExtension = getSetForSemantics(ranking, bbase, bbase, this.extensionSemantics);
 
-        /*
-        System.out.println(bbase);
-        System.out.println(ranking);
-
-        System.out.println(finalAllExtensions);
-
-         */
         finalAllExtensions.add(maxExtension);
         return finalAllExtensions;
     }
 
 
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_MaxConflictfree(Map<Argument, Double> ranking,
-                                                                                     DungTheory bbase) {
+                                                                                        DungTheory bbase) {
 
 
         var restrictedtheory = new DungTheory(bbase);
 
 
-
         //alle Kandidaten erhalten, die Rankingkriterien erfüllen:
-        var candidates = getSetForSemantics(ranking, restrictedtheory, bbase, extensionSemantics);
+        var candidates = getSetForSemantics(ranking, restrictedtheory, bbase);
 
 
         return this.getMaximalConflictFreeSets(bbase, ranking.keySet().stream()
@@ -179,15 +209,14 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_Conflictfree(Map<Argument, Double> ranking,
-                                                                                        DungTheory bbase) {
+                                                                                     DungTheory bbase) {
 
 
         var restrictedtheory = new DungTheory(bbase);
 
 
-
         //alle Kandidaten erhalten, die Rankingkriterien erfüllen:
-        var candidates = getSetForSemantics(ranking, restrictedtheory, bbase, extensionSemantics);
+        var candidates = getSetForSemantics(ranking, restrictedtheory, bbase);
 
 
         return this.getConflictFreeSets(bbase, ranking.keySet().stream()
@@ -198,28 +227,36 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
     /**
      * computes all conflict-free sets of bbase, that contain only arguments in candidates
-     * @param bbase an argumentation framework
+     *
+     * @param bbase      an argumentation framework
      * @param candidates a set of arguments
      * @return conflict-free sets in bbase
      */
     public Collection<Extension<DungTheory>> getConflictFreeSets(DungTheory bbase, Collection<Argument> candidates) {
+        Set<Argument> candidatesWithouSA = new HashSet<>(candidates);
+        for (Argument argument : bbase) {
+            if (bbase.isAttackedBy(argument, argument)) {
+                candidatesWithouSA.remove(argument);
+            }
+        }
+
         Collection<Extension<DungTheory>> subsets = new HashSet<>();
-        if (candidates.size() == 0 || bbase.size() == 0) {
+        if (candidatesWithouSA.size() == 0 || bbase.size() == 0) {
             subsets.add(new Extension<>());
         } else {
-            for (Argument element: candidates) {
+            for (Argument element : candidatesWithouSA) {
                 DungTheory remainingTheory = new DungTheory(bbase);
                 remainingTheory.remove(element);
                 remainingTheory.removeAll(bbase.getAttacked(element));
 
-                Set<Argument> remainingCandidates = new HashSet<>(candidates);
+                Set<Argument> remainingCandidates = new HashSet<>(candidatesWithouSA);
                 remainingCandidates.remove(element);
                 remainingCandidates.removeAll(bbase.getAttacked(element));
                 remainingCandidates.removeAll(bbase.getAttackers(element));
 
                 Collection<Extension<DungTheory>> subsubsets = this.getConflictFreeSets(remainingTheory, remainingCandidates);
 
-                for (Extension<DungTheory> subsubset: subsubsets) {
+                for (Extension<DungTheory> subsubset : subsubsets) {
                     subsets.add(new Extension<>(subsubset));
                     subsubset.add(element);
                     subsets.add(new Extension<>(subsubset));
@@ -231,158 +268,140 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     }
 
 
-
-
-
-
-
     private Extension<DungTheory> getSetForSemantics(Map<Argument, Double> ranking, Collection<Argument> e,
-                                                     DungTheory bbase, Semantics extensionSemantics) {
+                                                     DungTheory bbase) {
 
 
-            switch (extensionSemantics) {
+        switch (this.akzeptanzbedingung) {
 
-                // threshold argument strength
-                case RB_ARG_ABS_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg ->
-                            useThresholdArg(ranking.get(arg),thresh)).collect(Collectors.toList()));
-
-
-                }
-                // only acceptable if strength higher than any of its attackers
-                case RB_ARG_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),ranking.get(arg)));
-                    }).collect(Collectors.toList()));
-
-                }
-
-                // threshold attacker strength
-                case RB_ATT_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),thresh));
-                    }).collect(Collectors.toList()));
-                }
-
-                case RB_ATT_STRENGTH_ARG_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return useThresholdArg(ranking.get(arg),thresh) &&
-                                attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),thresh));
-                    }).collect(Collectors.toList()));
-
-                }
-
-                case RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return useThresholdArg(ranking.get(arg),thresh) &&
-                                attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),thresh)
-                                        && useThresholdAtt(ranking.get(att),ranking.get(arg))
-                                );
-                    }).collect(Collectors.toList()));
-                }
-
-                case RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return useThresholdArg(ranking.get(arg),thresh) &&
-                                attackers.stream().allMatch(att ->
-                                        useThresholdAtt(ranking.get(att),ranking.get(arg))
-                                );
-                    }).collect(Collectors.toList()));
-                }
-                case RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return
-                                attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),thresh)
-                                        && useThresholdAtt(ranking.get(att),ranking.get(arg))
-                                );
-                    }).collect(Collectors.toList()));
-                }
-
-                case RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return
-                                attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),thresh)
-                                        || useThresholdAtt(ranking.get(att),ranking.get(arg))
-                                );
-                    }).collect(Collectors.toList()));
-                }
-
-                case RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return useThresholdArg(ranking.get(arg),thresh) ||
-                                attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),thresh)
-                                        || useThresholdAtt(ranking.get(att),ranking.get(arg))
-                                );
-                    }).collect(Collectors.toList()));
-                }
-
-                case RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return useThresholdArg(ranking.get(arg),thresh) ||
-                                attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),ranking.get(arg))
-                                );
-                    }).collect(Collectors.toList()));
-                }
-
-                case RB_ATT_STRENGTH_OR_ARG_STRENGTH: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return useThresholdArg(ranking.get(arg),thresh) ||
-                                attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),thresh)
-
-                                );
-                    }).collect(Collectors.toList()));
-                }
+            // threshold argument strength
+            case RB_ARG_ABS_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg ->
+                        useThresholdArg(ranking.get(arg), thresh)).collect(Collectors.toList()));
 
 
-                case RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return useThresholdArg(ranking.get(arg),thresh) ||
-                                attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),thresh)
-                                        && useThresholdAtt(ranking.get(att),ranking.get(arg))
-                                );
-                    }).collect(Collectors.toList()));
-                }
+            }
+
+            // only acceptable if strength higher than any of its attackers
+            case RB_ARG_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), ranking.get(arg)));
+                }).collect(Collectors.toList()));
+
+            }
 
 
-                case RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS: {
-                    return new Extension<>(e.stream().filter(arg -> {
-                        var attackers = bbase.getAttackers(arg);
-                        return useThresholdArg(ranking.get(arg),thresh) &&
-                                attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att),thresh)
-                                        || useThresholdAtt(ranking.get(att),ranking.get(arg))
-                                );
-                    }).collect(Collectors.toList()));
-                }
+            // threshold attacker strength
+            case RB_ATT_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh));
+                }).collect(Collectors.toList()));
+            }
+            case RB_ATT_STRENGTH_ARG_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) &&
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh));
+                }).collect(Collectors.toList()));
 
-                default: {
-                    System.out.println("Default");
-                    return new Extension<>();
-                }
+            }
+            case RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) &&
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                                    && useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
+            }
+            case RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) &&
+                            attackers.stream().allMatch(att ->
+                                    useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
+            }
+            case RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                                    && useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
+            }
+            case RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                                    || useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
+            }
+            case RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) ||
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                                    || useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
+            }
+            case RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) ||
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
+            }
+            case RB_ATT_STRENGTH_OR_ARG_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) ||
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
 
+                            );
+                }).collect(Collectors.toList()));
+            }
+            case RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) ||
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                                    && useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
+            }
+            case RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) &&
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                                    || useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
+            }
+            default -> {
+                return new Extension<>();
+            }
         }
 
     }
 
 
-
-
     private boolean useThresholdArg(double value, double thresh) {
 
 
-        return switch(this.rankingSemantics) {
-            case MAX, NSA, CATEGORIZER, MATT_TONI, COUNTING, TRUST-> value >= thresh;
-            case ALPHABBS_1, ALPHABBS_2-> value < thresh;
+        return switch (this.rankingSemantics) {
+            case MATT_TONI, COUNTING, NSA, CATEGORIZER, TRUST, MAX, EULER, ITS->
+                    vergleichsoperator == Vergleichsoperator.STRICT ? value > thresh : value >= thresh;
+            case ALPHABBS_1, ALPHABBS_2 -> value < thresh;
 
 
         };
@@ -391,13 +410,13 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     }
 
 
-
     private boolean useThresholdAtt(double value, double thresh) {
 
 
-        return switch(this.rankingSemantics) {
-            case MAX, NSA, CATEGORIZER, MATT_TONI, COUNTING, TRUST-> value < thresh;
-            case ALPHABBS_1, ALPHABBS_2-> value > thresh;
+        return switch (this.rankingSemantics) {
+            case NSA, CATEGORIZER, TRUST, MAX, MATT_TONI, COUNTING, EULER, ITS ->
+                    vergleichsoperator == Vergleichsoperator.STRICT ? value <= thresh : value < thresh;
+            case ALPHABBS_1, ALPHABBS_2 -> value > thresh;
 
 
         };

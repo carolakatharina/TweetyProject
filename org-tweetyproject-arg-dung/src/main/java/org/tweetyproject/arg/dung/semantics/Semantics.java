@@ -54,33 +54,12 @@ public enum Semantics {
 	/** N */
 	N ("Naive semantics", "N"),
 	/** diverse */
-	diverse ("diverse semantics", "div"),
-	RB_ARG_ABS_STRENGTH("Ranking-based_Argument_Absolute_Strength", "RB_ARG_ABS_STRENGTH"),
-	RB_ARG_STRENGTH("Ranking-based_Argument_Strength", "RB_ARG_STRENGTH"),
-	RB_ATT_STRENGTH("Ranking-based_Attacker_Strength", "RB_ATT_STRENGTH"),
-	RB("Ranking-based", "RB"),
-	RB_ATT_STRENGTH_ARG_STRENGTH("Ranking-based_Argument_and_Attacker_Strength", "RB_ATT_STRENGTH_ARG_STRENGTH" ),
-	RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH(
-			"Ranking-based_Argument_and_Attacker_Strength_Abs_and_Rel", "RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH" ),
-	RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH(
-			"Ranking-based_Argument_Strength_Abs_and_Rel", "RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH"
-	),
-	RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH(
-			"Ranking-based_Argument_and_Attacker_Strength_Abs_or_Rel", "RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH" ),
-
-	RB_ATT_STRENGTH_OR_ARG_STRENGTH("Ranking-based_Argument_OR_Attacker_Strength", "RB_ATT_STRENGTH_OR_ARG_STRENGTH" ),
-
-	RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH(
-			"Ranking-based_Attacker_Strength_Abs_and_Rel", "RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH"
-	), RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH("Ranking-based_Attacker_Strength_Abs_OR_Rel", "RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH"),
-	RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH("Ranking-based_ARG_Strength_Abs_OR_Rel", "RB_ARz_STRENGTH_ABS_OR_REL_STRENGTH"),
-	RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS("","" ), RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS("", "");
-
+	diverse ("diverse semantics", "div");
 	/**
 	 * all semantics
 	 */
 	public static final Semantics 
-		/** GROUNDED SEMANTICS*/
+		/** GROUNDED SEMANTICS */
 		GROUNDED_SEMANTICS = GR,
 		/** STABLE_SEMANTICS */	
 		STABLE_SEMANTICS = ST,
@@ -94,7 +73,6 @@ public enum Semantics {
 		WEAKLY_ADMISSIBLE_SEMANTICS = WAD,
 		/** CONFLICTFREE_SEMANTICS */
 		CONFLICTFREE_SEMANTICS = CF,
-				RB_SEMANTICS = RB,
 		/** SEMISTABLE_SEMANTICS */
 		SEMISTABLE_SEMANTICS = SST,
 		/** IDEAL_SEMANTICS */
