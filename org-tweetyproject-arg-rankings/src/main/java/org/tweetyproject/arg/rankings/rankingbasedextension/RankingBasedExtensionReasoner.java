@@ -21,6 +21,7 @@ package org.tweetyproject.arg.rankings.rankingbasedextension;
  */
 
 import org.tweetyproject.arg.dung.reasoner.AbstractExtensionReasoner;
+import org.tweetyproject.arg.dung.reasoner.SimpleGroundedReasoner;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
@@ -52,18 +53,18 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
     public enum Akzeptanzbedingung {
         RB_ARG_ABS_STRENGTH,
-        RB_ARG_STRENGTH,
-        RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
-        RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH,
+        RB_ARG_REL_STRENGTH,
+        RB_ARG_ABS_AND_ATT_REL_STRENGTH,
+        RB_ARG_ABS_OR_ARG_REL_STRENGTH,
         RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS,
         RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS,
         RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
-        RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH,
-        RB_ATT_STRENGTH,
-        RB_ATT_STRENGTH_ARG_STRENGTH,
-        RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH,
-        RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH,
-        RB_ATT_STRENGTH_OR_ARG_STRENGTH
+        RB_ATT_ABS_OR_ARG_ABS_OR_ARG_REL_STRENGTH,
+        RB_ATT_ABS_STRENGTH,
+        RB_ATT_ABS_ARG_ABS_STRENGTH,
+        RB_ATT_ABS_OR_REL_ARG_STRENGTH,
+        RB_ATT_ABS_AND_REL_ARG_STRENGTH,
+        RB_ATT_ABS_AND_REL_STRENGTH_AND_ARG_STRENGTH_ABS, RB_ATT_ABS_OR_ARG_ABS_STRENGTH
     }
 
 
@@ -188,6 +189,13 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
         finalAllExtensions.add(maxExtension);
+
+
+        var grounded = new SimpleGroundedReasoner().getModel(bbase);
+        if (!grounded.equals(maxExtension) && !maxExtension.stream().anyMatch(arg -> arg.getName().startsWith("_aux"))) {
+            System.out.println(bbase+"------- "+ranking+"------- "+maxExtension+"-------"+grounded);
+        }
+
         return finalAllExtensions;
     }
 
@@ -275,7 +283,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
         switch (this.akzeptanzbedingung) {
 
-            // threshold argument strength
+            // absolute argument strength
             case RB_ARG_ABS_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg ->
                         useThresholdArg(ranking.get(arg), thresh)).collect(Collectors.toList()));
@@ -283,24 +291,24 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
             }
 
-            // only acceptable if strength higher than any of its attackers
-            case RB_ARG_STRENGTH -> {
+            // relative argument strength
+            case RB_ARG_REL_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), ranking.get(arg)));
+                    return attackers.stream().allMatch(att -> useThresholdArg(ranking.get(arg), ranking.get(att)));
                 }).collect(Collectors.toList()));
 
             }
 
-
-            // threshold attacker strength
-            case RB_ATT_STRENGTH -> {
+            // absolute attack strength
+            case RB_ATT_ABS_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
                     return attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh));
                 }).collect(Collectors.toList()));
             }
-            case RB_ATT_STRENGTH_ARG_STRENGTH -> {
+            // absolute argument strength and absolute attack strength
+            case RB_ATT_ABS_ARG_ABS_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
                     return useThresholdArg(ranking.get(arg), thresh) &&
@@ -308,16 +316,9 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                 }).collect(Collectors.toList()));
 
             }
-            case RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH -> {
-                return new Extension<>(e.stream().filter(arg -> {
-                    var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) &&
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
-                                    && useThresholdAtt(ranking.get(att), ranking.get(arg))
-                            );
-                }).collect(Collectors.toList()));
-            }
-            case RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH -> {
+            //absolute argument and relative argument strength
+
+            case RB_ARG_ABS_AND_ATT_REL_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
                     return useThresholdArg(ranking.get(arg), thresh) &&
@@ -326,7 +327,9 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                             );
                 }).collect(Collectors.toList()));
             }
-            case RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH -> {
+
+            //absolute attack and relative argument strength
+            case RB_ATT_ABS_AND_REL_ARG_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
                     return
@@ -335,7 +338,9 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                             );
                 }).collect(Collectors.toList()));
             }
-            case RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH -> {
+
+            //absolute attack or relative argument strength
+            case RB_ATT_ABS_OR_REL_ARG_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
                     return
@@ -344,24 +349,9 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                             );
                 }).collect(Collectors.toList()));
             }
-            case RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH -> {
-                return new Extension<>(e.stream().filter(arg -> {
-                    var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) ||
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
-                                    || useThresholdAtt(ranking.get(att), ranking.get(arg))
-                            );
-                }).collect(Collectors.toList()));
-            }
-            case RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH -> {
-                return new Extension<>(e.stream().filter(arg -> {
-                    var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) ||
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), ranking.get(arg))
-                            );
-                }).collect(Collectors.toList()));
-            }
-            case RB_ATT_STRENGTH_OR_ARG_STRENGTH -> {
+
+            //absolute attack or absolute argument strength
+            case RB_ATT_ABS_OR_ARG_ABS_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
                     return useThresholdArg(ranking.get(arg), thresh) ||
@@ -370,6 +360,32 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                             );
                 }).collect(Collectors.toList()));
             }
+
+            //absolute argument or relative argument strength
+
+            case RB_ARG_ABS_OR_ARG_REL_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) ||
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
+
+            }
+
+            //absolute ARGUMENT or absolute ATTACK or relative argument strength
+
+            case RB_ATT_ABS_OR_ARG_ABS_OR_ARG_REL_STRENGTH -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) ||
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                                    || useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
+            }
+
+            //absolute ARGUMENT OR absolute ATTACK AND relative argument strength
             case RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
@@ -379,6 +395,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                             );
                 }).collect(Collectors.toList()));
             }
+            //absolute ARGUMENT AND absolute ATTACK STRENGTH or relative argument strength
             case RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
@@ -388,11 +405,21 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                             );
                 }).collect(Collectors.toList()));
             }
-            default -> {
-                return new Extension<>();
+
+            //absolute ARGUMENT AND absolute ATTACK STRENGTH or relative argument strength
+            case RB_ATT_ABS_AND_REL_STRENGTH_AND_ARG_STRENGTH_ABS -> {
+                return new Extension<>(e.stream().filter(arg -> {
+                    var attackers = bbase.getAttackers(arg);
+                    return useThresholdArg(ranking.get(arg), thresh) &&
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                                    && useThresholdAtt(ranking.get(att), ranking.get(arg))
+                            );
+                }).collect(Collectors.toList()));
             }
+
         }
 
+        return null;
     }
 
 

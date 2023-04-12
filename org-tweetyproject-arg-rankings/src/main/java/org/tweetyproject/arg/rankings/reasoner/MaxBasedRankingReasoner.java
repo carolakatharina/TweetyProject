@@ -64,8 +64,9 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
         do {
             valuationsOld = valuations.clone();
 
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < n; i++) {
                 valuations[i] = calculateMaxBasedFunction(valuationsOld, directAttackMatrix, i);
+            }
         } while (getDistance(valuationsOld, valuations) > epsilon);
 
         //Use computed valuations as values for argument ranking
@@ -111,7 +112,9 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
         for (int i = 0; i < v.length; i++) {
             sum += Math.pow(v[i]-vOld[i],2.0);
         }
-        return Math.sqrt(sum);
+
+        double result = Math.pow(sum, 0.5);
+        return Double.isNaN(result)?0.:result;
     }
 
 

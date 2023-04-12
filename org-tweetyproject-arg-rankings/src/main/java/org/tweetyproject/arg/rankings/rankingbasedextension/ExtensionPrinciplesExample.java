@@ -18,20 +18,20 @@
  */
 package org.tweetyproject.arg.rankings.rankingbasedextension;
 
+import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
+import org.tweetyproject.arg.dung.parser.ApxParser;
 import org.tweetyproject.arg.dung.principles.Principle;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
+import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.io.File;
+import java.util.*;
 
-import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH;
-import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ATT_STRENGTH;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Akzeptanzbedingung.*;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.RankingSemantics.*;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Vergleichsoperator.NOT_STRICT;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Vergleichsoperator.STRICT;
@@ -57,24 +57,16 @@ public class ExtensionPrinciplesExample {
                     //RankingBasedExtensionReasoner.Vorgehensweise.CF
             ));
 
-    private static final Collection<RankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = new ArrayList<RankingBasedExtensionReasoner.Akzeptanzbedingung>(List.of(
-            RB_ARG_ABS_STRENGTH,
-            //RB_ARG_STRENGTH,
-            //RB_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
-            //RB_ARG_STRENGTH_ABS_OR_REL_STRENGTH,
-            //RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS,
-            //RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS,
-            //RB_ATT_STRENGTH_ARG_STRENGTH_ABS_AND_REL_STRENGTH,
-            //RB_ATT_STRENGTH_ARG_STRENGTH_ABS_or_REL_STRENGTH,
-            RB_ATT_STRENGTH
-            //RB_ATT_STRENGTH_ARG_STRENGTH,
-            //RB_ATT_STRENGTH_ABS_OR_REL_STRENGTH,
-            //RB_ATT_STRENGTH_ABS_AND_REL_STRENGTH
+    private static final Collection<RankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = Arrays.asList(
 
-    ));
+            //RankingBasedExtensionReasoner.Akzeptanzbedingung.values()
+            RB_ARG_ABS_STRENGTH
+            //RB_ATT_ABS_STRENGTH
+    );
+
     private static final Collection<RankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX,
-            CATEGORIZER,
+            MAX
+            /*CATEGORIZER,
             NSA,
             TRUST,
             COUNTING,
@@ -82,6 +74,8 @@ public class ExtensionPrinciplesExample {
             MATT_TONI,
             EULER,
             ITS
+
+             */
             /*,ALPHABBS_1,
             ALPHABBS_2*/
 
@@ -119,26 +113,28 @@ public class ExtensionPrinciplesExample {
     public static void Example(RankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung, RankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
 
 
-
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
         for (var vorg : vorgehen) {
             for (double thresh : getThresholds(rankingSemantics)) {
-
-                PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-                        new RankingBasedExtensionReasoner(akzeptanzbedingung,
-                                rankingSemantics, vorg, thresh, STRICT));
-                evaluator.addAllPostulates(all_principles);
-
-                System.out.println(evaluator.evaluate(10000, true).prettyPrint());
+                for (var vergleichsop : RankingBasedExtensionReasoner.Vergleichsoperator.values()) {
+                    //Tests für DP/DDPC:\Users\Carola\OneDrive\Desktop\TweetyProject\org-tweetyproject-arg-rankings\src\main\java\org\tweetyproject\arg\rankings\rankingbasedextension\resources
+                    File[] apxFiles = new File("C:\\Users\\Carola\\OneDrive\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\resources")
+                            .listFiles(new ApxFilenameFilter());
 
 
-                evaluator = new PostulateEvaluator<>(dg,
-                        new RankingBasedExtensionReasoner(akzeptanzbedingung,
-                                rankingSemantics, vorg, thresh, NOT_STRICT));
-                evaluator.addAllPostulates(all_principles);
+                    var dg2 = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
 
-                System.out.println(evaluator.evaluate(10000, true).prettyPrint());
+                    PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg2,
+                            new RankingBasedExtensionReasoner(akzeptanzbedingung,
+                                    rankingSemantics, vorg, thresh, vergleichsop));
+                    evaluator.addAllPostulates(all_principles);
 
+
+
+                    System.out.println(evaluator.evaluate(apxFiles.length, false).prettyPrint());
+
+
+                }
             }
         }
 
@@ -150,7 +146,8 @@ public class ExtensionPrinciplesExample {
 
 
         return switch (rankingSemantics) {
-            case MAX, NSA, CATEGORIZER, EULER, ITS -> new double[]{0.5, (1. / ((1. + Math.sqrt(5.)) / 2.))};
+            case NSA, CATEGORIZER, EULER, ITS -> new double[]{0.5, (1. / ((1. + Math.sqrt(5.)) / 2.))};
+            case MAX -> new double[] {0.618034, (1. / ((1. + Math.sqrt(5.)) / 2.)), 0.6180339887498588, 0.61804697157};
             case ALPHABBS_1 -> new double[]{10.};
             case ALPHABBS_2 -> new double[]{2.};
             case ALPHABBS_0 -> new double[]{1.};
