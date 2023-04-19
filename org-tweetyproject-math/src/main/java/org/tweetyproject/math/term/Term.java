@@ -18,6 +18,7 @@
  */
 package org.tweetyproject.math.term;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import org.tweetyproject.math.*;
@@ -97,6 +98,19 @@ public abstract class Term {
 		if(c instanceof FloatConstant)
 			return ((FloatConstant)c).getValue();
 		return ((IntegerConstant)c).getValue();
+	}
+
+
+	/**
+	 * Computes the actual value of this term if it contains no variables.
+	 * @return the BigDecimal value of this term.
+	 * @throws IllegalArgumentException if this term contains at least on
+	 * 		variable.
+	 */
+	public BigDecimal bigDecimalValue() throws IllegalArgumentException{
+		double c = this.value().doubleValue();
+		return BigDecimal.valueOf(c);
+
 	}
 	
 	/**

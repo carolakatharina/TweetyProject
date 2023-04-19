@@ -18,16 +18,19 @@
  */
 package org.tweetyproject.arg.rankings.examples;
 
-import java.util.Collection;
-import java.util.HashSet;
-
-import org.tweetyproject.arg.dung.semantics.Semantics;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.dung.util.*;
+import org.tweetyproject.arg.dung.util.DefaultDungTheoryGenerator;
+import org.tweetyproject.arg.dung.util.DungTheoryGenerationParameters;
+import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
+import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.postulates.RankingPostulate;
 import org.tweetyproject.arg.rankings.reasoner.*;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
+
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Example code for evaluating ranking semantics in regard
@@ -95,7 +98,7 @@ public class RankingPostulatesExample {
 	public static void MaxBasedExample() {
 		DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
-				new MaxBasedRankingReasoner());
+				new ExactMaxBasedRankingReasoner(BigDecimal.valueOf(0.001)));
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(4000, false).prettyPrint());
 	}

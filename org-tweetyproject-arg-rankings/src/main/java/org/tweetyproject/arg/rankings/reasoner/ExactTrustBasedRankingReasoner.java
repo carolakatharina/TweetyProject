@@ -20,9 +20,11 @@ package org.tweetyproject.arg.rankings.reasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.comparator.NumericalPartialOrder;
+import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -35,26 +37,31 @@ import java.util.HashSet;
  *
  * @author Carola Bauer
  */
-public class TrustBasedRankingReasoner_Without_Selfattacking extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
+public class ExactTrustBasedRankingReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
 
-    private double epsilon=0.001;
+    private final BigDecimal epsilon;
+
+    public ExactTrustBasedRankingReasoner(BigDecimal epsilon) {
+        this.epsilon = epsilon;
+    }
+
     @Override
-    public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
+    public Collection<ExactNumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
+        Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
         ranks.add(this.getModel(bbase));
         return ranks;
     }
 
     @Override
-    public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
+    public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
 
         Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
-        double[] valuations = new double[n];	 //Stores valuations of the current iteration
+        BigDecimal[] valuations = new BigDecimal[n];	 //Stores valuations of the current iteration
         for (int i=0; i<n; i++) {
-            valuations[i]=1.0;
+            valuations[i]= BigDecimal.valueOf(1.0);
         }
-        double[] valuationsOld; //Stores valuations of the last iteration
+        BigDecimal[] valuationsOld; //Stores valuations of the last iteration
 
         //Keep computing valuations until the values stop changing
         do {
@@ -62,62 +69,61 @@ public class TrustBasedRankingReasoner_Without_Selfattacking extends AbstractRan
 
             for (int i = 0; i < n; i++)
                 valuations[i] = calculateTrustBasedFunction(valuationsOld, directAttackMatrix, i);
-        } while (getDistance(valuationsOld, valuations) > this.epsilon);
+        } while (getDistance(valuationsOld, valuations).compareTo(this.epsilon)>0);
 
 
         //Use computed valuations as values for argument ranking
         //Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
-        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<>();
-        ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
+        ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<>();
+        ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
         int i = 0;
-        for (Argument a : kb) {
-            if (directAttackMatrix.getEntry(i, i).doubleValue() != 0.) {
-                ranking.put(a, 0.);
-                i++;
-            } else {
-                ranking.put(a, valuations[i++]);
-            }
-        }
+        for (Argument a : kb)
+            ranking.put(a, valuations[i++]);
         return ranking;
     }
 
     /**
      * Computes the weightfunction.
-     * @param vOld array of double valuations that were computed in the previous iteration
+     * @param vOld array of BigDecimal valuations that were computed in the previous iteration
      * @param directAttackMatrix complete matrix of direct attacks
      * @param i row of the attack matrix that will be used in the calculation
      * @return value
      */
-    private double calculateTrustBasedFunction(double[] vOld, Matrix directAttackMatrix, int i) {
-        double max = 0.;
-
+    private BigDecimal calculateTrustBasedFunction(BigDecimal[] vOld, Matrix directAttackMatrix, int i) {
+        BigDecimal max = BigDecimal.valueOf(0.);
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            double attacker= vOld[j] * directAttackMatrix.getEntry(i,j).doubleValue();
-            if (attacker>max) {
+            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue());
+            if (attacker.compareTo(max)>0) {
                 max = attacker;
             }
         }
 
+        var var1= BigDecimal.valueOf(0.5);
+        var var2 =  BigDecimal.valueOf(1.).subtract(max);
+        var var3 = BigDecimal.valueOf(Math.min(1., (var2.doubleValue())));
 
-        return ((0.5*1.)+0.5*Math.min(1., (1. - max)));
+        return var1.add(BigDecimal.valueOf(0.5).multiply(var3));
 
     }
 
     /**
      * Computes the Euclidean distance between to the given arrays.
+     *
      * @param vOld first array
-     * @param v second array
+     * @param v    second array
      * @return distance between v and vOld
      */
-    private double getDistance(double[] vOld, double[] v) {
-        double sum = 0.0;
+    private BigDecimal getDistance(BigDecimal[] vOld, BigDecimal[] v) {
+        var sum = BigDecimal.valueOf(0.0);
         for (int i = 0; i < v.length; i++) {
-            sum += Math.pow(v[i]-vOld[i],2.0);
+            var distance = v[i].subtract(vOld[i]);
+            sum = sum.add(distance.pow(2));
         }
-        return Math.sqrt(sum);
-    }
 
+        BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
+        return result;
+    }
 
     /**
      * natively installed

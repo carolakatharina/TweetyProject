@@ -20,9 +20,11 @@ package org.tweetyproject.arg.rankings.reasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.comparator.NumericalPartialOrder;
+import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -33,74 +35,59 @@ import java.util.HashSet;
  *
  * @author Carola Bauer
  */
-public class AlphaBurdenBasedRankingReasoner_Without_Selfattacking extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
+public class ExactAlphaBurdenBasedRankingReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
 
-    private double epsilon;
-    private double alpha;
+    private final BigDecimal epsilon;
+    private final BigDecimal alpha;
 
-    /**
-     * Create a new CountingRankingReasoner with default
-     * parameters.
-     */
-    public AlphaBurdenBasedRankingReasoner_Without_Selfattacking() {
-        this.epsilon = 0.001;
-        this.alpha = 0.5;
-    }
 
     /**
      * Create a new AlphaBurdenBasedRankingReasoner with the given
      * parameters.
      *
-     * @param epsilon TODO add description
+     * @param epsilon
      * @param alpha   TODO add description
      */
-    public AlphaBurdenBasedRankingReasoner_Without_Selfattacking(double epsilon, double alpha) {
+    public ExactAlphaBurdenBasedRankingReasoner(BigDecimal epsilon, BigDecimal alpha) {
         this.epsilon = epsilon;
         this.alpha = alpha;
     }
 
     @Override
-    public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks
-                = new HashSet<NumericalPartialOrder<Argument, DungTheory>>();
+    public Collection<ExactNumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
+        Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks
+                = new HashSet<ExactNumericalPartialOrder<Argument, DungTheory>>();
         ranks.add(this.getModel(bbase));
         return ranks;
     }
 
     @Override
-    public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory base) {
+    public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory base) {
         Matrix directAttackMatrix = ((DungTheory) base).getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
-        double valuations[] = new double[n];     //Stores valuations of the current iteration
-        double valuationsOld[] = new double[n]; //Stores valuations of the last iteration
+        BigDecimal valuations[] = new BigDecimal[n];     //Stores valuations of the current iteration
+        BigDecimal valuationsOld[] = new BigDecimal[n]; //Stores valuations of the last iteration
 
         //Keep computing valuations until the values stop changing much or converge
         do {
             valuationsOld = valuations.clone();
             for (int i = 0; i < n; i++) {
-				valuations[i] = calculateBurdenBasedFunction(valuationsOld, directAttackMatrix, i);
-                if (directAttackMatrix.getEntry(i,i).doubleValue()!=0.) {
-                    valuations[i]=0.;
-                }
+                valuations[i] = calculateBurdenBasedFunction(valuationsOld, directAttackMatrix, i);
 
-			}
+            }
 
-		} while (getDistance(valuationsOld, valuations) > this.epsilon);
+        } while (getDistance(valuationsOld, valuations).compareTo(epsilon) > 0);
 
         //Use computed valuations as values for argument ranking
         //Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
-        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<Argument, DungTheory>();
-        ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
+        ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<Argument, DungTheory>();
+        ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
         int i = 0;
         for (Argument a : ((DungTheory) base)) {
-            if (directAttackMatrix.getEntry(i,i).doubleValue()!=0.){
-                ranking.put(a, 0.);
 
-            } else {
-                ranking.put(a, (1.0 / valuations[i]));
-            }
+            ranking.put(a, (BigDecimal.valueOf(1.0).divide(valuations[i], MathContext.DECIMAL128)));
 
-			i++;
+            i++;
         }
 
         return ranking;
@@ -109,40 +96,45 @@ public class AlphaBurdenBasedRankingReasoner_Without_Selfattacking extends Abstr
     /**
      * Computes the alpha-burdenbased function.
      *
-     * @param vOld               array of double valuations that were computed in the previous iteration
+     * @param vOld               array of BigDecimal valuations that were computed in the previous iteration
      * @param directAttackMatrix complete matrix of direct attacks
      * @param i                  row of the attack matrix that will be used in the calculation
      * @return categorizer valuation
      */
-    private double calculateBurdenBasedFunction(double[] vOld, Matrix directAttackMatrix, int i) {
-        double c = 0.0;
-
+    private BigDecimal calculateBurdenBasedFunction(BigDecimal[] vOld, Matrix directAttackMatrix, int i) {
+        BigDecimal c = BigDecimal.valueOf(0.0);
+        if (directAttackMatrix.getXDimension() == 0) {
+            return BigDecimal.valueOf(1.0);
+        }
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            var zaehler = Math.pow(vOld[j] * directAttackMatrix.getEntry(i, j).doubleValue(), alpha);
-            if (zaehler!=0) {
-                c += (1.0 / zaehler);
+            var mult = vOld[j].multiply(directAttackMatrix.getEntry(i, j).bigDecimalValue());
+            var zaehler = BigDecimal.valueOf(Math.pow(mult.doubleValue(), alpha.doubleValue()));
+            if (zaehler.compareTo(BigDecimal.valueOf(0.)) != 1) {
+                c = c.add(BigDecimal.valueOf(1.0).divide(zaehler, MathContext.DECIMAL128));
             }
         }
-        return (1.0 + Math.pow(c, (1.0 / alpha)));
+        return (BigDecimal.valueOf(1.0).add(BigDecimal.valueOf(Math.pow(c.doubleValue(), (BigDecimal.valueOf(1.0).divide(alpha, MathContext.DECIMAL128).doubleValue())))));
 
     }
-
 
 
     /**
      * Computes the Euclidean distance between to the given arrays.
+     *
      * @param vOld first array
-     * @param v second array
+     * @param v    second array
      * @return distance between v and vOld
      */
-    private double getDistance(double[] vOld, double[] v) {
-        double sum = 0.0;
+    private BigDecimal getDistance(BigDecimal[] vOld, BigDecimal[] v) {
+        var sum = BigDecimal.valueOf(0.0);
         for (int i = 0; i < v.length; i++) {
-            sum += Math.pow(v[i]-vOld[i],2.0);
+            var distance = v[i].subtract(vOld[i]);
+            sum = sum.add(distance.pow(2));
         }
-        return Math.sqrt(sum);
-    }
 
+        BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
+        return result;
+    }
 
 
     /**

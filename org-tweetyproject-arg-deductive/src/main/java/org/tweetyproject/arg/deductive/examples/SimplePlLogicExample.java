@@ -60,19 +60,9 @@ public class SimplePlLogicExample {
 			e.printStackTrace();
 		}
 		
-		System.out.println(k.getAF());
+
 		
-		DungTheory af = k.getAF();
-		for (Argument arg : af.getNodes())
-			System.out.println(arg);
-		
-		for (Attack att : af.getAttacks()){
-			System.out.println(att);
-		}
-		if(k.getAF().toString().equals("<{ <[[a, t] -> b, [b] -> c, t, a],c>, <[[d] -> !a, d],!a>, <[[d] -> !c, d],!c>, <[[a, t] -> b, t, a],b> },[(<[[a, t] -> b, [b] -> c, t, a],c>,<[[d] -> !c, d],!c>), (<[[d] -> !a, d],!a>,<[[a, t] -> b, [b] -> c, t, a],c>), (<[[d] -> !c, d],!c>,<[[a, t] -> b, [b] -> c, t, a],c>), (<[[d] -> !a, d],!a>,<[[a, t] -> b, t, a],b>)]>")){
-			System.out.println("hurrah");
-		
-		}
+
 	}
 
 }

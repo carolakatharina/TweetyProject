@@ -20,9 +20,11 @@ package org.tweetyproject.arg.rankings.reasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.comparator.NumericalPartialOrder;
+import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -31,23 +33,17 @@ import java.util.HashSet;
  * originally proposed by [Besnard, Hunter. A logic-based theory of deductive arguments. 2001]
  * for deductive logics. It uses the Fixed-point algorithm of 
  * [Pu, Zhang, Luo, Luo. Argument Ranking with Categoriser Function. KSEM 2014]
- * which allows for cycles in argumentation graphs.
+ * which allows for cycles in argumentation graphs. TODO: EXception for self-attacking Arguments
  * 
  * @see org.tweetyproject.arg.deductive.categorizer.HCategorizer
  * 
- * @author Anna Gessler
+ * @author Carola Bauer
  */
-public class CategorizerRankingReasoner_Without_SelfAttacking extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
+public class ExactNsaReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
 
-	private double epsilon;
+	private final BigDecimal epsilon;
 
-	/**
-	 * Create a new CountingRankingReasoner with default
-	 * parameters.
-	 */
-	public CategorizerRankingReasoner_Without_SelfAttacking() {
-		this.epsilon = 0.001;
-	}
+
 
 	/**
 	 * Create a new CategorizerRankingReasoner with the given
@@ -55,40 +51,42 @@ public class CategorizerRankingReasoner_Without_SelfAttacking extends AbstractRa
 	 *
 	 * @param epsilon TODO add description
 	 */
-	public CategorizerRankingReasoner_Without_SelfAttacking(double epsilon) {
+	public ExactNsaReasoner(BigDecimal epsilon) {
 		this.epsilon = epsilon;
 	}
 	
 	@Override
-	public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-		Collection<NumericalPartialOrder<Argument, DungTheory>> ranks 
-			= new HashSet<NumericalPartialOrder<Argument, DungTheory>>();
+	public Collection<ExactNumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
+		Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks 
+			= new HashSet<ExactNumericalPartialOrder<Argument, DungTheory>>();
 		ranks.add(this.getModel(bbase));
 		return ranks;
 	}
 
 	@Override
-	public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory base) {
+	public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory base) {
 		Matrix directAttackMatrix = ((DungTheory)base).getAdjacencyMatrix().transpose(); //The matrix of direct attackers
 		int n = directAttackMatrix.getXDimension();
-		double valuations[] = new double[n];	 //Stores valuations of the current iteration
-		double valuationsOld[] = new double[n]; //Stores valuations of the last iteration
-		
+		BigDecimal valuations[] = new BigDecimal[n];	 //Stores valuations of the current iteration
+		BigDecimal valuationsOld[] = new BigDecimal[n]; //Stores valuations of the last iteration
+		for (int i=0; i<n; i++) {
+			valuations[i]= BigDecimal.valueOf(1.);
+		}
 		//Keep computing valuations until the values stop changing much or converge 
 		do {
 			valuationsOld = valuations.clone();
 			for (int i = 0; i < n; i++) 
 				valuations[i] = calculateCategorizerFunction(valuationsOld,directAttackMatrix,i);
-		} while (getDistance(valuationsOld, valuations) > this.epsilon);
+		} while (getDistance(valuationsOld, valuations).compareTo(this.epsilon)>0);
 	
 		//Use computed valuations as values for argument ranking
 		//Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
-		NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<Argument, DungTheory>();
-		ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
+		ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<Argument, DungTheory>();
+		ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
 		int i = 0;
 		for (Argument a : ((DungTheory)base)) {
 			if (directAttackMatrix.getEntry(i,i).doubleValue()!=0.){
-				ranking.put(a, 0.);
+				ranking.put(a, BigDecimal.valueOf(0.));
 				i++;
 			} else {
 				ranking.put(a, valuations[i++]);
@@ -100,36 +98,39 @@ public class CategorizerRankingReasoner_Without_SelfAttacking extends AbstractRa
 
 	/**
 	 * Computes the h-Categorizer function.
-	 * @param vOld array of double valuations that were computed in the previous iteration
+	 * @param vOld array of BigDecimal valuations that were computed in the previous iteration
 	 * @param directAttackMatrix complete matrix of direct attacks
 	 * @param i row of the attack matrix that will be used in the calculation
 	 * @return categorizer valuation
 	 */
-	private double calculateCategorizerFunction(double[] vOld, Matrix directAttackMatrix, int i) {
-		double c = 1.0;
-
-
+	private BigDecimal calculateCategorizerFunction(BigDecimal[] vOld, Matrix directAttackMatrix, int i) {
+		BigDecimal c = BigDecimal.valueOf(1.0);
 		for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-			c += vOld[j] * directAttackMatrix.getEntry(i,j).doubleValue();
+			c = c.add(vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue()));
 		}
-		return (1.0 / c);
-		
+		return (BigDecimal.valueOf(1.0).divide(c, MathContext.DECIMAL128));
+
 	}
 
 	/**
 	 * Computes the Euclidean distance between to the given arrays.
+	 *
 	 * @param vOld first array
-	 * @param v second array
+	 * @param v    second array
 	 * @return distance between v and vOld
 	 */
-	private double getDistance(double[] vOld, double[] v) {
-		double sum = 0.0;
+	private BigDecimal getDistance(BigDecimal[] vOld, BigDecimal[] v) {
+		var sum = BigDecimal.valueOf(0.0);
 		for (int i = 0; i < v.length; i++) {
-			sum += Math.pow(v[i]-vOld[i],2.0);
+			var distance = v[i].subtract(vOld[i]);
+			sum = sum.add(distance.pow(2));
 		}
-		return Math.sqrt(sum);
+
+		BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
+		return result;
 	}
-	
+
+
 	/**natively installed*/
 	@Override
 	public boolean isInstalled() {

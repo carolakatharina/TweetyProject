@@ -23,10 +23,12 @@ import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.postulates.RankingPostulate;
-import org.tweetyproject.arg.rankings.reasoner.*;
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
+import org.tweetyproject.arg.rankings.reasoner.ExactMaxBasedRankingReasoner;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
-import org.tweetyproject.comparator.NumericalPartialOrder;
+import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -135,19 +137,20 @@ public class RankingPostulatesExample {
 
     }
 
-    public static AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> getReasoner(RankingBasedExtensionReasoner.RankingSemantics sem) {
+    public static AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> getReasoner(RankingBasedExtensionReasoner.RankingSemantics sem) {
         return switch (sem) {
-            case CATEGORIZER -> new CategorizerRankingReasoner();
+            /*case CATEGORIZER -> new CategorizerRankingReasoner();
             case MATT_TONI -> new StrategyBasedRankingReasoner();
-            case COUNTING -> new CountingRankingReasoner();
-            case MAX -> new MaxBasedRankingReasoner();
-            case TRUST -> new TrustBasedRankingReasoner();
+            case COUNTING -> new CountingRankingReasoner();*/
+            case MAX -> new ExactMaxBasedRankingReasoner(BigDecimal.valueOf(0.001));
+            /*case TRUST -> new TrustBasedRankingReasoner();
             case ITS -> new IterativeSchemaRankingReasoner();
             case EULER -> new EulerMaxBasedRankingReasoner();
             case ALPHABBS_1 -> new AlphaBurdenBasedRankingReasoner(0.3);
             case ALPHABBS_2 -> new AlphaBurdenBasedRankingReasoner(10.);
             case ALPHABBS_0 -> new AlphaBurdenBasedRankingReasoner(1.);
-            case NSA -> new CategorizerRankingReasoner_Without_SelfAttacking();
+            case NSA -> new NsaReasoner();*/
+            default -> null;
         };
     }
 

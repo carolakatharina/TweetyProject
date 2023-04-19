@@ -27,6 +27,7 @@ import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.rankings.reasoner.*;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,9 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     RankingSemantics rankingSemantics;
 
     Vorgehensweise vorgehensweise;
-    double thresh;
+    BigDecimal threshhold;
+
+    BigDecimal epsilon;
 
     Vergleichsoperator vergleichsoperator;
 
@@ -79,21 +82,23 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     }
 
     public RankingBasedExtensionReasoner(Akzeptanzbedingung akzeptanzbedingung,
-                                         RankingSemantics semantics, Vorgehensweise vorgehensweise, double thresh,
-                                         Vergleichsoperator vergleichsoperator) {
+                                         RankingSemantics semantics, Vorgehensweise vorgehensweise, BigDecimal threshhold,
+                                         Vergleichsoperator vergleichsoperator, BigDecimal epsilon) {
 
 
         this.rankingSemantics = semantics;
         this.akzeptanzbedingung=akzeptanzbedingung;
         this.vorgehensweise = vorgehensweise;
-        this.thresh = thresh;
+        this.threshhold = threshhold;
         this.vergleichsoperator=vergleichsoperator;
+        this.epsilon=epsilon;
 
         System.out.println("Ranking Semantic: "+this.rankingSemantics);
         System.out.println("Vorgehen: "+this.vorgehensweise);
         System.out.println("Akzeptanzbedingung: "+this.akzeptanzbedingung);
-        System.out.println("Schwellwert: "+this.thresh);
+        System.out.println("Schwellwert: "+this.threshhold);
         System.out.println("Vergleichsoperator: "+this.vergleichsoperator);
+        System.out.println("Epsilon: "+this.epsilon);
     }
 
 
@@ -106,7 +111,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
     @Override
     public Collection<Extension<DungTheory>> getModels(DungTheory bbase) {
-        Map<Argument, Double> ranking;
+        Map<Argument, BigDecimal> ranking;
         ranking = getRanking(bbase);
 
         //TODO: Carola implement missing branches
@@ -119,21 +124,22 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
     }
 
-    private Map<Argument, Double> getRanking(DungTheory bbase) {
+    private Map<Argument, BigDecimal> getRanking(DungTheory bbase) {
 
 
         return new HashMap<>(switch (this.rankingSemantics) {
-            case CATEGORIZER -> new CategorizerRankingReasoner().getModel(bbase);
-            case EULER -> new EulerMaxBasedRankingReasoner().getModel(bbase);
-            case ITS -> new IterativeSchemaRankingReasoner().getModel(bbase);
-            case COUNTING -> new CountingRankingReasoner().getModel(bbase);
-            case MAX -> new MaxBasedRankingReasoner().getModel(bbase);
-            case TRUST -> new TrustBasedRankingReasoner().getModel(bbase);
-            case NSA -> new CategorizerRankingReasoner_Without_SelfAttacking().getModel(bbase);
-            case ALPHABBS_0 -> new AlphaBurdenBasedRankingReasoner(1.).getModel(bbase);
-            case ALPHABBS_1 -> new AlphaBurdenBasedRankingReasoner(0.3).getModel(bbase);
-            case ALPHABBS_2 -> new AlphaBurdenBasedRankingReasoner(10).getModel(bbase);
-            case MATT_TONI -> new StrategyBasedRankingReasoner().getModel(bbase);
+            case CATEGORIZER -> new ExactCategorizerRankingReasoner(epsilon).getModel(bbase);
+            case EULER -> new ExactEulerMaxBasedRankingReasoner(epsilon).getModel(bbase);
+            case ITS -> new ExactIterativeSchemaRankingReasoner(epsilon).getModel(bbase);
+            case COUNTING -> new ExactCountingRankingReasoner(BigDecimal.valueOf(0.9), epsilon).getModel(bbase);
+            case MAX -> new ExactMaxBasedRankingReasoner(epsilon).getModel(bbase);
+            case TRUST -> new ExactTrustBasedRankingReasoner(epsilon).getModel(bbase);
+            case NSA -> new ExactNsaReasoner(epsilon).getModel(bbase);
+            case ALPHABBS_0 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(1.)).getModel(bbase);
+            //case ALPHABBS_1 -> new AlphaBurdenBasedRankingReasoner(0.3).getModel(bbase);
+            //case ALPHABBS_2 -> new AlphaBurdenBasedRankingReasoner(10).getModel(bbase);
+            case MATT_TONI -> new ExactStrategyBasedRankingReasoner().getModel(bbase);
+            default -> null;
         });
 
     }
@@ -180,7 +186,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     }
 
 
-    private Collection<Extension<DungTheory>> getExtensionsForSemantics_Simple(Map<Argument, Double> ranking,
+    private Collection<Extension<DungTheory>> getExtensionsForSemantics_Simple(Map<Argument, BigDecimal> ranking,
                                                                                DungTheory bbase) {
         Collection<Extension<DungTheory>> finalAllExtensions = new ArrayList<>();
 
@@ -192,15 +198,18 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
         var grounded = new SimpleGroundedReasoner().getModel(bbase);
+        /*
         if (!grounded.equals(maxExtension) && !maxExtension.stream().anyMatch(arg -> arg.getName().startsWith("_aux"))) {
             System.out.println(bbase+"------- "+ranking+"------- "+maxExtension+"-------"+grounded);
         }
+
+         */
 
         return finalAllExtensions;
     }
 
 
-    private Collection<Extension<DungTheory>> getExtensionsForSemantics_MaxConflictfree(Map<Argument, Double> ranking,
+    private Collection<Extension<DungTheory>> getExtensionsForSemantics_MaxConflictfree(Map<Argument, BigDecimal> ranking,
                                                                                         DungTheory bbase) {
 
 
@@ -217,7 +226,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     }
 
 
-    private Collection<Extension<DungTheory>> getExtensionsForSemantics_Conflictfree(Map<Argument, Double> ranking,
+    private Collection<Extension<DungTheory>> getExtensionsForSemantics_Conflictfree(Map<Argument, BigDecimal> ranking,
                                                                                      DungTheory bbase) {
 
 
@@ -277,7 +286,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     }
 
 
-    private Extension<DungTheory> getSetForSemantics(Map<Argument, Double> ranking, Collection<Argument> e,
+    private Extension<DungTheory> getSetForSemantics(Map<Argument, BigDecimal> ranking, Collection<Argument> e,
                                                      DungTheory bbase) {
 
 
@@ -286,7 +295,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             // absolute argument strength
             case RB_ARG_ABS_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg ->
-                        useThresholdArg(ranking.get(arg), thresh)).collect(Collectors.toList()));
+                        useThresholdArg(ranking.get(arg), threshhold)).collect(Collectors.toList()));
 
 
             }
@@ -304,15 +313,15 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case RB_ATT_ABS_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh));
+                    return attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold));
                 }).collect(Collectors.toList()));
             }
             // absolute argument strength and absolute attack strength
             case RB_ATT_ABS_ARG_ABS_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) &&
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh));
+                    return useThresholdArg(ranking.get(arg), threshhold) &&
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold));
                 }).collect(Collectors.toList()));
 
             }
@@ -321,7 +330,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case RB_ARG_ABS_AND_ATT_REL_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) &&
+                    return useThresholdArg(ranking.get(arg), threshhold) &&
                             attackers.stream().allMatch(att ->
                                     useThresholdAtt(ranking.get(att), ranking.get(arg))
                             );
@@ -333,7 +342,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
                     return
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold)
                                     && useThresholdAtt(ranking.get(att), ranking.get(arg))
                             );
                 }).collect(Collectors.toList()));
@@ -344,7 +353,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
                     return
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold)
                                     || useThresholdAtt(ranking.get(att), ranking.get(arg))
                             );
                 }).collect(Collectors.toList()));
@@ -354,8 +363,8 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case RB_ATT_ABS_OR_ARG_ABS_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) ||
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                    return useThresholdArg(ranking.get(arg), threshhold) ||
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold)
 
                             );
                 }).collect(Collectors.toList()));
@@ -366,7 +375,7 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case RB_ARG_ABS_OR_ARG_REL_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) ||
+                    return useThresholdArg(ranking.get(arg), threshhold) ||
                             attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), ranking.get(arg))
                             );
                 }).collect(Collectors.toList()));
@@ -378,8 +387,8 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case RB_ATT_ABS_OR_ARG_ABS_OR_ARG_REL_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) ||
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                    return useThresholdArg(ranking.get(arg), threshhold) ||
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold)
                                     || useThresholdAtt(ranking.get(att), ranking.get(arg))
                             );
                 }).collect(Collectors.toList()));
@@ -389,8 +398,8 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case RB_ATT_ABS_AND_REL_STRENGTH_OR_ARG_STRENGTH_ABS -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) ||
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                    return useThresholdArg(ranking.get(arg), threshhold) ||
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold)
                                     && useThresholdAtt(ranking.get(att), ranking.get(arg))
                             );
                 }).collect(Collectors.toList()));
@@ -399,8 +408,8 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case RB_ATT_ABS_OR_REL_STRENGTH_AND_ARG_STRENGTH_ABS -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) &&
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                    return useThresholdArg(ranking.get(arg), threshhold) &&
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold)
                                     || useThresholdAtt(ranking.get(att), ranking.get(arg))
                             );
                 }).collect(Collectors.toList()));
@@ -410,8 +419,8 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case RB_ATT_ABS_AND_REL_STRENGTH_AND_ARG_STRENGTH_ABS -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return useThresholdArg(ranking.get(arg), thresh) &&
-                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), thresh)
+                    return useThresholdArg(ranking.get(arg), threshhold) &&
+                            attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold)
                                     && useThresholdAtt(ranking.get(att), ranking.get(arg))
                             );
                 }).collect(Collectors.toList()));
@@ -423,14 +432,14 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     }
 
 
-    private boolean useThresholdArg(double value, double thresh) {
+    private boolean useThresholdArg(BigDecimal value, BigDecimal thresh) {
 
 
         return switch (this.rankingSemantics) {
             case MATT_TONI, COUNTING, NSA, CATEGORIZER, TRUST, MAX, EULER, ITS, ALPHABBS_0->
-                    vergleichsoperator == Vergleichsoperator.STRICT ? value > thresh : value >= thresh;
-            case ALPHABBS_1, ALPHABBS_2 -> vergleichsoperator == Vergleichsoperator.STRICT? value < thresh
-                    :value<=thresh;
+                    vergleichsoperator== Vergleichsoperator.STRICT? value.compareTo(thresh)>0:value.compareTo(thresh)>=0;
+            case ALPHABBS_1, ALPHABBS_2 -> vergleichsoperator == Vergleichsoperator.STRICT? value.compareTo(thresh)==-1
+            : value.compareTo(thresh)<=0;
 
 
         };
@@ -439,14 +448,14 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     }
 
 
-    private boolean useThresholdAtt(double value, double thresh) {
+    private boolean useThresholdAtt(BigDecimal value, BigDecimal thresh) {
 
 
         return switch (this.rankingSemantics) {
             case NSA, CATEGORIZER, TRUST, MAX, MATT_TONI, COUNTING, EULER, ITS ->
-                    vergleichsoperator == Vergleichsoperator.STRICT ? value <= thresh : value < thresh;
-            case ALPHABBS_1, ALPHABBS_2,  ALPHABBS_0 -> vergleichsoperator == Vergleichsoperator.STRICT? value >= thresh
-            :value>thresh;
+                    vergleichsoperator == Vergleichsoperator.STRICT ? value.compareTo(thresh) <= 0 : value.compareTo(thresh)<0;
+            case ALPHABBS_1, ALPHABBS_2,  ALPHABBS_0 -> vergleichsoperator == Vergleichsoperator.STRICT? value.compareTo(thresh) >= 0
+            :value.compareTo(thresh)>0;
 
         };
 

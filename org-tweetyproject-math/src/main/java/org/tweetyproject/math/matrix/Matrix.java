@@ -20,6 +20,8 @@ package org.tweetyproject.math.matrix;
 
 import org.tweetyproject.math.term.*;
 
+import java.math.BigDecimal;
+
 /**
  * This class models a matrix of terms.
  * 
@@ -120,6 +122,16 @@ public class Matrix {
 	 */
 	public Matrix mult(double scalar){
 		return this.mult(new FloatConstant(scalar));
+	}
+
+	/**
+	 * Multiply this matrix with the given scalar
+	 * (every entry is multiplied)
+	 * @param scalar a BigDecimal
+	 * @return a new matrix.
+	 */
+	public Matrix mult(BigDecimal scalar){
+		return this.mult(new BigDecimalConstant(scalar));
 	}
 	
 	/**

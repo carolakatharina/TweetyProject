@@ -20,9 +20,11 @@ package org.tweetyproject.arg.rankings.reasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.comparator.NumericalPartialOrder;
+import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -37,42 +39,52 @@ import java.util.HashSet;
  * @author Carola Bauer
  */
 
-public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
+public class ExactMaxBasedRankingReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
+
+    private final BigDecimal epsilon;
+    //muss zu schwellwert passen, wenn 0.00001 dann 0.6180339887498588 und 0.6180339887498948 und  0.618034 okay
+    // wenn 0.0001 erst ab 0.6180555555555556 okay
+    //wenn 0.001 erst ab 0.6181818181818182
+    //wenn 0.01 erst ab 0.6190476190476191
+    //wenn 0.1 erst ab 0.625;
+
+    public ExactMaxBasedRankingReasoner(BigDecimal epsilon) {
+        this.epsilon = epsilon;
+    }
 
 
     @Override
-    public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-        Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
+    public Collection<ExactNumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
+        Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
         ranks.add(this.getModel(bbase));
         return ranks;
     }
 
     @Override
-    public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
+    public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
 
 
         Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
-        double[] valuations = new double[n];	 //Stores valuations of the current iteration
+        BigDecimal[] valuations = new BigDecimal[n];	 //Stores valuations of the current iteration
         for (int i=0; i<n; i++) {
-            valuations[i]=1.;
+            valuations[i]=BigDecimal.valueOf(1.);
         }
-        double[] valuationsOld; //Stores valuations of the last iteration
+        BigDecimal[] valuationsOld; //Stores valuations of the last iteration
 
-        //Keep computing valuations until the values stop changing much or converge
-        double epsilon = 0.001;
+
         do {
             valuationsOld = valuations.clone();
 
             for (int i = 0; i < n; i++) {
                 valuations[i] = calculateMaxBasedFunction(valuationsOld, directAttackMatrix, i);
             }
-        } while (getDistance(valuationsOld, valuations) > epsilon);
+        } while (getDistance(valuationsOld, valuations).compareTo(epsilon)>0);
 
         //Use computed valuations as values for argument ranking
         //Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
-        NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<>();
-        ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
+        ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<>();
+        ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
         int i = 0;
         for (Argument a : kb)
             ranking.put(a, valuations[i++]);
@@ -81,40 +93,43 @@ public class MaxBasedRankingReasoner extends AbstractRankingReasoner<NumericalPa
 
     /**
      * Computes the maxbased function.
-     * @param vOld array of double valuations that were computed in the previous iteration
+     *
+     * @param vOld               array of BigDecimal valuations that were computed in the previous iteration
      * @param directAttackMatrix complete matrix of direct attacks
-     * @param i row of the attack matrix that will be used in the calculation
+     * @param i                  row of the attack matrix that will be used in the calculation
      * @return categorizer valuation
      */
-    private double calculateMaxBasedFunction(double[] vOld, Matrix directAttackMatrix, int i) {
-        double max = 0.;
+    private BigDecimal calculateMaxBasedFunction(BigDecimal[] vOld, Matrix directAttackMatrix, int i) {
+        var max = BigDecimal.valueOf(0.);
 
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            double attacker= vOld[j] * directAttackMatrix.getEntry(i,j).doubleValue();
-            if (attacker>max) {
+            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue());
+            if (attacker.compareTo(max)==1) {
                 max = attacker;
             }
         }
 
-        return (1. / (1.+max));
+        return BigDecimal.valueOf(1.).divide(BigDecimal.valueOf(1.).add(max), MathContext.DECIMAL128);
 
     }
 
     /**
      * Computes the Euclidean distance between to the given arrays.
+     *
      * @param vOld first array
-     * @param v second array
+     * @param v    second array
      * @return distance between v and vOld
      */
-    private double getDistance(double[] vOld, double[] v) {
-        double sum = 0.0;
+    private BigDecimal getDistance(BigDecimal[] vOld, BigDecimal[] v) {
+        var sum = BigDecimal.valueOf(0.0);
         for (int i = 0; i < v.length; i++) {
-            sum += Math.pow(v[i]-vOld[i],2.0);
+            var distance = v[i].subtract(vOld[i]);
+            sum = sum.add(distance.pow(2));
         }
 
-        double result = Math.pow(sum, 0.5);
-        return Double.isNaN(result)?0.:result;
+        BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
+        return result;
     }
 
 

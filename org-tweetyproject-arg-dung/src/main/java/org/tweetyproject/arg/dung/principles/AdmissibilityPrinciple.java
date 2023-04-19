@@ -55,9 +55,7 @@ public class AdmissibilityPrinciple extends Principle {
 
         for (Extension<DungTheory> ext: exts) {
             if (!theory.isAdmissable(ext)) {
-                System.out.println(ev.getModels((DungTheory) kb));
-                System.out.println(kb+" "+ext+""+ ((DungTheory) kb).getAdjacencyMatrix().transpose()); //The matrix of direct attackers);
-                return false;
+                  return false;
             }
         }
         return true;
