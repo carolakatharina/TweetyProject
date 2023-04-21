@@ -16,11 +16,12 @@
  *
  *  Copyright 2016 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
-package org.tweetyproject.arg.rankings.reasoner;
+package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.commons.util.SetTools;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.equation.Equation;
@@ -42,7 +43,7 @@ import java.util.*;
  * 
  * @author Anna Gessler
  */
-public class ExactStrategyBasedRankingReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
+public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
 	@Override
 	public Collection<ExactNumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
@@ -59,6 +60,14 @@ public class ExactStrategyBasedRankingReasoner extends AbstractRankingReasoner<E
 		for (Argument a : ((DungTheory)kb)) 
 			ranking.put(a, computeStrengthOfArgument(a, ((DungTheory)kb), subsets)); 
 		return ranking;
+	}
+
+	public static BigDecimal getMinimalValue() {
+		return BigDecimal.valueOf(0.);
+	}
+
+	public static BigDecimal getMaximalValue() {
+		return BigDecimal.valueOf(1.);
 	}
 
 	/**
@@ -95,9 +104,9 @@ public class ExactStrategyBasedRankingReasoner extends AbstractRankingReasoner<E
 		for (int count = 1; count <= proponentStrategies.size(); count++) { 
 			BigDecimalVariable pI = new BigDecimalVariable("P" + count);
 			probabilityVariables.add(pI);
-			problem.add(new Inequation(pI, new BigDecimalConstant(BigDecimal.valueOf(0.0)), Inequation.GREATER_EQUAL));
+			problem.add(new Inequation(pI, new BigDecimalConstant(0.0), Inequation.GREATER_EQUAL));
 		}
-		problem.add(new Inequation(targetVar, new BigDecimalConstant(BigDecimal.valueOf(0.0)), Inequation.GREATER_EQUAL));
+		problem.add(new Inequation(targetVar, new BigDecimalConstant(0.0), Inequation.GREATER_EQUAL));
 		
 		for (Collection<Argument> j : opponentStrategies) {
 			List<Term> products = new ArrayList<Term>(); 
@@ -106,10 +115,10 @@ public class ExactStrategyBasedRankingReasoner extends AbstractRankingReasoner<E
 				BigDecimalConstant rewardsIj = new BigDecimalConstant(computeRewards(i, j, kb));
 				products.add(new Product(rewardsIj, probabilityVariables.get(pi++)));
 			}
-			problem.add( new Inequation(new Sum(products).minus(targetVar), new BigDecimalConstant(BigDecimal.valueOf(0.0)),
+			problem.add( new Inequation(new Sum(products).minus(targetVar), new BigDecimalConstant(0.0),
 					Inequation.GREATER_EQUAL));
 		}
-		problem.add(new Equation(new Sum(probabilityVariables), new BigDecimalConstant(BigDecimal.valueOf(1.0))));
+		problem.add(new Equation(new Sum(probabilityVariables), new BigDecimalConstant(1.0)));
 
 		/*
 		 * Solve problem with simplex algorithm
@@ -118,7 +127,7 @@ public class ExactStrategyBasedRankingReasoner extends AbstractRankingReasoner<E
 		solver.onlyPositive = true;
 		try {
 			Map<Variable, Term> solution = solver.solve(problem);
-			return solution.get(targetVar).bigDecimalValue();
+			return BigDecimal.valueOf(solution.get(targetVar).doubleValue());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -164,9 +173,9 @@ public class ExactStrategyBasedRankingReasoner extends AbstractRankingReasoner<E
 		}
 
 		BigDecimal result = BigDecimal.valueOf(1.0);
-		result = result.add(BigDecimal.valueOf(1.0).subtract(BigDecimal.valueOf(1.0).divide(BigDecimal.valueOf(attacksFromAtoB + 1.0)), MathContext.DECIMAL128));
-		result = result.subtract(BigDecimal.valueOf(1.0).subtract (BigDecimal.valueOf(1.0).divide(BigDecimal.valueOf(attacksFromBtoA + 1.0)), MathContext.DECIMAL128));
-		return BigDecimal.valueOf(0.5).multiply(result);
+		result = result.add(BigDecimal.valueOf(1.0).subtract(BigDecimal.valueOf(1.0).divide(BigDecimal.valueOf(attacksFromAtoB + 1.0), MathContext.DECIMAL128)));
+		result = result.subtract(BigDecimal.valueOf(1.0).subtract (BigDecimal.valueOf(1.0).divide(BigDecimal.valueOf(attacksFromBtoA + 1.0), MathContext.DECIMAL128)));
+		return BigDecimal.valueOf(0.5).multiply(result, MathContext.DECIMAL128);
 	}
 	
 	/**natively installed*/

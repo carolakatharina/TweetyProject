@@ -63,6 +63,16 @@ public class Minimum extends AssociativeOperation{
 				value = (((FloatConstant)value).getValue() < ((IntegerConstant)tValue).getValue())?(value):(tValue);
 			else if((value instanceof FloatConstant) && (tValue instanceof FloatConstant))			
 				value = (((FloatConstant)value).getValue() < ((FloatConstant)tValue).getValue())?(value):(tValue);
+			else if((value instanceof IntegerConstant) && (tValue instanceof BigDecimalConstant))
+				value = (((IntegerConstant)value).getValue() < ((BigDecimalConstant)tValue).getValue().doubleValue())?(value):(tValue);
+			else if((value instanceof BigDecimalConstant) && (tValue instanceof IntegerConstant))
+				value = (((BigDecimalConstant)value).getValue().doubleValue() < ((IntegerConstant)tValue).getValue())?(value):(tValue);
+			else if((value instanceof FloatConstant) && (tValue instanceof BigDecimalConstant))
+				value = (((FloatConstant)value).getValue() < ((BigDecimalConstant)tValue).getValue().doubleValue())?(value):(tValue);
+			else if((value instanceof BigDecimalConstant) && (tValue instanceof FloatConstant))
+				value = (((BigDecimalConstant)value).getValue().doubleValue() < ((FloatConstant)tValue).getValue())?(value):(tValue);
+			else if((value instanceof BigDecimalConstant) && (tValue instanceof BigDecimalConstant))
+				value = (((BigDecimalConstant)value).getValue().compareTo(((BigDecimalConstant)tValue).getValue()))<0?(value):(tValue);
 			else throw new IllegalArgumentException("Unrecognized atomic term type.");					
 		}
 		return value;	

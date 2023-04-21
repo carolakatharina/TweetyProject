@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 
 /**
  * This class encapsulates a float as a term.
- * @author Carola Bauer
+ * @author Matthias Thimm
  */
 public class BigDecimalConstant extends Constant {
 
@@ -32,17 +32,32 @@ public class BigDecimalConstant extends Constant {
 	private BigDecimal f;
 
 	/**
-	 * Creates a new BigDecimal.
-	 * @param f a BigDecimal.
+	 * Creates a new Float.
+	 * @param f a float.
+	 */
+	public BigDecimalConstant(float f){
+		this.f = BigDecimal.valueOf(f);
+	}
+
+	/**
+	 * Creates a new Float.
+	 * @param f a float.
 	 */
 	public BigDecimalConstant(BigDecimal f){
 		this.f = f;
 	}
 
-
+	/**
+	 * Creates a new Float.
+	 * @param f a double.
+	 */
+	public BigDecimalConstant(double f){
+		this.f = BigDecimal.valueOf(f);
+	}
 	
 	/**
 	 * Get the value of this float.
+	 *
 	 * @return the value of this float.
 	 */
 	public BigDecimal getValue(){

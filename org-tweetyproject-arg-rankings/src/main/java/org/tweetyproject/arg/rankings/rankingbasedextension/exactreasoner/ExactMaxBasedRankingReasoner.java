@@ -16,10 +16,11 @@
  *
  *  Copyright 2016 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
-package org.tweetyproject.arg.rankings.reasoner;
+package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
@@ -28,22 +29,30 @@ import java.math.MathContext;
 import java.util.Collection;
 import java.util.HashSet;
 
-
 /**
- * This class implements the argument ranking approach of [DaCosta. Changing One's Mind: Erase or Rewind, 2011]:.
+ * This class implements the argument ranking approach of [Amgoud
+ * et al. Acceptability Semantics for Weighted Argumentation
+ * Frameworks. 2019]:.
  * <p>
  * This approach ranks arguments iteratively by considering an argument's basic
- * strength or the strength of its strongest attacker.
+ * strength as well as the strength of its strongest attacker.
  *
  * @author Carola Bauer
  */
-public class ExactTrustBasedRankingReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
+
+public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
     private final BigDecimal epsilon;
+    //muss zu schwellwert passen, wenn 0.00001 dann 0.6180339887498588 und 0.6180339887498948 und  0.618034 okay
+    // wenn 0.0001 erst ab 0.6180555555555556 okay
+    //wenn 0.001 erst ab 0.6181818181818182
+    //wenn 0.01 erst ab 0.6190476190476191
+    //wenn 0.1 erst ab 0.625;
 
-    public ExactTrustBasedRankingReasoner(BigDecimal epsilon) {
+    public ExactMaxBasedRankingReasoner(BigDecimal epsilon) {
         this.epsilon = epsilon;
     }
+
 
     @Override
     public Collection<ExactNumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
@@ -55,22 +64,23 @@ public class ExactTrustBasedRankingReasoner extends AbstractRankingReasoner<Exac
     @Override
     public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
 
+
         Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
         BigDecimal[] valuations = new BigDecimal[n];	 //Stores valuations of the current iteration
         for (int i=0; i<n; i++) {
-            valuations[i]= BigDecimal.valueOf(1.0);
+            valuations[i]=BigDecimal.valueOf(1.);
         }
         BigDecimal[] valuationsOld; //Stores valuations of the last iteration
 
-        //Keep computing valuations until the values stop changing
+
         do {
             valuationsOld = valuations.clone();
 
-            for (int i = 0; i < n; i++)
-                valuations[i] = calculateTrustBasedFunction(valuationsOld, directAttackMatrix, i);
-        } while (getDistance(valuationsOld, valuations).compareTo(this.epsilon)>0);
-
+            for (int i = 0; i < n; i++) {
+                valuations[i] = calculateMaxBasedFunction(valuationsOld, directAttackMatrix, i);
+            }
+        } while (getDistance(valuationsOld, valuations).compareTo(epsilon)>0);
 
         //Use computed valuations as values for argument ranking
         //Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
@@ -82,28 +92,34 @@ public class ExactTrustBasedRankingReasoner extends AbstractRankingReasoner<Exac
         return ranking;
     }
 
+    public static BigDecimal getMinimalValue() {
+        return BigDecimal.valueOf(0.5);
+    }
+
+    public static BigDecimal getMaximalValue() {
+        return BigDecimal.valueOf(1.);
+    }
+
     /**
-     * Computes the weightfunction.
-     * @param vOld array of BigDecimal valuations that were computed in the previous iteration
+     * Computes the maxbased function.
+     *
+     * @param vOld               array of BigDecimal valuations that were computed in the previous iteration
      * @param directAttackMatrix complete matrix of direct attacks
-     * @param i row of the attack matrix that will be used in the calculation
-     * @return value
+     * @param i                  row of the attack matrix that will be used in the calculation
+     * @return categorizer valuation
      */
-    private BigDecimal calculateTrustBasedFunction(BigDecimal[] vOld, Matrix directAttackMatrix, int i) {
-        BigDecimal max = BigDecimal.valueOf(0.);
+    private BigDecimal calculateMaxBasedFunction(BigDecimal[] vOld, Matrix directAttackMatrix, int i) {
+        var max = BigDecimal.valueOf(0.);
+
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue());
-            if (attacker.compareTo(max)>0) {
+            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL128);
+            if (attacker.compareTo(max)==1) {
                 max = attacker;
             }
         }
 
-        var var1= BigDecimal.valueOf(0.5);
-        var var2 =  BigDecimal.valueOf(1.).subtract(max);
-        var var3 = BigDecimal.valueOf(Math.min(1., (var2.doubleValue())));
-
-        return var1.add(BigDecimal.valueOf(0.5).multiply(var3));
+        return BigDecimal.valueOf(1.).divide(BigDecimal.valueOf(1.).add(max), MathContext.DECIMAL128);
 
     }
 
@@ -118,12 +134,13 @@ public class ExactTrustBasedRankingReasoner extends AbstractRankingReasoner<Exac
         var sum = BigDecimal.valueOf(0.0);
         for (int i = 0; i < v.length; i++) {
             var distance = v[i].subtract(vOld[i]);
-            sum = sum.add(distance.pow(2));
+            sum = sum.add(distance.pow(2), MathContext.DECIMAL128);
         }
 
         BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
         return result;
     }
+
 
     /**
      * natively installed

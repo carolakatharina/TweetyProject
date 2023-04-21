@@ -6,8 +6,10 @@ import org.tweetyproject.arg.dung.principles.Principle;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +64,40 @@ public class CsvWriter {
 
 
     }
+
+
+
+
+    public void createCsvForChart() throws IOException {
+        BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\results\\"+title+".csv"));
+        var bezeichnungen = data.stream().map(obj -> obj.getBezeichnung()).distinct().collect(Collectors.joining(",","",""));
+        bezeichnungen = bezeichnungen.replaceAll("\"", "");
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+                .setHeader(x_axis, bezeichnungen)
+                .build();
+
+
+        try (final CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
+            List<BigDecimal> thresholds = data.get(0).getThresholds();
+            for (var i =0; i< thresholds.size(); i++) {
+                List<Integer> principlesList = new ArrayList<>();
+                final int index = i;
+
+                data.stream().forEach(obj -> {
+                    principlesList.add((obj.getPrinziplesFulfilled().get(index)).size());
+
+                });
+                String s = principlesList.stream().map(number -> number.toString()).collect(Collectors.joining(",", "", ""));
+                s= s.replaceAll("\"", "");
+                printer.printRecord(thresholds.get(index),s);
+            }
+
+            printer.flush();
+        }
+
+
+    }
+
 
     private static String getPrinciples(List<Principle> principles) {
         return principles.stream()

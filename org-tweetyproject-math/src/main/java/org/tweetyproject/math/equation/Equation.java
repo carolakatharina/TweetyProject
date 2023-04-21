@@ -20,6 +20,8 @@ package org.tweetyproject.math.equation;
 
 import org.tweetyproject.math.term.*;
 
+import java.math.BigDecimal;
+
 /**
  * This class represent an equation of two terms.
  * @author Matthias Thimm
@@ -51,6 +53,11 @@ public class Equation extends Statement{
 		if(this.getRightTerm() instanceof Constant){
 			if(this.getRightTerm() instanceof FloatConstant){
 				if(((FloatConstant)this.getRightTerm()).getValue() == 0)
+					return true;
+			}
+
+			if(this.getRightTerm() instanceof BigDecimalConstant){
+				if(((BigDecimalConstant)this.getRightTerm()).getValue() == BigDecimal.valueOf(0))
 					return true;
 			}
 			if(this.getRightTerm() instanceof IntegerConstant){

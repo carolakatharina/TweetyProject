@@ -266,6 +266,8 @@ public class OptimizationProblem extends ConstraintSatisfactionProblem {
 				result += "int " + v.getName() + ";\n";
 			else if(v instanceof FloatVariable)
 				result += "sec " + v.getName() + ";\n";
+			else if(v instanceof BigDecimalVariable)
+				result += "sec " + v.getName() + ";\n";
 			else throw new IllegalArgumentException("Variable '" + v + "' has unknown type.");			
 		}		
 		//TODO: solve the following workarounds

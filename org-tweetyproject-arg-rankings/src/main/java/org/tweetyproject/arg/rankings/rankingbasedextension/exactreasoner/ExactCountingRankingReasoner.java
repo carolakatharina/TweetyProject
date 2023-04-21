@@ -16,13 +16,13 @@
  *
  *  Copyright 2016 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
-package org.tweetyproject.arg.rankings.reasoner;
+package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
-import org.tweetyproject.math.term.FloatConstant;
+import org.tweetyproject.math.term.BigDecimalConstant;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -40,7 +40,7 @@ import java.util.HashSet;
  * 
  * @author Anna Gessler
  */
-public class ExactCountingRankingReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
+public class ExactCountingRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
 	/**
 	 * This parameter influences whether shorter/longer attackers/defender lines are
@@ -79,9 +79,13 @@ public class ExactCountingRankingReasoner extends AbstractRankingReasoner<ExactN
 	@Override
 	public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
 		Matrix adjacencyMatrix = ((DungTheory)kb).getAdjacencyMatrix();
-		
+
+		var normfactor = getInfiniteNormalizationFactor(adjacencyMatrix);
+
+		if (normfactor.compareTo(BigDecimal.ZERO)!=0) {
 		// Apply matrix norm to guarantee that the argument strength scale is bounded
-		adjacencyMatrix = adjacencyMatrix.mult((BigDecimal.valueOf(1.0).divide(getInfiniteNormalizationFactor(adjacencyMatrix))));
+		adjacencyMatrix = adjacencyMatrix.mult(BigDecimal.valueOf(1.0).divide(normfactor,  MathContext.DECIMAL128));
+		}
 
 		// Apply damping factor
 		adjacencyMatrix = adjacencyMatrix.mult(this.dampingFactor).simplify();
@@ -92,7 +96,7 @@ public class ExactCountingRankingReasoner extends AbstractRankingReasoner<ExactN
 		
 		Matrix e = new Matrix(1, n); // column vector of all ones
 		for (int i = 0; i < n; i++) {
-			e.setEntry(0, i, new FloatConstant(1.0)); 
+			e.setEntry(0, i, new BigDecimalConstant(BigDecimal.valueOf(1.0)));
 		}
 		// the ranking for step 0 is 1.0 for all arguments
 		valuations = e; 
@@ -111,6 +115,14 @@ public class ExactCountingRankingReasoner extends AbstractRankingReasoner<ExactN
 		return ranking;
 	}
 
+	public static BigDecimal getMinimalValue() {
+		return BigDecimal.valueOf(0.);
+	}
+
+	public static BigDecimal getMaximalValue() {
+		return BigDecimal.valueOf(1.);
+	}
+
 	/**
 	 * Calculates the infinite matrix norm of the given matrix (i.e. the maximum
 	 * absolute row sum).
@@ -122,10 +134,15 @@ public class ExactCountingRankingReasoner extends AbstractRankingReasoner<ExactN
 		BigDecimal maxSum = BigDecimal.valueOf(0.0);
 		for (int y = 0; y < matrix.getXDimension(); y++) {
 			BigDecimal sum = BigDecimal.valueOf(0.0);
-			for (int x = 0; x < matrix.getYDimension(); x++)
+			for (int x = 0; x < matrix.getYDimension(); x++) {
 				sum = sum.add(matrix.getEntry(x, y).bigDecimalValue());
-			if (sum.compareTo(maxSum)>0)
+
+			}
+
+			if (sum.compareTo(maxSum)>0) {
 				maxSum = sum;
+
+			}
 		}
 		return maxSum;
 	}
@@ -142,10 +159,11 @@ public class ExactCountingRankingReasoner extends AbstractRankingReasoner<ExactN
 		BigDecimal sum = BigDecimal.valueOf(0.0);
 		for (int i = 0; i < v.getYDimension(); i++) {
 			var val = v.getEntry(0, i).bigDecimalValue().subtract(vOld.getEntry(0, i).bigDecimalValue());
-			sum = sum.add(val.pow(2));
+			sum = sum.add(val.pow(2), MathContext.DECIMAL128);
 		}
 		return sum.sqrt(MathContext.DECIMAL128);
 	}
+
 	
 	/**natively installed*/
 	@Override

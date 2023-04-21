@@ -19,8 +19,8 @@
 package org.tweetyproject.math.term;
 
 /**
- * This class models an BigDecimal variable as a mathematical term.
- * @author Carola Bauer
+ * This class models an float variable as a mathematical term.
+ * @author Matthias Thimm
  */
 public class BigDecimalVariable extends Variable{
 

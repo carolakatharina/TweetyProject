@@ -1,4 +1,4 @@
-package org.tweetyproject.arg.rankings.rankingbasedextension;
+package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 
 
 /*
@@ -25,14 +25,13 @@ import org.tweetyproject.arg.dung.reasoner.SimpleGroundedReasoner;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.rankings.reasoner.*;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
-public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
+public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtensionReasoner {
     RankingSemantics rankingSemantics;
 
     Vorgehensweise vorgehensweise;
@@ -81,9 +80,9 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
     }
 
-    public RankingBasedExtensionReasoner(Akzeptanzbedingung akzeptanzbedingung,
-                                         RankingSemantics semantics, Vorgehensweise vorgehensweise, BigDecimal threshhold,
-                                         Vergleichsoperator vergleichsoperator, BigDecimal epsilon) {
+    public ExactGeneralRankingBasedExtensionReasoner(Akzeptanzbedingung akzeptanzbedingung,
+                                                     RankingSemantics semantics, Vorgehensweise vorgehensweise, BigDecimal threshhold,
+                                                     Vergleichsoperator vergleichsoperator, BigDecimal epsilon) {
 
 
         this.rankingSemantics = semantics;
@@ -136,10 +135,9 @@ public class RankingBasedExtensionReasoner extends AbstractExtensionReasoner {
             case TRUST -> new ExactTrustBasedRankingReasoner(epsilon).getModel(bbase);
             case NSA -> new ExactNsaReasoner(epsilon).getModel(bbase);
             case ALPHABBS_0 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(1.)).getModel(bbase);
-            //case ALPHABBS_1 -> new AlphaBurdenBasedRankingReasoner(0.3).getModel(bbase);
-            //case ALPHABBS_2 -> new AlphaBurdenBasedRankingReasoner(10).getModel(bbase);
+            case ALPHABBS_1 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(0.3)).getModel(bbase);
+            case ALPHABBS_2 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(10.)).getModel(bbase);
             case MATT_TONI -> new ExactStrategyBasedRankingReasoner().getModel(bbase);
-            default -> null;
         });
 
     }

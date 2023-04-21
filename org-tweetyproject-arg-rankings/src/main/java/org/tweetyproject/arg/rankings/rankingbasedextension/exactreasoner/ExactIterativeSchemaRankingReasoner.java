@@ -1,4 +1,4 @@
-package org.tweetyproject.arg.rankings.reasoner;
+package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 
 /*
  *  This file is part of "TweetyProject", a collection of Java libraries for
@@ -22,6 +22,7 @@ package org.tweetyproject.arg.rankings.reasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
@@ -39,7 +40,7 @@ import java.util.HashSet;
  *
  * @author Carola Bauer
  */
-public class ExactIterativeSchemaRankingReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
+public class ExactIterativeSchemaRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
     private final BigDecimal epsilon;
 
@@ -64,6 +65,7 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractRankingReasoner
             valuations[i]= BigDecimal.valueOf(1.);
         }
         BigDecimal[] valuationsOld; //Stores valuations of the last iteration
+        var distance = BigDecimal.valueOf(0.);
 
         //Keep computing valuations until the values stop changing
         do {
@@ -71,7 +73,8 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractRankingReasoner
 
             for (int i = 0; i < n; i++)
                 valuations[i] = calculateFunction(valuationsOld, directAttackMatrix, i);
-        } while (getDistance(valuationsOld, valuations).compareTo(epsilon) > 0);
+            distance = getDistance(valuationsOld, valuations);
+        } while (distance.compareTo(epsilon)>0);
 
 
         //Use computed valuations as values for argument ranking
@@ -81,7 +84,16 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractRankingReasoner
         int i = 0;
         for (Argument a : kb)
             ranking.put(a, valuations[i++]);
+
         return ranking;
+    }
+
+    public static BigDecimal getMinimalValue() {
+        return BigDecimal.valueOf(0.);
+    }
+
+    public static BigDecimal getMaximalValue() {
+        return BigDecimal.valueOf(1.);
     }
 
     /**
@@ -95,7 +107,7 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractRankingReasoner
         BigDecimal max = BigDecimal.valueOf(0.);
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue());
+            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL128);
             if (attacker.compareTo(max)>0) {
                 max = attacker;
             }
@@ -104,7 +116,7 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractRankingReasoner
         var var2 = BigDecimal.valueOf(1.).subtract(max);
 
 
-        return (var1.multiply(BigDecimal.valueOf(Math.min(0.5, (var2.doubleValue())))).add(BigDecimal.valueOf(Math.max(0.5, var2.doubleValue()))));
+        return (var1.multiply(var2.min(BigDecimal.valueOf(0.5))).add(var2.max(BigDecimal.valueOf(0.5)), MathContext.DECIMAL128));
 
     }
 
@@ -120,7 +132,7 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractRankingReasoner
         var sum = BigDecimal.valueOf(0.0);
         for (int i = 0; i < v.length; i++) {
             var distance = v[i].subtract(vOld[i]);
-            sum = sum.add(distance.pow(2));
+            sum = sum.add(distance.pow(2), MathContext.DECIMAL128);
         }
 
         BigDecimal result = sum.sqrt(MathContext.DECIMAL128);

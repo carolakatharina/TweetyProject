@@ -16,10 +16,11 @@
  *
  *  Copyright 2018 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
-package org.tweetyproject.arg.rankings.reasoner;
+package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.comparator.NumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
@@ -40,7 +41,7 @@ import java.util.HashSet;
  * 
  * @author Anna Gessler
  */
-public class ExactCategorizerRankingReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
+public class ExactCategorizerRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
 	private BigDecimal epsilon;
 
@@ -98,6 +99,14 @@ public class ExactCategorizerRankingReasoner extends AbstractRankingReasoner<Exa
 		return ranking;
 	}
 
+	public static BigDecimal getMinimalValue() {
+		return BigDecimal.valueOf(0.);
+	}
+
+	public static BigDecimal getMaximalValue() {
+		return BigDecimal.valueOf(1.);
+	}
+
 	/**
 	 * Computes the h-Categorizer function.
 	 * @param vOld array of BigDecimal valuations that were computed in the previous iteration
@@ -109,7 +118,7 @@ public class ExactCategorizerRankingReasoner extends AbstractRankingReasoner<Exa
 		BigDecimal c = BigDecimal.valueOf(1.0);
 		for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
 
-			var oldValue = vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue());
+			var oldValue = vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL128);
 			c = c.add(oldValue);
 
 		}
@@ -128,7 +137,7 @@ public class ExactCategorizerRankingReasoner extends AbstractRankingReasoner<Exa
 		var sum = BigDecimal.valueOf(0.0);
 		for (int i = 0; i < v.length; i++) {
 			var distance = v[i].subtract(vOld[i]);
-			sum = sum.add(distance.pow(2));
+			sum = sum.add(distance.pow(2), MathContext.DECIMAL128);
 		}
 
 		BigDecimal result = sum.sqrt(MathContext.DECIMAL128);

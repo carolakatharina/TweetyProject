@@ -97,21 +97,26 @@ public abstract class Term {
 		Constant c = this.value();
 		if(c instanceof FloatConstant)
 			return ((FloatConstant)c).getValue();
+		if(c instanceof BigDecimalConstant)
+			return ((BigDecimalConstant)c).getValue().doubleValue();
 		return ((IntegerConstant)c).getValue();
 	}
 
-
 	/**
 	 * Computes the actual value of this term if it contains no variables.
-	 * @return the BigDecimal value of this term.
+	 * @return the double value of this term.
 	 * @throws IllegalArgumentException if this term contains at least on
 	 * 		variable.
 	 */
 	public BigDecimal bigDecimalValue() throws IllegalArgumentException{
-		double c = this.value().doubleValue();
-		return BigDecimal.valueOf(c);
-
+		Constant c = this.value();
+		if(c instanceof FloatConstant)
+			return BigDecimal.valueOf(((FloatConstant)c).getValue());
+		if(c instanceof BigDecimalConstant)
+			return ((BigDecimalConstant)c).getValue();
+		return BigDecimal.valueOf(((IntegerConstant)c).getValue());
 	}
+
 	
 	/**
 	 * Checks whether this term is continuous in v. 

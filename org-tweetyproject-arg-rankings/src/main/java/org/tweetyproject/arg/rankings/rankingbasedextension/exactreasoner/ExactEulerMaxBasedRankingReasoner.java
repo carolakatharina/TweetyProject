@@ -16,10 +16,11 @@
  *
  *  Copyright 2016 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
-package org.tweetyproject.arg.rankings.reasoner;
+package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
@@ -40,7 +41,7 @@ import static java.lang.StrictMath.exp;
  *
  * @author Carola Bauer
  */
-public class ExactEulerMaxBasedRankingReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
+public class ExactEulerMaxBasedRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
     final BigDecimal epsilon;
 
@@ -85,6 +86,15 @@ public class ExactEulerMaxBasedRankingReasoner extends AbstractRankingReasoner<E
         return ranking;
     }
 
+
+    public static BigDecimal getMinimalValue() {
+        return BigDecimal.valueOf(0.);
+    }
+
+    public static BigDecimal getMaximalValue() {
+        return BigDecimal.valueOf(1.);
+    }
+
     /**
      * Computes the maxbased function.
      * @param vOld array of BigDecimal valuations that were computed in the previous iteration
@@ -96,12 +106,12 @@ public class ExactEulerMaxBasedRankingReasoner extends AbstractRankingReasoner<E
         BigDecimal max = BigDecimal.valueOf(0.);
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue());
+            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL128);
             if (attacker.compareTo(max)>0) {
                 max = attacker;
             }
         }
-        return  BigDecimal.valueOf(1.).multiply(BigDecimal.valueOf(exp(-max.doubleValue())));
+        return  BigDecimal.valueOf(1.).multiply(BigDecimal.valueOf(exp(-max.doubleValue())), MathContext.DECIMAL128);
 
     }
 
@@ -118,7 +128,7 @@ public class ExactEulerMaxBasedRankingReasoner extends AbstractRankingReasoner<E
         var sum = BigDecimal.valueOf(0.0);
         for (int i = 0; i < v.length; i++) {
             var distance = v[i].subtract(vOld[i]);
-            sum = sum.add(distance.pow(2));
+            sum = sum.add(distance.pow(2), MathContext.DECIMAL128);
         }
 
         BigDecimal result = sum.sqrt(MathContext.DECIMAL64);

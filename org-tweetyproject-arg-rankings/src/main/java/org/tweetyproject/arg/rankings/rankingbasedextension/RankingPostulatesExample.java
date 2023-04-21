@@ -23,8 +23,9 @@ import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.postulates.RankingPostulate;
+import org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner;
 import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
-import org.tweetyproject.arg.rankings.reasoner.ExactMaxBasedRankingReasoner;
+import org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactMaxBasedRankingReasoner;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 
@@ -34,7 +35,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.RankingSemantics.*;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.*;
 
 /**
  * Example code for evaluating weighted ranking semantics in regard
@@ -46,7 +47,7 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedE
 public class RankingPostulatesExample {
     private static Collection<RankingPostulate> all_postulates;
 
-    private static final Collection<RankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
+    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
             MAX, CATEGORIZER,
             NSA, MATT_TONI, COUNTING, TRUST, ALPHABBS_1, ALPHABBS_2
 
@@ -92,7 +93,7 @@ public class RankingPostulatesExample {
     }
 
 
-    public static void Example(RankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
+    public static void Example(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
 
 
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
@@ -137,7 +138,7 @@ public class RankingPostulatesExample {
 
     }
 
-    public static AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> getReasoner(RankingBasedExtensionReasoner.RankingSemantics sem) {
+    public static AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> getReasoner(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics sem) {
         return switch (sem) {
             /*case CATEGORIZER -> new CategorizerRankingReasoner();
             case MATT_TONI -> new StrategyBasedRankingReasoner();

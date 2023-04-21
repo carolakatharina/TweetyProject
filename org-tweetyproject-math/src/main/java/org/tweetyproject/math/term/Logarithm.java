@@ -18,6 +18,7 @@
  */
 package org.tweetyproject.math.term;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.tweetyproject.math.*;
@@ -97,6 +98,11 @@ public class Logarithm extends FunctionalTerm {
 			if(((FloatConstant)c).getValue() <= 0)				
 				return new FloatConstant(Float.NEGATIVE_INFINITY);
 			else return new FloatConstant((float)(Math.log(((FloatConstant)c).getValue())));
+		}
+		else if(c instanceof BigDecimalConstant){
+			if(((BigDecimalConstant)c).getValue().doubleValue() <= 0)
+				return new BigDecimalConstant(Float.NEGATIVE_INFINITY);
+			else return new BigDecimalConstant((BigDecimal) BigDecimal.valueOf(Math.log(((BigDecimalConstant)c).getValue().doubleValue())));
 		}
 		throw new IllegalArgumentException("Unrecognized atomic term type.");
 	}

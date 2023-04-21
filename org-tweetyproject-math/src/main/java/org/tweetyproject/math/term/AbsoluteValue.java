@@ -18,6 +18,8 @@
  */
 package org.tweetyproject.math.term;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.*;
 
 import org.tweetyproject.math.*;
@@ -106,7 +108,11 @@ public class AbsoluteValue extends FunctionalTerm {
 			if(((FloatConstant)c).getValue() < 0)
 				return new FloatConstant(((FloatConstant)c).getValue()*-1);
 			else return c;
-		}
+		}else if(c instanceof BigDecimalConstant){
+		if(((BigDecimalConstant)c).getValue().doubleValue() < 0)
+			return new BigDecimalConstant(((BigDecimalConstant)c).getValue().multiply(BigDecimal.valueOf(-1), MathContext.DECIMAL128));
+		else return c;
+	}
 		throw new IllegalArgumentException("Unrecognized atomic term type.");
 	}
 

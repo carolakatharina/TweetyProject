@@ -16,10 +16,11 @@
  *
  *  Copyright 2018 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
-package org.tweetyproject.arg.rankings.reasoner;
+package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
@@ -35,7 +36,7 @@ import java.util.HashSet;
  *
  * @author Carola Bauer
  */
-public class ExactAlphaBurdenBasedRankingReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
+public class ExactAlphaBurdenBasedRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
     private final BigDecimal epsilon;
     private final BigDecimal alpha;
@@ -93,6 +94,14 @@ public class ExactAlphaBurdenBasedRankingReasoner extends AbstractRankingReasone
         return ranking;
     }
 
+    public static BigDecimal getMinimalValue() {
+        return null;
+    }
+
+    public static BigDecimal getMaximalValue() {
+        return null;
+    }
+
     /**
      * Computes the alpha-burdenbased function.
      *
@@ -107,7 +116,7 @@ public class ExactAlphaBurdenBasedRankingReasoner extends AbstractRankingReasone
             return BigDecimal.valueOf(1.0);
         }
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            var mult = vOld[j].multiply(directAttackMatrix.getEntry(i, j).bigDecimalValue());
+            var mult = vOld[j].multiply(BigDecimal.valueOf(directAttackMatrix.getEntry(i, j).doubleValue()));
             var zaehler = BigDecimal.valueOf(Math.pow(mult.doubleValue(), alpha.doubleValue()));
             if (zaehler.compareTo(BigDecimal.valueOf(0.)) != 1) {
                 c = c.add(BigDecimal.valueOf(1.0).divide(zaehler, MathContext.DECIMAL128));

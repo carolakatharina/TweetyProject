@@ -18,6 +18,8 @@
  */
 package org.tweetyproject.math.term;
 
+import java.math.BigDecimal;
+
 /**
  * This class encapsulates a float as a term.
  * @author Matthias Thimm
@@ -25,7 +27,7 @@ package org.tweetyproject.math.term;
 public class FloatConstant extends Constant {
 	
 	/**
-	 * the actual float.
+	 * the actual Variable.
 	 */	
 	private double f;
 	
@@ -36,7 +38,15 @@ public class FloatConstant extends Constant {
 	public FloatConstant(float f){
 		this.f = f;
 	}
-	
+
+	/**
+	 * Creates a new Float.
+	 * @param f a float.
+	 */
+	public FloatConstant(BigDecimal f){
+		this.f = f.floatValue();
+	}
+
 	/**
 	 * Creates a new Float.
 	 * @param f a double.

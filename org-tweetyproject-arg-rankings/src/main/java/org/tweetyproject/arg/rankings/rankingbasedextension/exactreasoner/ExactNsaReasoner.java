@@ -16,10 +16,11 @@
  *
  *  Copyright 2018 The TweetyProject Team <http://tweetyproject.org/contact/>
  */
-package org.tweetyproject.arg.rankings.reasoner;
+package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
@@ -39,7 +40,7 @@ import java.util.HashSet;
  * 
  * @author Carola Bauer
  */
-public class ExactNsaReasoner extends AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> {
+public class ExactNsaReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
 	private final BigDecimal epsilon;
 
@@ -96,6 +97,14 @@ public class ExactNsaReasoner extends AbstractRankingReasoner<ExactNumericalPart
 		return ranking;
 	}
 
+	public static BigDecimal getMinimalValue() {
+		return BigDecimal.valueOf(0.);
+	}
+
+	public static BigDecimal getMaximalValue() {
+		return BigDecimal.valueOf(1.);
+	}
+
 	/**
 	 * Computes the h-Categorizer function.
 	 * @param vOld array of BigDecimal valuations that were computed in the previous iteration
@@ -106,7 +115,7 @@ public class ExactNsaReasoner extends AbstractRankingReasoner<ExactNumericalPart
 	private BigDecimal calculateCategorizerFunction(BigDecimal[] vOld, Matrix directAttackMatrix, int i) {
 		BigDecimal c = BigDecimal.valueOf(1.0);
 		for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-			c = c.add(vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue()));
+			c = c.add(vOld[j].multiply(BigDecimal.valueOf(directAttackMatrix.getEntry(i,j).doubleValue()), MathContext.DECIMAL128));
 		}
 		return (BigDecimal.valueOf(1.0).divide(c, MathContext.DECIMAL128));
 
@@ -123,7 +132,7 @@ public class ExactNsaReasoner extends AbstractRankingReasoner<ExactNumericalPart
 		var sum = BigDecimal.valueOf(0.0);
 		for (int i = 0; i < v.length; i++) {
 			var distance = v[i].subtract(vOld[i]);
-			sum = sum.add(distance.pow(2));
+			sum = sum.add(distance.pow(2), MathContext.DECIMAL128);
 		}
 
 		BigDecimal result = sum.sqrt(MathContext.DECIMAL128);

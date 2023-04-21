@@ -26,22 +26,21 @@ import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
-import org.tweetyproject.arg.dung.util.IsoSafeEnumeratingDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.rankingbasedextension.evaluation.CsvWriter;
 import org.tweetyproject.arg.rankings.rankingbasedextension.evaluation.LineChartDrawing;
 import org.tweetyproject.arg.rankings.rankingbasedextension.evaluation.ThresholdEvaluationObject;
 import org.tweetyproject.arg.rankings.rankingbasedextension.evaluation.ThresholdValuesForRBSemantics;
+import org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH;
-import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.RankingSemantics.*;
-import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedExtensionReasoner.Vergleichsoperator.STRICT;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.*;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Vergleichsoperator.STRICT;
 
 /**
  * Example code for evaluating weighted ranking semantics in regard
@@ -53,10 +52,12 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.RankingBasedE
 public class ExtensionPrinciplesExample {
     private static Collection<Principle> all_principles;
 
-    private static BigDecimal[] epsilon_values = {BigDecimal.valueOf(0.01), BigDecimal.valueOf(0.001), BigDecimal.valueOf(0.0001), BigDecimal.valueOf(0.00001), BigDecimal.valueOf(0.000001), BigDecimal.valueOf(0.0000001)};
+    private static BigDecimal[] epsilon_values = {BigDecimal.valueOf(0.01), BigDecimal.valueOf(0.001), BigDecimal.valueOf(0.0001), BigDecimal.valueOf(0.00001)
+    };
+            //, BigDecimal.valueOf(0.000001), BigDecimal.valueOf(0.0000001), BigDecimal.valueOf(0.00000001)};
 
-    private static final Collection<RankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
-            List.of(RankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
+    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
+            List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
                     /*
                     RankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF,
                     RankingBasedExtensionReasoner.Vorgehensweise.INC_BUDGET,
@@ -65,26 +66,29 @@ public class ExtensionPrinciplesExample {
                     //RankingBasedExtensionReasoner.Vorgehensweise.CF
             ));
 
-    private static final Collection<RankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = Arrays.asList(
+    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = Arrays.asList(
 
             //RankingBasedExtensionReasoner.Akzeptanzbedingung.values()
             RB_ARG_ABS_STRENGTH
             //RB_ATT_ABS_STRENGTH
     );
 
-    private static final Collection<RankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX,
-            CATEGORIZER,
-            NSA,
-            TRUST,
-            COUNTING,
-            ALPHABBS_0,
-            MATT_TONI,
-            EULER,
+    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
+            /*MAX,*/
+            //CATEGORIZER,
+            //NSA,
+            //TRUST,
+
+            //COUNTING,
+
+            //MATT_TONI,
+            //EULER
             ITS
 
 
+
             /*,ALPHABBS_1,
+             ALPHABBS_0,
             ALPHABBS_2*/
 
     ));
@@ -118,7 +122,7 @@ public class ExtensionPrinciplesExample {
 
     }
 
-    public static void Example(RankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung, RankingBasedExtensionReasoner.RankingSemantics rankingSemantics) throws IOException {
+    public static void Example(ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics) throws IOException {
         var threshholds = ThresholdValuesForRBSemantics.getThresholdValues(rankingSemantics);
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
 
@@ -126,63 +130,60 @@ public class ExtensionPrinciplesExample {
         for (var vorg : vorgehen) {
             for (var epsilon : epsilon_values) {
                 String bezeichnung = rankingSemantics + " mit Epsilon=" + epsilon;
-                List<List<Principle>> principles_fulfilled= new ArrayList<>();
-                List<List<Principle>> principles_not_fulfilled= new ArrayList<>();
+                List<List<Principle>> principles_fulfilled = new ArrayList<>();
+                List<List<Principle>> principles_not_fulfilled = new ArrayList<>();
                 for (BigDecimal thresh : threshholds) {
-                        for (var vergleichsop : List.of(STRICT)) {
+                    for (var vergleichsop : List.of(STRICT)) {
 
-                            //Tests für DP/DDPC:\Users\Carola\OneDrive\Desktop\TweetyProject\org-tweetyproject-arg-rankings\src\main\java\org\tweetyproject\arg\rankings\rankingbasedextension\resources
-                            File[] apxFiles = new File("C:\\Users\\Carola\\OneDrive\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\resources")
-                                    .listFiles(new ApxFilenameFilter());
-
-
-                            var dg2 = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
-
-                            PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
-                                    new RankingBasedExtensionReasoner(akzeptanzbedingung,
-                                            rankingSemantics, vorg, thresh, vergleichsop, epsilon));
-                            evaluator.addAllPostulates(all_principles);
-
-                            List<Principle> principlesNotFulfilled= new ArrayList<>();
-                            var ev = evaluator.evaluate(1000, true);
-                            List<Principle> principlesFulfilled= new ArrayList<>();
+                        //Tests für DP/DDPC:\Users\Carola\OneDrive\Desktop\TweetyProject\org-tweetyproject-arg-rankings\src\main\java\org\tweetyproject\arg\rankings\rankingbasedextension\resources
+                        File[] apxFiles = new File("C:\\Users\\Carola\\OneDrive\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\resources")
+                                .listFiles(new ApxFilenameFilter());
 
 
-                            for (var princ : all_principles) {
+                        var dg2 = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
 
-                                if (ev.getNegativeInstances(princ).size()>0) {
-                                    principlesNotFulfilled.add(princ);
-                                } else {
-                                    principlesFulfilled.add(princ);
-                                }
+                        PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<>(dg,
+                                new ExactGeneralRankingBasedExtensionReasoner(akzeptanzbedingung,
+                                        rankingSemantics, vorg, thresh, vergleichsop, epsilon));
+                        evaluator.addAllPostulates(all_principles);
+
+                        List<Principle> principlesNotFulfilled = new ArrayList<>();
+                        var ev = evaluator.evaluate(1000, true);
+                        List<Principle> principlesFulfilled = new ArrayList<>();
+
+
+                        for (var princ : all_principles) {
+
+                            if (ev.getNegativeInstances(princ).size() > 0) {
+                                principlesNotFulfilled.add(princ);
+                            } else {
+                                principlesFulfilled.add(princ);
                             }
-                            System.out.println(ev.prettyPrint());
-
-                            principles_fulfilled.add(principlesFulfilled);
-                            principles_not_fulfilled.add(principlesNotFulfilled);
-
-
-
-
-                            //System.out.println(evaluator.evaluate(1000, true).prettyPrint());
                         }
-                        data.add(new ThresholdEvaluationObject(bezeichnung, principles_fulfilled, principles_not_fulfilled, threshholds));
+                        System.out.println(ev.prettyPrint());
+
+                        principles_fulfilled.add(principlesFulfilled);
+                        principles_not_fulfilled.add(principlesNotFulfilled);
 
 
+                        //System.out.println(evaluator.evaluate(1000, true).prettyPrint());
+                    }
                 }
+                data.add(new ThresholdEvaluationObject(bezeichnung, principles_fulfilled, principles_not_fulfilled, threshholds));
+
+
             }
         }
 
         new LineChartDrawing("Threshold_evaluation_for_" + rankingSemantics + "_using_absolute_argument_strength", "Value for threshold delta", "Number of Principles fulfilled", data);
-        new CsvWriter("Threshold_evaluation_for_" + rankingSemantics + "_using_absolute_argument strength", "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
+        new CsvWriter("Threshold_evaluation_for_" + rankingSemantics + "_using_absolute_argument strength", "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
+        new CsvWriter("Threshold_evaluation_for_" + rankingSemantics + "_using_absolute_argument strength_all", "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
+
         //csv: givenDataArray_whenConvertToCSV_thenOutputCreated("Threshold_evaluation_" + rankingSemantics + "_absolute_argument_strength", "Value for threshold delta", "Number of Principles fulfilled", data);
     }
 
 
-
-
-
-    private static double[] getThresholds(RankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
+    private static double[] getThresholds(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
 
 
         return switch (rankingSemantics) {
