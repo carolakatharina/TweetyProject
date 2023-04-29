@@ -25,6 +25,8 @@ import org.tweetyproject.arg.dung.reasoner.SimpleGroundedReasoner;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
+import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -42,6 +44,11 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     Vergleichsoperator vergleichsoperator;
 
     Akzeptanzbedingung akzeptanzbedingung;
+
+    private Map<Argument, BigDecimal> ranking;
+
+    private AbstractExactNumericalPartialOrderRankingReasoner reasoner;
+    private Collection<Extension<DungTheory>> finalAllExtensions;
 
 
     public enum Vorgehensweise {
@@ -91,6 +98,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
         this.threshhold = threshhold;
         this.vergleichsoperator=vergleichsoperator;
         this.epsilon=epsilon;
+        this.reasoner=getReasoner();
 
         System.out.println("Ranking Semantic: "+this.rankingSemantics);
         System.out.println("Vorgehen: "+this.vorgehensweise);
@@ -101,6 +109,22 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     }
 
 
+    public AbstractExactNumericalPartialOrderRankingReasoner getReasoner() {
+        return switch (this.rankingSemantics) {
+            case CATEGORIZER -> new ExactCategorizerRankingReasoner(epsilon);
+            case EULER -> new ExactEulerMaxBasedRankingReasoner(epsilon);
+            case ITS -> new ExactIterativeSchemaRankingReasoner(epsilon);
+            case COUNTING -> new ExactCountingRankingReasoner(BigDecimal.valueOf(0.9), epsilon);
+            case MAX -> new ExactMaxBasedRankingReasoner(epsilon);
+            case TRUST -> new ExactTrustBasedRankingReasoner(epsilon);
+            case NSA -> new ExactNsaReasoner(epsilon);
+            case ALPHABBS_0 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(1.));
+            case ALPHABBS_1 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(0.3));
+            case ALPHABBS_2 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(10.));
+            case MATT_TONI -> new ExactStrategyBasedRankingReasoner();
+        };
+    }
+
     @Override
     public Extension<DungTheory> getModel(DungTheory bbase) {
 
@@ -110,8 +134,8 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
     @Override
     public Collection<Extension<DungTheory>> getModels(DungTheory bbase) {
-        Map<Argument, BigDecimal> ranking;
         ranking = getRanking(bbase);
+        System.out.println(ranking);
 
         //TODO: Carola implement missing branches
         return switch (this.vorgehensweise) {
@@ -125,20 +149,8 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
     private Map<Argument, BigDecimal> getRanking(DungTheory bbase) {
 
+        return new HashMap<>(reasoner.getModel(bbase));
 
-        return new HashMap<>(switch (this.rankingSemantics) {
-            case CATEGORIZER -> new ExactCategorizerRankingReasoner(epsilon).getModel(bbase);
-            case EULER -> new ExactEulerMaxBasedRankingReasoner(epsilon).getModel(bbase);
-            case ITS -> new ExactIterativeSchemaRankingReasoner(epsilon).getModel(bbase);
-            case COUNTING -> new ExactCountingRankingReasoner(BigDecimal.valueOf(0.9), epsilon).getModel(bbase);
-            case MAX -> new ExactMaxBasedRankingReasoner(epsilon).getModel(bbase);
-            case TRUST -> new ExactTrustBasedRankingReasoner(epsilon).getModel(bbase);
-            case NSA -> new ExactNsaReasoner(epsilon).getModel(bbase);
-            case ALPHABBS_0 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(1.)).getModel(bbase);
-            case ALPHABBS_1 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(0.3)).getModel(bbase);
-            case ALPHABBS_2 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(10.)).getModel(bbase);
-            case MATT_TONI -> new ExactStrategyBasedRankingReasoner().getModel(bbase);
-        });
 
     }
 
@@ -186,16 +198,14 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_Simple(Map<Argument, BigDecimal> ranking,
                                                                                DungTheory bbase) {
-        Collection<Extension<DungTheory>> finalAllExtensions = new ArrayList<>();
+        finalAllExtensions = new ArrayList<>();
 
 
-        var maxExtension = getSetForSemantics(ranking, bbase, bbase);
+
+        finalAllExtensions.add(getSetForSemantics(ranking, bbase, bbase));
 
 
-        finalAllExtensions.add(maxExtension);
-
-
-        var grounded = new SimpleGroundedReasoner().getModel(bbase);
+        //var grounded = new SimpleGroundedReasoner().getModel(bbase);
         /*
         if (!grounded.equals(maxExtension) && !maxExtension.stream().anyMatch(arg -> arg.getName().startsWith("_aux"))) {
             System.out.println(bbase+"------- "+ranking+"------- "+maxExtension+"-------"+grounded);

@@ -12,9 +12,9 @@ public class ThresholdValuesForRBSemantics {
         var endValue = getRangeForSemantics(rankingSemantics)[1];
         var values = new ArrayList<BigDecimal>();
         BigDecimal lastValue = startValue;
-        //values.add(startValue);
+        values.add(startValue);
         do {
-            var newValue = lastValue.add(BigDecimal.valueOf(0.01));
+            var newValue = lastValue.add(BigDecimal.valueOf(0.001));
             values.add(newValue);
             lastValue = newValue;
         } while (lastValue.compareTo(endValue)<0);
@@ -25,7 +25,8 @@ public class ThresholdValuesForRBSemantics {
         return switch (semantics) {
             case CATEGORIZER -> new BigDecimal[]{ExactCategorizerRankingReasoner.getMinimalValue(), ExactCategorizerRankingReasoner.getMaximalValue()};
             case COUNTING -> new BigDecimal[]{ExactCountingRankingReasoner.getMinimalValue(), ExactCountingRankingReasoner.getMaximalValue()};
-            case MAX -> new BigDecimal[]{ExactMaxBasedRankingReasoner.getMinimalValue(), ExactMaxBasedRankingReasoner.getMaximalValue()};
+            case MAX -> new BigDecimal[] {BigDecimal.valueOf(0.61), BigDecimal.valueOf(0.62)};
+                    //new BigDecimal[]{ExactMaxBasedRankingReasoner.getMinimalValue(), ExactMaxBasedRankingReasoner.getMaximalValue()};
             case TRUST -> new BigDecimal[]{ExactTrustBasedRankingReasoner.getMinimalValue(), ExactTrustBasedRankingReasoner.getMaximalValue()};
             case NSA -> new BigDecimal[]{ExactNsaReasoner.getMinimalValue(), ExactNsaReasoner.getMaximalValue()};
             case ALPHABBS_0 -> null;

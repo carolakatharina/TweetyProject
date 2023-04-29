@@ -68,4 +68,25 @@ public class SemiQualifiedAdmissibilityPrinciple extends Principle{
         }
         return true;
     }
+
+    @Override
+    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
+        DungTheory theory = (DungTheory) kb;
+
+        Collection<Argument> union = new HashSet<>();
+        for (Extension<DungTheory> ext: exts) {
+            union.addAll(ext);
+        }
+
+        for (Extension<DungTheory> ext: exts) {
+            for (Argument a: ext) {
+                for (Argument b: theory.getAttackers(a)) {
+                    if (union.contains(b) && !theory.isAttacked(b, ext)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 }

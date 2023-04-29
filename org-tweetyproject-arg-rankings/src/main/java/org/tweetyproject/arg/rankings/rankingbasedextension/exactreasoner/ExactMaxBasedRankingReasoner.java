@@ -49,6 +49,12 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
     //wenn 0.01 erst ab 0.6190476190476191
     //wenn 0.1 erst ab 0.625;
 
+    private Matrix directAttackMatrix;
+    private BigDecimal[] valuations;
+    private BigDecimal[] valuationsOld;
+    private Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks;
+    private ExactNumericalPartialOrder<Argument, DungTheory> ranking;
+
     public ExactMaxBasedRankingReasoner(BigDecimal epsilon) {
         this.epsilon = epsilon;
     }
@@ -56,7 +62,7 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
 
     @Override
     public Collection<ExactNumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-        Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
+        ranks = new HashSet<>();
         ranks.add(this.getModel(bbase));
         return ranks;
     }
@@ -64,14 +70,13 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
     @Override
     public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
 
-
-        Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
+        System.out.println(kb.getNumberOfNodes());
+        directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
-        BigDecimal[] valuations = new BigDecimal[n];	 //Stores valuations of the current iteration
+        valuations = new BigDecimal[n];	 //Stores valuations of the current iteration
         for (int i=0; i<n; i++) {
             valuations[i]=BigDecimal.valueOf(1.);
         }
-        BigDecimal[] valuationsOld; //Stores valuations of the last iteration
 
 
         do {
@@ -84,7 +89,7 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
 
         //Use computed valuations as values for argument ranking
         //Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
-        ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<>();
+        ranking = new ExactNumericalPartialOrder<>();
         ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
         int i = 0;
         for (Argument a : kb)
@@ -113,13 +118,13 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
 
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL128);
+            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL32);
             if (attacker.compareTo(max)==1) {
                 max = attacker;
             }
         }
 
-        return BigDecimal.valueOf(1.).divide(BigDecimal.valueOf(1.).add(max), MathContext.DECIMAL128);
+        return BigDecimal.valueOf(1.).divide(BigDecimal.valueOf(1.).add(max), MathContext.DECIMAL32);
 
     }
 
@@ -134,10 +139,10 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
         var sum = BigDecimal.valueOf(0.0);
         for (int i = 0; i < v.length; i++) {
             var distance = v[i].subtract(vOld[i]);
-            sum = sum.add(distance.pow(2), MathContext.DECIMAL128);
+            sum = sum.add(distance.pow(2), MathContext.DECIMAL32);
         }
 
-        BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
+        BigDecimal result = sum.sqrt(MathContext.DECIMAL32);
         return result;
     }
 

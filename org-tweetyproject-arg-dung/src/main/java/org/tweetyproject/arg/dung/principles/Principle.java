@@ -20,7 +20,9 @@
 package org.tweetyproject.arg.dung.principles;
 
 import org.tweetyproject.arg.dung.reasoner.AbstractExtensionReasoner;
+import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
+import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.commons.postulates.Postulate;
 import org.tweetyproject.commons.postulates.PostulateEvaluatable;
 
@@ -85,10 +87,19 @@ public abstract class Principle implements Postulate<Argument> {
      */
     @Override
     public boolean isSatisfied(Collection<Argument> kb, PostulateEvaluatable<Argument> ev) {
-        if(ev instanceof AbstractExtensionReasoner)
-            return this.isSatisfied(kb, (AbstractExtensionReasoner) ev);
+        if(ev instanceof AbstractExtensionReasoner) {
+            DungTheory theory = (DungTheory) kb;
+            var exts = ((AbstractExtensionReasoner) ev).getModels(theory);
+            return this.isSatisfied(kb, exts, (AbstractExtensionReasoner) ev);
+        }
         throw new RuntimeException("PostulateEvaluatable of type AbstractExtensionReasoner expected.");
     }
+
+    /* (non-Javadoc)
+     * @see org.tweetyproject.commons.postulates.Postulate#isSatisfied(org.tweetyproject.commons.BeliefBase, org.tweetyproject.commons.postulates.PostulateEvaluatable)
+     */
+
+
 
     /* (non-Javadoc)
      * @see org.tweetyproject.commons.postulates.Postulate#isSatisfied(org.tweetyproject.commons.BeliefBase, org.tweetyproject.commons.postulates.PostulateEvaluatable)
@@ -101,4 +112,7 @@ public abstract class Principle implements Postulate<Argument> {
      * @return is Satisfied
      */
     public abstract boolean isSatisfied(Collection<Argument> kb, AbstractExtensionReasoner ev);
+
+
+    public abstract boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev);
 }

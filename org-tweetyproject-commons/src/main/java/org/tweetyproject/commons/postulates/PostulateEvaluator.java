@@ -157,4 +157,17 @@ public class PostulateEvaluator<T extends Formula, U extends BeliefSet<T,?>>{
 	public PostulateEvaluationReport<T> evaluate(long num) {
 		return this.evaluate(num, true);
 	}
+
+
+	public BeliefSetIterator<T, U> getIterator() {
+		return iterator;
+	}
+
+	public PostulateEvaluatable<T> getEv() {
+		return ev;
+	}
+
+	public List<Postulate<T>> getPostulates() {
+		return postulates;
+	}
 }

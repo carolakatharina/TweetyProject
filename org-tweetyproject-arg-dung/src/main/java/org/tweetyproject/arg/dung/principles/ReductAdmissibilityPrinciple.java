@@ -72,4 +72,29 @@ public class ReductAdmissibilityPrinciple extends Principle {
         }
         return true;
     }
+
+    @Override
+    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
+        DungTheory theory = (DungTheory) kb;
+
+        for (Extension<DungTheory> ext: exts) {
+            // get union of all extensions of the E-reduct
+            DungTheory reduct = theory.getReduct(ext);
+            Collection<Extension<DungTheory>> exts_reduct = ev.getModels(reduct);
+            Collection<Argument> union = new HashSet<>();
+            for (Extension<DungTheory> ext_r: exts_reduct) {
+                union.addAll(ext_r);
+            }
+            for (Argument a: ext) {
+                Collection<Argument> attackers = theory.getAttackers(a);
+                // if any attacker
+                for (Argument b: attackers) {
+                    if (union.contains(b)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 }

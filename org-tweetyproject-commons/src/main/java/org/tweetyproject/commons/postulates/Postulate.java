@@ -55,6 +55,8 @@ public interface Postulate<S extends Formula> {
 	 * @return true if the postulate is satisfied on the instance
 	 */
 	public boolean isSatisfied(Collection<S> kb, PostulateEvaluatable<S> ev);
+
+
 	
 	/**
 	 * The textual name of the postulate

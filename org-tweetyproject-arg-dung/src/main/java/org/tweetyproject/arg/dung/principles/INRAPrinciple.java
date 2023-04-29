@@ -75,4 +75,31 @@ public class INRAPrinciple extends Principle {
         }
         return true;
     }
+
+    @Override
+    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
+        DungTheory theory = (DungTheory) kb;
+
+        for (Argument a: theory) {
+            // check if an argument is attacked by all extensions
+            boolean attackedByAll = true;
+            for (Extension<DungTheory> ext: exts) {
+                if (!theory.isAttacked(a, ext)) {
+                    attackedByAll = false;
+                    break;
+                }
+            }
+            // if a is attacked by all extensions, check if it can be ignored without losing information
+            if (attackedByAll) {
+                Collection<Argument> argsWithoutA = new HashSet<>(theory);
+                argsWithoutA.remove(a);
+                DungTheory theoryWithoutA = (DungTheory) theory.getRestriction(argsWithoutA);
+                Collection<Extension<DungTheory>> extsWithoutA = ev.getModels(theoryWithoutA);
+                if (!exts.equals(extsWithoutA)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

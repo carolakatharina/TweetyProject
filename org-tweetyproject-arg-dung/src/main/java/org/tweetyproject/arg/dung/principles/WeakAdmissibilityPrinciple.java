@@ -34,6 +34,8 @@ import java.util.Collection;
  */
 public class WeakAdmissibilityPrinciple extends Principle {
 
+    WeaklyAdmissibleReasoner reasoner = new WeaklyAdmissibleReasoner();
+
     @Override
     public String getName() {
         return "Weak Admissibility";
@@ -57,6 +59,18 @@ public class WeakAdmissibilityPrinciple extends Principle {
         return true;
     }
 
+    @Override
+    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
+        DungTheory theory = (DungTheory) kb;
+
+        for (Extension<DungTheory> ext: exts) {
+            if (!isWeaklyAdmissible(theory, ext)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * checks whether ext is weakly admissible in bbase
@@ -65,7 +79,6 @@ public class WeakAdmissibilityPrinciple extends Principle {
      * @return "true" if ext is weakly admissible in bbase
      */
     protected boolean isWeaklyAdmissible(DungTheory bbase, Extension<DungTheory> ext) {
-        var reasoner = new WeaklyAdmissibleReasoner();
         return reasoner.getModels(bbase).contains(ext);
     }
 }

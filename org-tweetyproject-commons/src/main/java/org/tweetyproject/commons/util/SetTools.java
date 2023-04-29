@@ -38,25 +38,20 @@ public class SetTools<E> {
 	 * @param elements a set of elements of class "E".
 	 * @return all subsets of "elements".
 	 */
-	public Set<Set<E>> subsets(Collection<? extends E> elements){
-		Set<Set<E>> subsets = new HashSet<Set<E>>();		
-		if(elements.size() == 0){
-			subsets.add(new HashSet<E>());
-		}else{
-			E element = elements.iterator().next();
-			
-			Set<E> remainingElements = new HashSet<E>(elements);
-			remainingElements.remove(element);
-			Set<Set<E>> subsubsets = this.subsets(remainingElements);
-			for(Set<E> subsubset: subsubsets){
-				subsets.add(new HashSet<E>(subsubset));
-				subsubset.add(element);
-				subsets.add(new HashSet<E>(subsubset));				
-			}				
+	public Set<Set<E>> subsets(Collection<? extends E> elements) {
+		Set<Set<E>> subsets = new HashSet<>();
+		subsets.add(Collections.emptySet()); // add the empty subset
+		for (E element : elements) {
+			Set<Set<E>> newSubsets = new HashSet<>();
+			for (Set<E> subset : subsets) {
+				Set<E> newSubset = new HashSet<>(subset);
+				newSubset.add(element);
+				newSubsets.add(newSubset);
+			}
+			subsets.addAll(newSubsets);
 		}
 		return subsets;
-	}	
-	
+	}
 	/**
 	 * This method computes all subsets of the given set of elements
 	 * of class "E" with the given size.

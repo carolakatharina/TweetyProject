@@ -87,4 +87,42 @@ public class SCOOCPrinciple extends Principle {
         }
         return true;
     }
+
+    @Override
+    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
+        DungTheory theory = (DungTheory) kb;
+
+        Set<Stack<Argument>> cycles = DefaultGraph.getCyclesIncludingSelfLoops(theory);
+
+        for (Extension<DungTheory> ext: exts) {
+            for (Argument a: theory) {
+                // if a is in ext or ext attacks a, we can ignore it since the premise is violated
+                if (ext.contains(a) || theory.isAttacked(a, ext)) {
+                    continue;
+                }
+                for (Stack<Argument> cycle: cycles) {
+                    // if the number of arguments in the cycle is even, skip
+                    // the cycle contains the "starting" node twice, so even number of arguments means odd cycle
+                    if (cycle.size() % 2 != 0) {
+                        continue;
+                    }
+
+                    boolean outsideOddCycle = true;
+                    if (cycle.contains(a)) {
+                        outsideOddCycle = false;
+                    }
+                    for (Argument b: theory.getAttackers(a)) {
+                        if (cycle.contains(b)) {
+                            outsideOddCycle = false;
+                        }
+                    }
+                    if (outsideOddCycle) {
+                        return false;
+                    }
+                }
+
+            }
+        }
+        return true;
+    }
 }

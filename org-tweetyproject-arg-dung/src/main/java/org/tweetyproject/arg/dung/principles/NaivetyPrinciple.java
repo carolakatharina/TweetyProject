@@ -38,6 +38,8 @@ import java.util.Collection;
  */
 public class NaivetyPrinciple extends Principle {
 
+    AbstractExtensionReasoner reasoner = AbstractExtensionReasoner.getSimpleReasonerForSemantics(Semantics.NAIVE_SEMANTICS);
+
     @Override
     public String getName() {
         return "Naivety";
@@ -54,8 +56,23 @@ public class NaivetyPrinciple extends Principle {
         DungTheory theory = (DungTheory) kb;
         Collection<Extension<DungTheory>> exts = ev.getModels(theory);
 
-        Collection<Extension<DungTheory>> naiveExts = AbstractExtensionReasoner.getSimpleReasonerForSemantics(Semantics.NAIVE_SEMANTICS).getModels(theory);
+        Collection<Extension<DungTheory>> naiveExts = reasoner.getModels(theory);
 
+        return naiveExts.containsAll(exts);
+    }
+
+    @Override
+    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
+        DungTheory theory = (DungTheory) kb;
+
+        for(var ext:exts) {
+            if(theory.isConflictFree(ext)) {
+                return false;
+            }
+        }
+
+        Collection<Extension<DungTheory>> naiveExts = reasoner.getModels(theory);
+        //ueberpruefen ob so tatsächlich korrekt!
         return naiveExts.containsAll(exts);
     }
 }

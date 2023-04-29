@@ -35,4 +35,18 @@ public class DefencePrinciple extends Principle {
         }
         return true;
     }
+
+    @Override
+    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
+        DungTheory theory = (DungTheory) kb;
+
+        for (Extension<DungTheory> ext: exts) {
+            for (Argument argument : ext.getArgumentsOfStatus(ArgumentStatus.IN)) {
+                if (!theory.isAcceptable(argument, ext))
+                    return false;
+            }
+            return true;
+        }
+        return true;
+    }
 }
