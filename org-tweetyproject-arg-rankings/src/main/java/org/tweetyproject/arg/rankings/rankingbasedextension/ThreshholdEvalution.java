@@ -91,7 +91,7 @@ public class ThreshholdEvalution {
 
     public static void main(String[] args) throws IOException {
         all_principles = new HashSet<>();
-        all_principles.add(Principle.ADMISSIBILITY);
+        /*all_principles.add(Principle.ADMISSIBILITY);
         all_principles.add(Principle.STRONG_ADMISSIBILITY);
         all_principles.add(Principle.REDUCT_ADM);
         all_principles.add(Principle.SEMIQUAL_ADM);
@@ -103,13 +103,16 @@ public class ThreshholdEvalution {
         all_principles.add(Principle.REINSTATEMENT);
         all_principles.add(Principle.WEAK_REINSTATEMENT);
         all_principles.add(Principle.CF_REINSTATEMENT);
-        all_principles.add(Principle.DIRECTIONALITY);
         all_principles.add(Principle.INRA);
         all_principles.add(Principle.MODULARIZATION);
         all_principles.add(Principle.SCC_RECURSIVENESS);
 
+         */
+        all_principles.add(Principle.DIRECTIONALITY);
+
+
         List<String[]> pathsuffixe  =  new ArrayList<>();
-        pathsuffixe.add(new String[]{"all" });
+        pathsuffixe.add(new String[]{"all_withoutbigafs" });
                 //new String []{"\\iccma\\", "iccma19", "\\A"},
                 //new String []{"\\iccma\\", "iccma19", "\\B"},
                 //new String []{"\\iccma\\", "iccma19", "\\C"},
@@ -134,7 +137,7 @@ public class ThreshholdEvalution {
         List<ThresholdEvaluationObject> data=new ArrayList<>();
         for (var vorg : vorgehen) {
             for (var epsilon : epsilon_values) {
-                apxFiles= new File("C:\\Users\\Carola\\OneDrive\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all")
+                apxFiles= new File("C:\\Users\\Carola\\OneDrive\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all_withoutbigafs")
                         .listFiles(new ApxFilenameFilter());
                 var dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
                 String bezeichnung = rankingSemantics + " mit Epsilon=" + epsilon;

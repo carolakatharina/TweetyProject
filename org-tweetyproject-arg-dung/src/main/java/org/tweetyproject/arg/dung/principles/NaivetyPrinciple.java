@@ -65,11 +65,13 @@ public class NaivetyPrinciple extends Principle {
     public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
         DungTheory theory = (DungTheory) kb;
 
-        for(var ext:exts) {
-            if(theory.isConflictFree(ext)) {
+        /*for(var ext:exts) {
+            if(!theory.isConflictFree(ext)) {
                 return false;
             }
         }
+
+         */
 
         Collection<Extension<DungTheory>> naiveExts = reasoner.getModels(theory);
         //ueberpruefen ob so tatsächlich korrekt!
