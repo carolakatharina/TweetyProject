@@ -48,9 +48,9 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner
 public class ThreshholdEvalution {
     private static Collection<Principle> all_principles;
 
-    private static BigDecimal[] epsilon_values = {BigDecimal.valueOf(0.01) //,BigDecimal.valueOf(0.001), BigDecimal.valueOf(0.0001), BigDecimal.valueOf(0.00001)
+    private static BigDecimal[] epsilon_values = {BigDecimal.valueOf(0.01),BigDecimal.valueOf(0.001), BigDecimal.valueOf(0.0001), BigDecimal.valueOf(0.00001)
     };
-            //, BigDecimal.valueOf(0.000001), BigDecimal.valueOf(0.0000001), BigDecimal.valueOf(0.00000001)};
+
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
             List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
@@ -91,7 +91,7 @@ public class ThreshholdEvalution {
 
     public static void main(String[] args) throws IOException {
         all_principles = new HashSet<>();
-        /*all_principles.add(Principle.ADMISSIBILITY);
+        all_principles.add(Principle.ADMISSIBILITY);
         all_principles.add(Principle.STRONG_ADMISSIBILITY);
         all_principles.add(Principle.REDUCT_ADM);
         all_principles.add(Principle.SEMIQUAL_ADM);
@@ -107,7 +107,9 @@ public class ThreshholdEvalution {
         all_principles.add(Principle.MODULARIZATION);
         all_principles.add(Principle.SCC_RECURSIVENESS);
 
-         */
+
+
+
         all_principles.add(Principle.DIRECTIONALITY);
 
 
@@ -135,10 +137,11 @@ public class ThreshholdEvalution {
 
         File[] apxFiles;
         List<ThresholdEvaluationObject> data=new ArrayList<>();
+        apxFiles= new File("C:\\Users\\Carola\\OneDrive\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all_withoutbigafs")
+                .listFiles(new ApxFilenameFilter());
         for (var vorg : vorgehen) {
             for (var epsilon : epsilon_values) {
-                apxFiles= new File("C:\\Users\\Carola\\OneDrive\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all_withoutbigafs")
-                        .listFiles(new ApxFilenameFilter());
+
                 var dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
                 String bezeichnung = rankingSemantics + " mit Epsilon=" + epsilon;
                 List<List<Principle>> principles_fulfilled = new ArrayList<>();
