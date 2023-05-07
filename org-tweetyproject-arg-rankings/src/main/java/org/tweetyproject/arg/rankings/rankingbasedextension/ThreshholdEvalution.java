@@ -35,7 +35,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH;
-import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.MAX;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.*;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Vergleichsoperator.STRICT;
 
 /**
@@ -71,15 +71,17 @@ public class ThreshholdEvalution {
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
             MAX
-            //CATEGORIZER,
-            //NSA,
-            //TRUST,
+            /*CATEGORIZER,
+            NSA,
+            TRUST,
 
-            //COUNTING,
+            COUNTING,
+
+
 
             //MATT_TONI,
-            //EULER
-            //ITS
+            EULER,
+            ITS
 
 
 
@@ -137,7 +139,7 @@ public class ThreshholdEvalution {
 
         File[] apxFiles;
         List<ThresholdEvaluationObject> data=new ArrayList<>();
-        apxFiles= new File("C:\\Users\\Carola\\OneDrive\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all_withoutbigafs")
+        apxFiles= new File("C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all_withoutbigafs")
                 .listFiles(new ApxFilenameFilter());
         for (var vorg : vorgehen) {
             for (var epsilon : epsilon_values) {
@@ -189,20 +191,6 @@ public class ThreshholdEvalution {
     }
 
 
-    private static double[] getThresholds(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
-
-
-        return switch (rankingSemantics) {
-            case NSA, CATEGORIZER, EULER, ITS -> new double[]{0.5, (1. / ((1. + Math.sqrt(5.)) / 2.))};
-            case MAX -> new double[]{0.618034, (1. / ((1. + Math.sqrt(5.)) / 2.)), 0.6180339887498588, 0.61804697157};
-            case ALPHABBS_1 -> new double[]{10.};
-            case ALPHABBS_2 -> new double[]{2.};
-            case ALPHABBS_0 -> new double[]{1.};
-            case MATT_TONI, COUNTING, TRUST -> new double[]{0.5};
-
-
-        };
-
 
     }
 
@@ -234,4 +222,4 @@ public class ThreshholdEvalution {
          */
 
 
-}
+

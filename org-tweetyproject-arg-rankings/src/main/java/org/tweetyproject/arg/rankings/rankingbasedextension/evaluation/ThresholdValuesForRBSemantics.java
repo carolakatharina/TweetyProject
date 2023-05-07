@@ -14,7 +14,7 @@ public class ThresholdValuesForRBSemantics {
         BigDecimal lastValue = startValue;
         values.add(startValue);
         do {
-            var newValue = lastValue.add(BigDecimal.valueOf(0.01));
+            var newValue = lastValue.add(BigDecimal.valueOf(0.001));
             values.add(newValue);
             lastValue = newValue;
         } while (lastValue.compareTo(endValue)<0);

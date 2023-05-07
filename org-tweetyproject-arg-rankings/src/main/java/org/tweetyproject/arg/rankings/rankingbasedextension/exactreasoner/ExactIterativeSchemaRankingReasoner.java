@@ -89,7 +89,7 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractExactNumericalP
     }
 
     public static BigDecimal getMinimalValue() {
-        return BigDecimal.valueOf(0.);
+        return BigDecimal.valueOf(0.0001);
     }
 
     public static BigDecimal getMaximalValue() {
