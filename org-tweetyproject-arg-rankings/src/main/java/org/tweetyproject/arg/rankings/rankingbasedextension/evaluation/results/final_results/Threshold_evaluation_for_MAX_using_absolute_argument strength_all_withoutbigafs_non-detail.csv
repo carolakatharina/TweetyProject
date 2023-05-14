@@ -1,4 +1,4 @@
-Value for threshold delta;Mbs mit Epsilon=0.01;Mbs mit Epsilon=0.001;Mbs mit Epsilon=0.00010;Mbs mit Epsilon=0.000010
+Value for threshold delta;Mbs with Epsilon=0.01;Mbs with Epsilon=0.001;Mbs with Epsilon=0.00010;Mbs with Epsilon=0.000010
 0.5;6;6;6;6
 0.501;6;6;6;6
 0.502;6;6;6;6

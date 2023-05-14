@@ -70,18 +70,18 @@ public class ThreshholdEvalution {
     );
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX
-            /*CATEGORIZER,
-            NSA,
-            TRUST,
+            //MAX
+            //CATEGORIZER
+            //NSA,
 
-            COUNTING,
+
+            COUNTING
 
 
 
             //MATT_TONI,
-            EULER,
-            ITS
+            //EULER
+            //ITS
 
 
 
