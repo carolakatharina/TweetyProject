@@ -18,6 +18,7 @@
  */
 package org.tweetyproject.math.term;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import org.tweetyproject.math.*;
@@ -59,7 +60,6 @@ public class Sum extends AssociativeOperation{
 	public Constant value(){
 		Constant value = new IntegerConstant(0);
 		for(Term t: this.getTerms()){
-			///TODO: BigDecimal
 			Constant tValue = t.value();
 			if((value instanceof IntegerConstant) && (tValue instanceof IntegerConstant))
 				value = new IntegerConstant(((IntegerConstant)value).getValue() + ((IntegerConstant)tValue).getValue());
@@ -69,6 +69,16 @@ public class Sum extends AssociativeOperation{
 				value = new FloatConstant(((FloatConstant)value).getValue() + ((IntegerConstant)tValue).getValue());
 			else if((value instanceof FloatConstant) && (tValue instanceof FloatConstant))			
 				value = new FloatConstant(((FloatConstant)value).getValue() + ((FloatConstant)tValue).getValue());
+			else if((value instanceof IntegerConstant) && (tValue instanceof BigDecimalConstant))
+				value = new BigDecimalConstant((BigDecimal.valueOf(((IntegerConstant)value).getValue())).add(((BigDecimalConstant)tValue).getValue()));
+			else if((value instanceof BigDecimalConstant) && (tValue instanceof IntegerConstant))
+				value = new BigDecimalConstant((((BigDecimalConstant)value).getValue()).add(BigDecimal.valueOf(((((IntegerConstant)tValue).getValue())))));
+			else if((value instanceof FloatConstant) && (tValue instanceof BigDecimalConstant))
+				value = new BigDecimalConstant((BigDecimal.valueOf(((FloatConstant)value).getValue()).add((((BigDecimalConstant)tValue).getValue()))));
+			else if((value instanceof BigDecimalConstant) && (tValue instanceof FloatConstant))
+				value = new BigDecimalConstant((((BigDecimalConstant)value).getValue()).add(BigDecimal.valueOf(((((FloatConstant)tValue).getValue())))));
+			else if((value instanceof BigDecimalConstant) && (tValue instanceof BigDecimalConstant))
+				value = new BigDecimalConstant(((BigDecimalConstant)value).getValue().add(((BigDecimalConstant)tValue).getValue()));
 			else throw new IllegalArgumentException("Unrecognized atomic term type.");					
 		}
 		return value;

@@ -97,7 +97,7 @@ public abstract class Term {
 		Constant c = this.value();
 		if(c instanceof FloatConstant)
 			return ((FloatConstant)c).getValue();
-		if(c instanceof BigDecimalConstant)
+		else if(c instanceof BigDecimalConstant)
 			return ((BigDecimalConstant)c).getValue().doubleValue();
 		return ((IntegerConstant)c).getValue();
 	}
@@ -112,7 +112,7 @@ public abstract class Term {
 		Constant c = this.value();
 		if(c instanceof FloatConstant)
 			return BigDecimal.valueOf(((FloatConstant)c).getValue());
-		if(c instanceof BigDecimalConstant)
+		else if(c instanceof BigDecimalConstant)
 			return ((BigDecimalConstant)c).getValue();
 		return BigDecimal.valueOf(((IntegerConstant)c).getValue());
 	}

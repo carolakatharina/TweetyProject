@@ -21,34 +21,34 @@ package org.tweetyproject.math.term;
 import java.math.BigDecimal;
 
 /**
- * This class encapsulates a float as a term.
+ * This class encapsulates a bigdecimal as a term.
  * @author Matthias Thimm
  */
 public class BigDecimalConstant extends Constant {
 
 	/**
-	 * the actual float.
+	 * the actual bigdecimal.
 	 */
 	private BigDecimal f;
 
 	/**
-	 * Creates a new Float.
-	 * @param f a float.
+	 * Creates a new bigdecimal.
+	 * @param f a bigdecimal.
 	 */
-	public BigDecimalConstant(float f){
+	public BigDecimalConstant(Float f){
 		this.f = BigDecimal.valueOf(f);
 	}
 
 	/**
-	 * Creates a new Float.
-	 * @param f a float.
+	 * Creates a new bigdecimal.
+	 * @param f a bigdecimal.
 	 */
 	public BigDecimalConstant(BigDecimal f){
 		this.f = f;
 	}
 
 	/**
-	 * Creates a new Float.
+	 * Creates a new bigdecimal.
 	 * @param f a double.
 	 */
 	public BigDecimalConstant(double f){
@@ -56,9 +56,9 @@ public class BigDecimalConstant extends Constant {
 	}
 	
 	/**
-	 * Get the value of this float.
+	 * Get the value of this bigdecimal.
 	 *
-	 * @return the value of this float.
+	 * @return the value of this bigdecimal.
 	 */
 	public BigDecimal getValue(){
 		return this.f;

@@ -52,7 +52,7 @@ public class SetTools<E> {
 			subsets.add(subset);
 		}
 		return subsets;
-	}
+	}	
 	
 	/**
 	 * This method computes all subsets of the given set of elements

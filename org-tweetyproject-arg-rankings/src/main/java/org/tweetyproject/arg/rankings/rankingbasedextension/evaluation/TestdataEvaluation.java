@@ -13,9 +13,8 @@ import java.util.List;
 
 public class TestdataEvaluation {
     public static void main(String args[]) throws IOException {
-        File[] apxFiles = new File("C:\\Users\\Carola\\OneDrive\\Desktop\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all_withoutbigafs")
+        File[] apxFiles = new File("C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data_results")
                 .listFiles(new ApxFilenameFilter());
-
         List<DataEvaluationObject> theories=new ArrayList<>();
 
         var parser = new ApxParser();
@@ -31,7 +30,7 @@ public class TestdataEvaluation {
             }
 
         }
-        new CsvTestdataEvaluationWriter("all_withoutbigafs", theories).createCsv();
+        new CsvTestdataEvaluationWriter("resultset", theories).createCsv();
 
     }
 }

@@ -95,6 +95,16 @@ public abstract class Principle implements Postulate<Argument> {
         throw new RuntimeException("PostulateEvaluatable of type AbstractExtensionReasoner expected.");
     }
 
+
+
+    public Collection<Extension<DungTheory>> getExtensions(Collection<Argument> kb, PostulateEvaluatable<Argument> ev) {
+        if(ev instanceof AbstractExtensionReasoner) {
+            DungTheory theory = (DungTheory) kb;
+            return ((AbstractExtensionReasoner) ev).getModels(theory);
+        }
+        throw new RuntimeException("PostulateEvaluatable of type AbstractExtensionReasoner expected.");
+    }
+
     /* (non-Javadoc)
      * @see org.tweetyproject.commons.postulates.Postulate#isSatisfied(org.tweetyproject.commons.BeliefBase, org.tweetyproject.commons.postulates.PostulateEvaluatable)
      */

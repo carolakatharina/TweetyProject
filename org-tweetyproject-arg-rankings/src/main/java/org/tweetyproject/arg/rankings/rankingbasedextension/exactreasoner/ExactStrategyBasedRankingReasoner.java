@@ -21,7 +21,6 @@ package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.commons.util.SetTools;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.equation.Equation;
@@ -31,7 +30,6 @@ import org.tweetyproject.math.opt.solver.ApacheCommonsSimplex;
 import org.tweetyproject.math.term.*;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.*;
 
 /**
@@ -63,7 +61,7 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 	}
 
 	public static BigDecimal getMinimalValue() {
-		return BigDecimal.valueOf(0.);
+		return BigDecimal.valueOf(0.001);
 	}
 
 	public static BigDecimal getMaximalValue() {
@@ -83,7 +81,7 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 		 * The value of the game is the solution to a linear optimization problem
 		*/
 		OptimizationProblem problem = new OptimizationProblem(OptimizationProblem.MAXIMIZE);
-		Variable targetVar = new BigDecimalVariable("PMAX");
+		Variable targetVar = new FloatVariable("PMAX");
 		problem.setTargetFunction(targetVar);
 		
 		//Generate strategies of the proponent and opponent of the zero-sum strategic game
@@ -100,25 +98,25 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 		 * See [Matt, Toni. A game-theoretic measure of argument strength for abstract argumentation.
 		 * JELIA 2008] for details
 		 */
-		List<BigDecimalVariable> probabilityVariables = new ArrayList<BigDecimalVariable>();
+		List<FloatVariable> probabilityVariables = new ArrayList<>();
 		for (int count = 1; count <= proponentStrategies.size(); count++) { 
-			BigDecimalVariable pI = new BigDecimalVariable("P" + count);
+			FloatVariable pI = new FloatVariable("P" + count);
 			probabilityVariables.add(pI);
-			problem.add(new Inequation(pI, new BigDecimalConstant(0.0), Inequation.GREATER_EQUAL));
+			problem.add(new Inequation(pI, new FloatConstant(0.0), Inequation.GREATER_EQUAL));
 		}
-		problem.add(new Inequation(targetVar, new BigDecimalConstant(0.0), Inequation.GREATER_EQUAL));
+		problem.add(new Inequation(targetVar, new FloatConstant(0.0), Inequation.GREATER_EQUAL));
 		
 		for (Collection<Argument> j : opponentStrategies) {
 			List<Term> products = new ArrayList<Term>(); 
 			int pi = 0;
 			for (Collection<Argument> i : proponentStrategies) {
-				BigDecimalConstant rewardsIj = new BigDecimalConstant(computeRewards(i, j, kb));
+				FloatConstant rewardsIj = new FloatConstant(computeRewards(i, j, kb));
 				products.add(new Product(rewardsIj, probabilityVariables.get(pi++)));
 			}
-			problem.add( new Inequation(new Sum(products).minus(targetVar), new BigDecimalConstant(0.0),
+			problem.add( new Inequation(new Sum(products).minus(targetVar), new FloatConstant(0.0),
 					Inequation.GREATER_EQUAL));
 		}
-		problem.add(new Equation(new Sum(probabilityVariables), new BigDecimalConstant(1.0)));
+		problem.add(new Equation(new Sum(probabilityVariables), new FloatConstant(1.0)));
 
 		/*
 		 * Solve problem with simplex algorithm
@@ -130,6 +128,7 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 			return BigDecimal.valueOf(solution.get(targetVar).doubleValue());
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println(problem);
 		}
 		return BigDecimal.valueOf(-1.0);
 	}
@@ -142,12 +141,12 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 	 * @param kb knowledge base containing the relations between A and B
 	 * @return rewards of A
 	 */
-	public BigDecimal computeRewards(Collection<Argument> A, Collection<Argument> B, DungTheory kb) {
+	public double computeRewards(Collection<Argument> A, Collection<Argument> B, DungTheory kb) {
 		if (kb.isAttacked(new Extension<DungTheory>(A), new Extension<DungTheory>(A)))
-			return BigDecimal.valueOf(0.0);
+			return 0.0;
 		else if (kb.isAttacked(new Extension<DungTheory>(A), new Extension<DungTheory>(B)))
 			return computeDegreeOfAcceptability(A, B, kb);
-		return BigDecimal.valueOf(1.0);
+		return 1.0;
 	}
 
 	/**
@@ -158,7 +157,7 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 	 * @param kb knowledge base containing the relations between A and B
 	 * @return degree of acceptability of A wrt. B.
 	 */
-	public BigDecimal computeDegreeOfAcceptability(Collection<Argument> A, Collection<Argument> B, DungTheory kb) {
+	public double computeDegreeOfAcceptability(Collection<Argument> A, Collection<Argument> B, DungTheory kb) {
 		int attacksFromAtoB = 0;
 		for (Argument b : B) {
 			Set<Argument> attacks = kb.getAttackers(b);
@@ -172,10 +171,10 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 			attacksFromBtoA += attacks.size();
 		}
 
-		BigDecimal result = BigDecimal.valueOf(1.0);
-		result = result.add(BigDecimal.valueOf(1.0).subtract(BigDecimal.valueOf(1.0).divide(BigDecimal.valueOf(attacksFromAtoB + 1.0), MathContext.DECIMAL128)));
-		result = result.subtract(BigDecimal.valueOf(1.0).subtract (BigDecimal.valueOf(1.0).divide(BigDecimal.valueOf(attacksFromBtoA + 1.0), MathContext.DECIMAL128)));
-		return BigDecimal.valueOf(0.5).multiply(result, MathContext.DECIMAL128);
+		double result = 1.0;
+		result += 1.0 - (1.0 / (attacksFromAtoB + 1.0));
+		result -= 1.0 - (1.0 / (attacksFromBtoA + 1.0));
+		return 0.5 * result;
 	}
 	
 	/**natively installed*/

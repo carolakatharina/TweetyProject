@@ -100,7 +100,7 @@ public class ExactCategorizerRankingReasoner extends AbstractExactNumericalParti
 	}
 
 	public static BigDecimal getMinimalValue() {
-		return BigDecimal.valueOf(0.);
+		return BigDecimal.valueOf(0.0);
 	}
 
 	public static BigDecimal getMaximalValue() {

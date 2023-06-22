@@ -14,10 +14,10 @@ public class ThresholdValuesForRBSemantics {
         BigDecimal lastValue = startValue;
         values.add(startValue);
         do {
-            var newValue = lastValue.add(BigDecimal.valueOf(0.001));
+            var newValue = lastValue.add(BigDecimal.valueOf(0.00001));
             values.add(newValue);
             lastValue = newValue;
-        } while (lastValue.compareTo(endValue)<0);
+        } while (lastValue.compareTo(endValue) < 0);
         return values;
     }
 
@@ -36,4 +36,37 @@ public class ThresholdValuesForRBSemantics {
             case MATT_TONI -> new BigDecimal[]{ExactStrategyBasedRankingReasoner.getMinimalValue(), ExactStrategyBasedRankingReasoner.getMaximalValue()};
         };
     }
+
+    public static BigDecimal[] getAbsThresholdForSemantics(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics) {
+        return switch (semantics) {
+            case CATEGORIZER ->
+                    new BigDecimal[]{BigDecimal.valueOf(1.), //am meisten principles
+                            BigDecimal.valueOf(0.9134), //admissibility
+                            BigDecimal.valueOf(0.6181)}; //conflict-freeness
+            case COUNTING ->
+                    new BigDecimal[]{BigDecimal.valueOf(1.), //am meisten principles
+                            BigDecimal.valueOf(0.9939), //admissibility
+                            BigDecimal.valueOf(0.9638)}; //conflict-freeness
+
+            case MAX ->
+                    new BigDecimal[]{
+                            BigDecimal.valueOf(0.6181)}; //conflict-freeness+admissibility+mostprinciples
+
+            case TRUST ->  new BigDecimal[]{
+                    BigDecimal.valueOf(0.6680)}; //conflict-freeness + admissibility+am meisten
+            case NSA ->  new BigDecimal[]{BigDecimal.valueOf(1.), //am meisten principles
+                    BigDecimal.valueOf(0.9134), //admissibility
+                    BigDecimal.valueOf(0.6181)}; //conflict-freeness
+            case ALPHABBS_0 -> null;
+            case ALPHABBS_1 -> null;
+            case ALPHABBS_2 -> null;
+            case EULER ->  new BigDecimal[]{
+                    BigDecimal.valueOf(0.5672)}; //conflict-freeness+admissibility+mostprinciples
+            case ITS ->
+                    new BigDecimal[]{BigDecimal.valueOf(0.6341) };//conflict-freeness+admissibility+mostprinciples
+            case MATT_TONI ->
+                    null;
+        };
+    }
+
 }

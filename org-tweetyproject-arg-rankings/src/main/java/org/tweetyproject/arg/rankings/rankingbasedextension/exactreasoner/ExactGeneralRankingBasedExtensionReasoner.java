@@ -26,6 +26,7 @@ import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
+import org.tweetyproject.arg.rankings.reasoner.StrategyBasedRankingReasoner;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 
 import java.math.BigDecimal;
@@ -456,14 +457,14 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     }
 
 
-    private boolean useThresholdAtt(BigDecimal value, BigDecimal thresh) {
+    private boolean useThresholdAtt(BigDecimal att, BigDecimal thresh) {
 
 
         return switch (this.rankingSemantics) {
             case NSA, CATEGORIZER, TRUST, MAX, MATT_TONI, COUNTING, EULER, ITS ->
-                    vergleichsoperator == Vergleichsoperator.STRICT ? value.compareTo(thresh) <= 0 : value.compareTo(thresh)<0;
-            case ALPHABBS_1, ALPHABBS_2,  ALPHABBS_0 -> vergleichsoperator == Vergleichsoperator.STRICT? value.compareTo(thresh) >= 0
-            :value.compareTo(thresh)>0;
+                    vergleichsoperator == Vergleichsoperator.STRICT ? att.compareTo(thresh) < 0 : att.compareTo(thresh)<=0;
+            case ALPHABBS_1, ALPHABBS_2,  ALPHABBS_0 -> vergleichsoperator == Vergleichsoperator.STRICT? att.compareTo(thresh) >= 0
+            :att.compareTo(thresh)>0;
 
         };
 

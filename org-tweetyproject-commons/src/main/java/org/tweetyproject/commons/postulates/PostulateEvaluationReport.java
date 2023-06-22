@@ -116,6 +116,17 @@ public class PostulateEvaluationReport<S extends Formula> {
 			return this.negativeInstances.get(postulate);
 		return new HashSet<Collection<S>>();
 	}
+
+	/**
+	 * Returns the negative instances for the given postulate
+	 * @param postulate some postulate
+	 * @return a collection of negative instances.
+	 */
+	public Collection<Collection<S>> getPositiveInstances(Postulate<S> postulate){
+		if(this.positiveInstances.containsKey(postulate))
+			return this.positiveInstances.get(postulate);
+		return new HashSet<Collection<S>>();
+	}
 	/*
 	 * (non-Javadoc)
 	 * 

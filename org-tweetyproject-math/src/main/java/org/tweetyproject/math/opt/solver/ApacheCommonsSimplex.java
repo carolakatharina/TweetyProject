@@ -18,7 +18,6 @@
  */
 package org.tweetyproject.math.opt.solver;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,7 +29,14 @@ import org.tweetyproject.math.opt.problem.GeneralConstraintSatisfactionProblem;
 import org.tweetyproject.math.opt.problem.ConstraintSatisfactionProblem;
 import org.tweetyproject.math.opt.problem.OptimizationProblem;
 import org.tweetyproject.math.opt.ProblemInconsistentException;
-import org.tweetyproject.math.term.*;
+import org.tweetyproject.math.term.Constant;
+import org.tweetyproject.math.term.FloatConstant;
+import org.tweetyproject.math.term.IntegerConstant;
+import org.tweetyproject.math.term.OptProbElement;
+import org.tweetyproject.math.term.Product;
+import org.tweetyproject.math.term.Sum;
+import org.tweetyproject.math.term.Term;
+import org.tweetyproject.math.term.Variable;
 
 import org.apache.commons.math.optimization.GoalType;
 import org.apache.commons.math.optimization.OptimizationException;
@@ -101,20 +107,12 @@ public class ApacheCommonsSimplex extends Solver {
 					Constant c = (Constant)p.getTerms().get(0);
 					if(c instanceof FloatConstant)
 						constTerm += ((FloatConstant)c).getValue();
-					if(c instanceof BigDecimalConstant)
-						constTerm += ((BigDecimalConstant)c).getValue().doubleValue();
 					else constTerm += ((IntegerConstant)c).getValue();
 				}else{
 					// p consists of a variable and a constant
 					Variable v = (Variable) ((p.getTerms().get(0) instanceof Variable)?(p.getTerms().get(0)):(p.getTerms().get(1)));
 					Constant c = (Constant) ((p.getTerms().get(0) instanceof Constant)?(p.getTerms().get(0)):(p.getTerms().get(1)));
-					double coefficient = 0.;
-					if (c instanceof FloatConstant)
-						coefficient= (((FloatConstant)c).getValue());
-					if (c instanceof BigDecimalConstant)
-						coefficient=(((BigDecimalConstant)c).getValue()).doubleValue();
-					else
-						coefficient=(((IntegerConstant)c).getValue());
+					double coefficient = (c instanceof FloatConstant)?(((FloatConstant)c).getValue()):(((IntegerConstant)c).getValue());
 					coefficientsTarget[origVars2Idx.get(v)] += coefficient;
 				}
 			}
@@ -142,13 +140,7 @@ public class ApacheCommonsSimplex extends Solver {
 					// p consists of a variable and a constant
 					Variable v = (Variable) ((p.getTerms().get(0) instanceof Variable)?(p.getTerms().get(0)):(p.getTerms().get(1)));
 					Constant c = (Constant) ((p.getTerms().get(0) instanceof Constant)?(p.getTerms().get(0)):(p.getTerms().get(1)));
-					double coefficient=0.;
-					if (c instanceof FloatConstant)
-						coefficient= (((FloatConstant)c).getValue());
-					else if (c instanceof BigDecimalConstant)
-						coefficient=(((BigDecimalConstant)c).getValue()).doubleValue();
-					else if (c instanceof IntegerConstant)
-						coefficient=(((IntegerConstant)c).getValue());
+					double coefficient = (c instanceof FloatConstant)?(((FloatConstant)c).getValue()):(((IntegerConstant)c).getValue());
 					coefficientsConstraint[origVars2Idx.get(v)] += coefficient;
 				}
 			}

@@ -77,11 +77,11 @@ public class Product extends AssociativeOperation{
 			else if((value instanceof BigDecimalConstant) && (tValue instanceof FloatConstant))
 				value = new BigDecimalConstant(((BigDecimalConstant)value).getValue().multiply(BigDecimal.valueOf(((FloatConstant)tValue).getValue()), MathContext.DECIMAL128));
 			else if((value instanceof FloatConstant) && (tValue instanceof BigDecimalConstant))
-				value = new FloatConstant((BigDecimal.valueOf(((FloatConstant)value).getValue())).multiply(((BigDecimalConstant)tValue).getValue(), MathContext.DECIMAL128));
+				value = new BigDecimalConstant((BigDecimal.valueOf(((FloatConstant)value).getValue())).multiply(((BigDecimalConstant)tValue).getValue(), MathContext.DECIMAL128));
 			else if((value instanceof BigDecimalConstant) && (tValue instanceof IntegerConstant))
 				value = new BigDecimalConstant(((BigDecimalConstant)value).getValue().multiply(BigDecimal.valueOf(((IntegerConstant)tValue).getValue()), MathContext.DECIMAL128));
 			else if((value instanceof IntegerConstant) && (tValue instanceof BigDecimalConstant))
-				value = new IntegerConstant((BigDecimal.valueOf(((IntegerConstant)value).getValue()).multiply(((BigDecimalConstant)tValue).getValue()).intValueExact()));
+				value = new BigDecimalConstant((BigDecimal.valueOf(((IntegerConstant)value).getValue()).multiply(((BigDecimalConstant)tValue).getValue()).intValueExact()));
 			else throw new IllegalArgumentException("Unrecognized atomic term type.");					
 		}
 		return value;

@@ -83,7 +83,7 @@ public class Inequation extends Statement{
 						return true;
 				}
 				if(this.getRightTerm() instanceof BigDecimalConstant){
-					if(((BigDecimalConstant)this.getRightTerm()).getValue() == BigDecimal.valueOf(0))
+					if(((BigDecimalConstant)this.getRightTerm()).getValue().doubleValue() == 0)
 						return true;
 				}
 				if(this.getRightTerm() instanceof IntegerConstant){
