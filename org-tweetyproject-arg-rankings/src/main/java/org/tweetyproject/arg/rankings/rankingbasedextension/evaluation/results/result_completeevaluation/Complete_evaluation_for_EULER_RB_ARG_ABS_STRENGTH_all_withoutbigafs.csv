@@ -1,0 +1,2 @@
+Bezeichnung,Value for threshold delta,Number of Principles fulfilled,principles_fulfilled,principles_not_fulfilled,node_ext_percentage
+EULER mit Epsilon=0.00010,0.5672,12,{Strong Admissibility / Reinstatement / Admissibility / Semi-Qualified Admissibility / Conflict-Free / Defence / CF-Reinstatement / Weak Reinstatement / Modularization / I-Maximality / Irrelevance of Necessarily Rejected Arguments (INRA) / Reduct Admissibility},{SCC Decomposability / Directionality / Naivety},[0.2465]

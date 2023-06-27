@@ -1,0 +1,2 @@
+Bezeichnung,Value for threshold delta,Number of Principles fulfilled,principles_fulfilled,principles_not_fulfilled,node_ext_percentage
+MATT_TONI mit Epsilon=0.00010,0.251,7,{Reinstatement / Semi-Qualified Admissibility / CF-Reinstatement / Weak Reinstatement / Modularization / I-Maximality / Reduct Admissibility},{Strong Admissibility / Admissibility / SCC Decomposability / Directionality / Conflict-Free / Defence / Naivety / Irrelevance of Necessarily Rejected Arguments (INRA)},[0.6288333333333334]

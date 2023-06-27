@@ -10,11 +10,11 @@ public class ThresholdEvaluationObject {
     private final String bezeichnung;
     private final List<List<Principle>> prinziplesFulfilled;
 
-    public List<List<List<Integer>>> getNumberOfNodes() {
-        return numberNodes;
+    public List<Double> getNumberOfNodes() {
+        return percNodesInExtension;
     }
 
-    private final List<List<List<Integer>>> numberNodes;
+    private final List<Double> percNodesInExtension;
 
     public List<List<Principle>> getPrinziplesNotFulfilled() {
         return prinziplesNotFulfilled;
@@ -44,18 +44,18 @@ public class ThresholdEvaluationObject {
         this.prinziplesFulfilled = prinziplesFulfilled;
         this.prinziplesNotFulfilled = prinziplesNotFulfilled;
         this.thresholds = thresholds;
-        this.numberNodes= new ArrayList<>();
+        this.percNodesInExtension = new ArrayList<>();
     }
 
     public ThresholdEvaluationObject(String bezeichnung, List<List<Principle>>
             prinziplesFulfilled, List<List<Principle>> prinziplesNotFulfilled, List<BigDecimal> thresholds,
-                                    List<List<List<Integer>>> numberOfNodes) {
+                                    List<Double> percOfNodes) {
 
         this.bezeichnung = bezeichnung;
         this.prinziplesFulfilled = prinziplesFulfilled;
         this.prinziplesNotFulfilled = prinziplesNotFulfilled;
         this.thresholds = thresholds;
-        this.numberNodes = numberOfNodes;
+        this.percNodesInExtension = percOfNodes;
     }
 
 

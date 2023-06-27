@@ -1,0 +1,2 @@
+Bezeichnung,Value for threshold delta,Number of Principles fulfilled,principles_fulfilled,principles_not_fulfilled,node_ext_percentage
+NSA mit Epsilon=0.00010,0.726,4,{Conflict-Free / Naivety / CF-Reinstatement / I-Maximality},{Strong Admissibility / Reinstatement / Admissibility / SCC Decomposability / Directionality / Semi-Qualified Admissibility / Defence / Weak Reinstatement / Modularization / Irrelevance of Necessarily Rejected Arguments (INRA) / Reduct Admissibility},[0.4145]

@@ -22,7 +22,6 @@ import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
 import org.tweetyproject.arg.dung.parser.ApxParser;
 import org.tweetyproject.arg.dung.principles.ExtensionbasedPrincipleEvaluator;
 import org.tweetyproject.arg.dung.principles.Principle;
-import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.rankingbasedextension.evaluation.CsvThreshholdEvaluationWriter;
 import org.tweetyproject.arg.rankings.rankingbasedextension.evaluation.LineChartDrawing;
@@ -34,8 +33,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ATT_ABS_STRENGTH;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.*;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Vergleichsoperator.STRICT;
@@ -50,43 +49,43 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner
 public class ThreshholdEvalution {
     private static Collection<Principle> all_principles;
 
-    private static BigDecimal[] epsilon_values = {//BigDecimal.valueOf(0.01),BigDecimal.valueOf(0.001), //BigDecimal.valueOf(0.00001),
+    private static BigDecimal[] epsilon_values = {//BigDecimal.valueOf(0.01),BigDecimal.valueOf(0.001), BigDecimal.valueOf(0.00001),
             BigDecimal.valueOf(0.0001)
     };
 
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
-            List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
-                    /*
+            List.of(/*ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
+
                     RankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF,
                     RankingBasedExtensionReasoner.Vorgehensweise.INC_BUDGET,
                      */
-                    //RankingBasedExtensionReasoner.Vorgehensweise.MAX_CF,
-                    //RankingBasedExtensionReasoner.Vorgehensweise.CF
+                    //ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.MAX_CF
+                    ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.CF
+
+                    //ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF
             ));
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = Arrays.asList(
 
             //RankingBasedExtensionReasoner.Akzeptanzbedingung.values()
-            //RB_ARG_ABS_STRENGTH
-            RB_ATT_ABS_STRENGTH
+            RB_ARG_ABS_STRENGTH
+            //RB_ATT_ABS_STRENGTH
     );
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            //MAX
-            //TRUST,
-            //COUNTING,
-            ITS
-            //CATEGORIZER
-            //NSA
-            /*
+            MAX,
+            TRUST,
+            COUNTING,
+            MATT_TONI,
+            CATEGORIZER,
+            NSA,
             ITS,
             EULER,
-            MAX
 
-             */
 
-            //MATT_TONI,
+
+            MATT_TONI
             /* EULER,
             TRUST,
             ITS
@@ -149,7 +148,7 @@ public class ThreshholdEvalution {
         File[] apxFiles;
         List<ThresholdEvaluationObject> data = new ArrayList<>();
         apxFiles = new File(
-                "C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all_withoutbigafs")
+                "C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data_results")
                 .listFiles(new ApxFilenameFilter());
         for (var vorg : vorgehen) {
             for (var epsilon : epsilon_values) {
@@ -158,17 +157,21 @@ public class ThreshholdEvalution {
                 String bezeichnung = rankingSemantics + " mit Epsilon=" + epsilon;
                 List<List<Principle>> principles_fulfilled = new ArrayList<>();
                 List<List<Principle>> principles_not_fulfilled = new ArrayList<>();
-                List<List<List<Integer>>> number_of_nodes = new ArrayList<>();
+                List<Double> percentage_of_ext_nodes = new ArrayList<>();
+                ExactGeneralRankingBasedExtensionReasoner reasoner;
+
+
                 for (BigDecimal thresh : threshholds) {
                     for (var vergleichsop : List.of(STRICT)) {
 
-                        ExactGeneralRankingBasedExtensionReasoner reasoner = new ExactGeneralRankingBasedExtensionReasoner(akzeptanzbedingung,
+                        reasoner = new ExactGeneralRankingBasedExtensionReasoner(akzeptanzbedingung,
                                 rankingSemantics, vorg, thresh, vergleichsop, epsilon);
                         ExtensionbasedPrincipleEvaluator evaluator = new ExtensionbasedPrincipleEvaluator(dg,
                                 reasoner, all_principles);
 
                         List<Principle> principlesNotFulfilled = new ArrayList<>();
-                        List<List<Integer>> numberOfNodes = new ArrayList<>();
+                        List<Double> nodePercentageExt = new ArrayList<>();
+
                         var ev = evaluator.evaluate(apxFiles.length, true);
                         List<Principle> principlesFulfilled = new ArrayList<>();
 
@@ -179,40 +182,27 @@ public class ThreshholdEvalution {
                                 principlesNotFulfilled.add(princ);
                             } else {
                                 principlesFulfilled.add(princ);
-                                final AtomicInteger all_nodes = new AtomicInteger(0);
-                                final AtomicInteger ext_nodes = new AtomicInteger(0);
 
-                                ev.getPositiveInstances(princ)
-                                       .stream().forEach(
-                                                inst -> {
-                                                    all_nodes.set(all_nodes.get()+((DungTheory) inst).getNumberOfNodes());
-                                                    ext_nodes.set(ext_nodes.get()+(reasoner.getModels((DungTheory) inst).stream()
-                                                            .findFirst().get().size()));
-                                                }
-
-                                       );
-                                numberOfNodes.add(List.of(all_nodes.get(), ext_nodes.get()));
                             }
                         }
                         System.out.println(ev.prettyPrint());
 
                         principles_fulfilled.add(principlesFulfilled);
                         principles_not_fulfilled.add(principlesNotFulfilled);
-                        number_of_nodes.add(numberOfNodes);
+                        percentage_of_ext_nodes.add(ev.getPercentagesNodes().stream().mapToDouble(perc -> (double) perc).sum() / Double.valueOf(ev.getPercentagesNodes().size()));
 
 
                         //System.out.println(evaluator.evaluate(1000, true).prettyPrint());
                     }
                 }
-                data.add(new ThresholdEvaluationObject(bezeichnung, principles_fulfilled, principles_not_fulfilled, threshholds, number_of_nodes));
-
+                data.add(new ThresholdEvaluationObject(bezeichnung, principles_fulfilled, principles_not_fulfilled, threshholds, percentage_of_ext_nodes));
 
             }
         }
 
-        new LineChartDrawing("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "detailed5", "Value for threshold delta", "Number of Principles fulfilled", data);
-        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "detailed_numberextension", "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
-        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "detailed_numberextension", "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
+        new LineChartDrawing("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_cfmax", "Value for threshold delta", "Number of Principles fulfilled", data);
+        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_cfmax", "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
+        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_cfmax", "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
 
         //csv: givenDataArray_whenConvertToCSV_thenOutputCreated("Threshold_evaluation_" + rankingSemantics + "_absolute_argument_strength", "Value for threshold delta", "Number of Principles fulfilled", data);
     }

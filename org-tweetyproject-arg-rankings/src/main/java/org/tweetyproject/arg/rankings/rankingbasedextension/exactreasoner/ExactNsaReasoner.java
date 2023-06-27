@@ -34,17 +34,23 @@ import java.util.HashSet;
  * originally proposed by [Besnard, Hunter. A logic-based theory of deductive arguments. 2001]
  * for deductive logics. It uses the Fixed-point algorithm of 
  * [Pu, Zhang, Luo, Luo. Argument Ranking with Categoriser Function. KSEM 2014]
- * which allows for cycles in argumentation graphs. TODO: EXception for self-attacking Arguments
+ * which allows for cycles in argumentation graphs.
  * 
  * @see org.tweetyproject.arg.deductive.categorizer.HCategorizer
  * 
- * @author Carola Bauer
+ * @author Anna Gessler
  */
 public class ExactNsaReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
-	private final BigDecimal epsilon;
+	private BigDecimal epsilon;
 
-
+	/**
+	 * Create a new CountingRankingReasoner with default
+	 * parameters.
+	 */
+	public ExactNsaReasoner() {
+		this.epsilon = BigDecimal.valueOf(0.001);
+	}
 
 	/**
 	 * Create a new CategorizerRankingReasoner with the given
@@ -70,10 +76,12 @@ public class ExactNsaReasoner extends AbstractExactNumericalPartialOrderRankingR
 		int n = directAttackMatrix.getXDimension();
 		BigDecimal valuations[] = new BigDecimal[n];	 //Stores valuations of the current iteration
 		BigDecimal valuationsOld[] = new BigDecimal[n]; //Stores valuations of the last iteration
+
 		for (int i=0; i<n; i++) {
 			valuations[i]= BigDecimal.valueOf(1.);
 		}
-		//Keep computing valuations until the values stop changing much or converge 
+
+		//Keep computing valuations until the values stop changing much or converge
 		do {
 			valuationsOld = valuations.clone();
 			for (int i = 0; i < n; i++) 
@@ -86,7 +94,7 @@ public class ExactNsaReasoner extends AbstractExactNumericalPartialOrderRankingR
 		ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
 		int i = 0;
 		for (Argument a : ((DungTheory)base)) {
-			if (directAttackMatrix.getEntry(i,i).doubleValue()!=0.){
+			if (directAttackMatrix.getEntry(i,i).doubleValue()>0.){
 				ranking.put(a, BigDecimal.valueOf(0.));
 				i++;
 			} else {

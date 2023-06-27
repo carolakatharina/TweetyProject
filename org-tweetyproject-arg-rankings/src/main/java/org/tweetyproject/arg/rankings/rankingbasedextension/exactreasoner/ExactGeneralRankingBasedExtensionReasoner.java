@@ -21,13 +21,9 @@ package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
  */
 
 import org.tweetyproject.arg.dung.reasoner.AbstractExtensionReasoner;
-import org.tweetyproject.arg.dung.reasoner.SimpleGroundedReasoner;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
-import org.tweetyproject.arg.rankings.reasoner.StrategyBasedRankingReasoner;
-import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -140,12 +136,27 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
         //TODO: Carola implement missing branches
         return switch (this.vorgehensweise) {
-            case STRONGEST_CF, INC_BUDGET -> null;
+            case INC_BUDGET -> null;
             case MAX_CF -> getExtensionsForSemantics_MaxConflictfree(ranking, bbase);
             case CF -> getExtensionsForSemantics_Conflictfree(ranking, bbase);
             case SIMPLE -> getExtensionsForSemantics_Simple(ranking, bbase);
+            case STRONGEST_CF -> getStrongest(ranking, getExtensionsForSemantics_MaxConflictfree(ranking, bbase));
         };
 
+    }
+
+    private Collection<Extension<DungTheory>> getStrongest(Map<Argument, BigDecimal> ranking, Collection<Extension<DungTheory>> extensionsForSemanticsMaxConflictfree) {
+        var strongestExt= extensionsForSemanticsMaxConflictfree.stream()
+                .findFirst().get();
+        var sumStrongest = strongestExt.stream().mapToDouble(arg -> ranking.get(arg).doubleValue()).sum();
+        for (var ext: extensionsForSemanticsMaxConflictfree) {
+                var sum =ext.stream().mapToDouble(arg -> ranking.get(arg).doubleValue()).sum();
+                if (sum>sumStrongest) {
+                    strongestExt=ext;
+                }
+
+        }
+        return List.of(strongestExt);
     }
 
     private Map<Argument, BigDecimal> getRanking(DungTheory bbase) {
@@ -155,13 +166,6 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
     }
 
-    /**
-     * computes all maximal conflict-free sets of bbase
-     *
-     * @param bbase      an argumentation framework
-     * @param candidates a set of arguments
-     * @return conflict-free sets in bbase
-     */
     public Collection<Extension<DungTheory>> getMaximalConflictFreeSets(DungTheory bbase, Collection<Argument> candidates) {
         Set<Argument> candidatesWithouSA = new HashSet<>(candidates);
         for (Argument argument : bbase) {
@@ -179,7 +183,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
                 remainingTheory.remove(element);
                 remainingTheory.removeAll(bbase.getAttacked(element));
 
-                Set<Argument> remainingCandidates = new HashSet<>(candidatesWithouSA);
+                Set<Argument> remainingCandidates = new HashSet<Argument>(candidates);
                 remainingCandidates.remove(element);
                 remainingCandidates.removeAll(bbase.getAttacked(element));
                 remainingCandidates.removeAll(bbase.getAttackers(element));
@@ -187,9 +191,9 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
                 Collection<Extension<DungTheory>> subsubsets = this.getMaximalConflictFreeSets(remainingTheory, remainingCandidates);
 
                 for (Extension<DungTheory> subsubset : subsubsets) {
+                    //cfSubsets.add(new Extension(subsubset));
                     subsubset.add(element);
-                    cfSubsets.add(new Extension<>(subsubset));
-
+                    cfSubsets.add(new Extension<DungTheory>(subsubset));
                 }
             }
         }
@@ -236,7 +240,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
 
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_Conflictfree(Map<Argument, BigDecimal> ranking,
-                                                                                     DungTheory bbase) {
+                                                                      DungTheory bbase) {
 
 
         var restrictedtheory = new DungTheory(bbase);

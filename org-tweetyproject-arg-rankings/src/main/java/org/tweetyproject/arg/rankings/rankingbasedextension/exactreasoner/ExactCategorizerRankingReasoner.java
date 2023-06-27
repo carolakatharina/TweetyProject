@@ -50,7 +50,7 @@ public class ExactCategorizerRankingReasoner extends AbstractExactNumericalParti
 	 * parameters.
 	 */
 	public ExactCategorizerRankingReasoner() {
-		this.epsilon = BigDecimal.valueOf(0.001);
+		this.epsilon = BigDecimal.valueOf(0.0001);
 	}
 
 	/**
@@ -117,10 +117,7 @@ public class ExactCategorizerRankingReasoner extends AbstractExactNumericalParti
 	private BigDecimal calculateCategorizerFunction(BigDecimal[] vOld, Matrix directAttackMatrix, int i) {
 		BigDecimal c = BigDecimal.valueOf(1.0);
 		for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-
-			var oldValue = vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL128);
-			c = c.add(oldValue);
-
+			c = c.add(vOld[j].multiply(BigDecimal.valueOf(directAttackMatrix.getEntry(i,j).doubleValue()), MathContext.DECIMAL128));
 		}
 		return (BigDecimal.valueOf(1.0).divide(c, MathContext.DECIMAL128));
 		
@@ -143,7 +140,8 @@ public class ExactCategorizerRankingReasoner extends AbstractExactNumericalParti
 		BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
 		return result;
 	}
-	
+
+
 	/**natively installed*/
 	@Override
 	public boolean isInstalled() {

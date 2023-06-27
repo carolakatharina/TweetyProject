@@ -18,13 +18,7 @@
  */
 package org.tweetyproject.commons.postulates;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.tweetyproject.commons.Formula;
 
@@ -52,6 +46,13 @@ public class PostulateEvaluationReport<S extends Formula> {
 	 * satisfy the postulate)
 	 */
 	private Map<Postulate<S>, Collection<Collection<S>>> notApplicableInstances;
+
+	public List<Double> getPercentagesNodes() {
+		return percentagesNodes;
+	}
+
+
+	private List<Double> percentagesNodes=new ArrayList<>();
 
 	/**
 	 * the instances that violate the given postulate
@@ -127,6 +128,9 @@ public class PostulateEvaluationReport<S extends Formula> {
 			return this.positiveInstances.get(postulate);
 		return new HashSet<Collection<S>>();
 	}
+
+
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -167,5 +171,9 @@ public class PostulateEvaluationReport<S extends Formula> {
 			result += s;
 		
 		return result;
+	}
+
+	public void addPercentage(double v) {
+		percentagesNodes.add(v);
 	}
 }

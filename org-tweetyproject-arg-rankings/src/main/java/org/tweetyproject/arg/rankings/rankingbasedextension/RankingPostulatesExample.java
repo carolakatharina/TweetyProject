@@ -18,17 +18,21 @@
  */
 package org.tweetyproject.arg.rankings.rankingbasedextension;
 
+import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
+import org.tweetyproject.arg.dung.parser.ApxParser;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
+import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.postulates.RankingPostulate;
-import org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner;
+import org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.*;
 import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
-import org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactMaxBasedRankingReasoner;
+import org.tweetyproject.arg.rankings.reasoner.TrustBasedRankingReasoner;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,10 +50,15 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner
  */
 public class RankingPostulatesExample {
     private static Collection<RankingPostulate> all_postulates;
+    private static BigDecimal epsilon = BigDecimal.valueOf(0.0001);
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX, CATEGORIZER,
-            NSA, MATT_TONI, COUNTING, TRUST, ALPHABBS_1, ALPHABBS_2
+            MAX, MATT_TONI
+            /*CATEGORIZER,
+            NSA , ITS, COUNTING, TRUST//, ALPHABBS_1, ALPHABBS_2
+            MATT_TONI
+
+             */
 
     ));
 
@@ -95,14 +104,29 @@ public class RankingPostulatesExample {
 
     public static void Example(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
 
-
         DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
         PostulateEvaluator<Argument, DungTheory> evaluator;
         evaluator = new PostulateEvaluator<>(dg,
                 getReasoner(
                         rankingSemantics));
         evaluator.addAllPostulates(all_postulates);
-        System.out.println(evaluator.evaluate(50, true).prettyPrint());
+        System.out.println(evaluator.evaluate(20, true).prettyPrint());
+
+         /*
+
+
+        //Tests für DP/DDP
+        File[] apxFiles = new File("C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\resources").listFiles(new ApxFilenameFilter());
+
+
+        var dg2 = new FileDungTheoryGenerator(apxFiles, new ApxParser(), false);
+
+
+        var evaluator2 = new PostulateEvaluator<>(dg2,
+                getReasoner(
+                        rankingSemantics));
+        evaluator2.addAllPostulates(all_postulates);
+        System.out.println(evaluator2.evaluate(apxFiles.length, true).prettyPrint());
         /*
         params = new DungTheoryGenerationParameters();
         params.attackProbability = 0.5;
@@ -140,18 +164,17 @@ public class RankingPostulatesExample {
 
     public static AbstractRankingReasoner<ExactNumericalPartialOrder<Argument, DungTheory>> getReasoner(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics sem) {
         return switch (sem) {
-            /*case CATEGORIZER -> new CategorizerRankingReasoner();
-            case MATT_TONI -> new StrategyBasedRankingReasoner();
-            case COUNTING -> new CountingRankingReasoner();*/
-            case MAX -> new ExactMaxBasedRankingReasoner(BigDecimal.valueOf(0.001));
-            /*case TRUST -> new TrustBasedRankingReasoner();
-            case ITS -> new IterativeSchemaRankingReasoner();
-            case EULER -> new EulerMaxBasedRankingReasoner();
-            case ALPHABBS_1 -> new AlphaBurdenBasedRankingReasoner(0.3);
-            case ALPHABBS_2 -> new AlphaBurdenBasedRankingReasoner(10.);
-            case ALPHABBS_0 -> new AlphaBurdenBasedRankingReasoner(1.);
-            case NSA -> new NsaReasoner();*/
-            default -> null;
+            case CATEGORIZER -> new ExactCategorizerRankingReasoner(epsilon);
+            case EULER -> new ExactEulerMaxBasedRankingReasoner(epsilon);
+            case ITS -> new ExactIterativeSchemaRankingReasoner(epsilon);
+            case COUNTING -> new ExactCountingRankingReasoner(BigDecimal.valueOf(0.9), epsilon);
+            case MAX -> new ExactMaxBasedRankingReasoner(epsilon);
+            case TRUST -> new ExactTrustBasedRankingReasoner(epsilon);
+            case NSA -> new ExactNsaReasoner(epsilon);
+            case ALPHABBS_0 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(1.));
+            case ALPHABBS_1 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(0.3));
+            case ALPHABBS_2 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(10.));
+            case MATT_TONI -> new ExactStrategyBasedRankingReasoner();
         };
     }
 

@@ -38,18 +38,21 @@ public class SetTools<E> {
 	 * @param elements a set of elements of class "E".
 	 * @return all subsets of "elements".
 	 */
-	public static <E> Set<Set<E>> subsets(Collection<E> elements) {
-		List<E> list = new ArrayList<>(elements);
-		int n = list.size();
-		Set<Set<E>> subsets = new HashSet<>();
-		for (int i = 0; i < (1 << n); i++) {
-			Set<E> subset = new HashSet<>();
-			for (int j = 0; j < n; j++) {
-				if ((i & (1 << j)) != 0) {
-					subset.add(list.get(j));
-				}
+	public Set<Set<E>> subsets(Collection<? extends E> elements){
+		Set<Set<E>> subsets = new HashSet<Set<E>>();
+		if(elements.size() == 0){
+			subsets.add(new HashSet<E>());
+		}else{
+			E element = elements.iterator().next();
+
+			Set<E> remainingElements = new HashSet<E>(elements);
+			remainingElements.remove(element);
+			Set<Set<E>> subsubsets = this.subsets(remainingElements);
+			for(Set<E> subsubset: subsubsets){
+				subsets.add(new HashSet<E>(subsubset));
+				subsubset.add(element);
+				subsets.add(new HashSet<E>(subsubset));
 			}
-			subsets.add(subset);
 		}
 		return subsets;
 	}	

@@ -36,7 +36,7 @@ public class CsvThreshholdEvaluationWriter {
         BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\results\\"+title+".csv"));
 
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                .setHeader("Bezeichnung", x_axis, y_axis, "principles_fulfilled", "principles_not_fulfilled", "number_of_nodes")
+                .setHeader("Bezeichnung", x_axis, y_axis, "principles_fulfilled", "principles_not_fulfilled", "node_ext_percentage")
                 .build();
 
 

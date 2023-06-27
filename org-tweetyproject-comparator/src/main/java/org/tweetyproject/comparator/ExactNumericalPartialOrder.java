@@ -99,7 +99,29 @@ public class ExactNumericalPartialOrder<T extends Formula, R extends BeliefBase>
 			this.objectToValue.put(arg, initialvalue);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.tweetyproject.arg.dung.semantics.ArgumentRanking#
+	 * isStrictlyLessOrEquallyAcceptableThan(org.tweetyproject.arg.dung.syntax.Argument,
+	 * org.tweetyproject.arg.dung.syntax.Argument)
+	 */
+	@Override
+	public boolean isStrictlyLessOrEquallyAcceptableThan(T a, T b) {
+		if (sortingType == SortingType.LEXICOGRAPHIC) {
+			BigDecimal bda = new BigDecimal((Double) (this.objectToValue.get(a).doubleValue()));
+			BigDecimal bdb = new BigDecimal((Double) (this.objectToValue.get(b).doubleValue()));
+			bda = bda.setScale(5, RoundingMode.HALF_UP);
+			bdb = bdb.setScale(5, RoundingMode.HALF_UP);
+			return (bda.toString().compareTo(bdb.toString()) >= 0.0);
+		} else if (sortingType == SortingType.ASCENDING)
+			return this.objectToValue.get(b).doubleValue() <= this.objectToValue.get(a).doubleValue() + NumericalPartialOrder.PRECISION;
+		else if (sortingType == SortingType.DESCENDING)
+			return this.objectToValue.get(a).doubleValue() <= this.objectToValue.get(b).doubleValue() + NumericalPartialOrder.PRECISION;
+		else
+			throw new IllegalArgumentException("Unknown sorting type " + sortingType);
 
+	}
 
 
 
@@ -254,22 +276,7 @@ public class ExactNumericalPartialOrder<T extends Formula, R extends BeliefBase>
 		this.sortingType = sortingType;
 	}
 
-	@Override
-	public boolean isStrictlyLessOrEquallyAcceptableThan(T a, T b) {
-		if (sortingType==ExactNumericalPartialOrder.SortingType.LEXICOGRAPHIC) {
-			BigDecimal bda = this.objectToValue.get(a);
-			BigDecimal bdb = this.objectToValue.get(b);
-			bda = bda.setScale(5, RoundingMode.HALF_UP);
-			bdb = bdb.setScale(5, RoundingMode.HALF_UP);
-			return (bda.toString().compareTo(bdb.toString()) >= 0.0);
-		} else if (sortingType==ExactNumericalPartialOrder.SortingType.ASCENDING) {
-			return (this.objectToValue.get(a).compareTo(this.objectToValue.get(b)) <= 0.0);
-		} else if (sortingType == ExactNumericalPartialOrder.SortingType.DESCENDING)
-			return (this.objectToValue.get(a).compareTo(this.objectToValue.get(b)) >= 0.0);
-		else
-			throw new IllegalArgumentException("Unknown sorting type " + sortingType);
 
-	}
 
 
 

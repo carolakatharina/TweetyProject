@@ -60,18 +60,19 @@ public class RaAttackVsFullDefense extends RankingPostulate {
 		if (dt.containsCycle())
 			return true;
 
+		Iterator<Argument> it = dt.iterator();
+		Argument a = it.next();
+		Argument b = it.next();
 
-		//arguments without any attackbranch
-		var argWithoutAttB = dt.stream().filter(arg -> dt.hasAttackBranch(arg)).collect(Collectors.toList());
-
-		//arguments only attacked by one non-attacked argument
-		var argWithOneNaAtt = dt.stream().filter(arg -> dt.getAttackers(arg).size() == 1
-		&& dt.getAttackers(arg).stream().allMatch(att -> dt.getAttackers(att).isEmpty())).collect(Collectors.toList());
-
+		if (dt.getAttackers(b).size() != 1)
+			return true;
+		if (!dt.getAttackers(dt.getAttackers(b).iterator().next()).isEmpty())
+			return true;
+		if (dt.hasAttackBranch(a))
+			return true;
 
 		GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
-		return argWithoutAttB.stream().allMatch(arg -> argWithOneNaAtt.stream().allMatch(
-				att -> ranking.isStrictlyMoreAcceptableThan(arg, att)));
+		return ranking.isStrictlyMoreAcceptableThan(a, b);
 	}
 
 }
