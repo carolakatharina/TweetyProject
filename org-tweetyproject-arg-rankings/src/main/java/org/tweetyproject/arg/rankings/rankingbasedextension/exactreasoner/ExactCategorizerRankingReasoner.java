@@ -94,8 +94,10 @@ public class ExactCategorizerRankingReasoner extends AbstractExactNumericalParti
 		ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<Argument, DungTheory>();
 		ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
 		int i = 0;
-		for (Argument a : ((DungTheory)base)) 
-			ranking.put(a, valuations[i++]);
+		for (Argument a : ((DungTheory)base)) {
+				ranking.put(a, valuations[i++]);
+		}
+
 		return ranking;
 	}
 

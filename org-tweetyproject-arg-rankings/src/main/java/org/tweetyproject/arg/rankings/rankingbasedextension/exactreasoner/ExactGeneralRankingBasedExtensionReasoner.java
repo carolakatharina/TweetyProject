@@ -159,7 +159,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
         return List.of(strongestExt);
     }
 
-    private Map<Argument, BigDecimal> getRanking(DungTheory bbase) {
+    public Map<Argument, BigDecimal> getRanking(DungTheory bbase) {
 
         return new HashMap<>(reasoner.getModel(bbase));
 

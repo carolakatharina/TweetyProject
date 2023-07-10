@@ -1,0 +1,144 @@
+Notizen
+
+
+zuMaxERGEBNISSEN
+
+0.6666667 BEDEUTET vermutlich wird angegriffen, aber von Argumen, das von mind einem 1er Argument  angegriffen(kann gerader Kreis sein)
+
+0.5: Argument, das von 1 oder mehreren 1er Argumenten angegriffen
+
+0.6180257: argumente in geschlossenem geraden oder kreis oder selbst-angreifer, 0.6180556?, wahrscheinlich Zahl der Durchläufe wichtig
+
+
+1 nicht angegriffen
+
+-----------------------------------------------------------
+zuEulerERGEBNISSEN
+
+0.69220062755534630 BEDEUTET vermutlich wird angegriffen, aber von Argumen, das von mind einem 1er Argument  angegriffen(kann gerader Kreis sein)
+
+0.367879441171442330: Argument, das von 1 oder mehreren 1er Argumenten angegriffen
+
+0.56711904005721490: argumente in geschlossenem geraden oder kreis oder selbst-angreifer
+1 nicht angegriffen
+
+----------------------------------------------------------------
+zu TrustErgebnissen
+1 nicht angegriffen
+
+
+0.75 BEDEUTET vermutlich wird angegriffen, aber von Argumen, das von mind einem 1er Argument  angegriffen(kann gerader Kreis sein)
+
+0.50: Argument, das von 1 oder mehreren 1er Argumenten angegriffen
+
+0.66668701171875: argumente in geschlossenem geraden oder kreis oder selbst-angreifer
+
+
+-----------------------------------------------------------------------
+zu ITS Ergebnissen
+
+1 nicht angegriffen
+
+
+0.6666666641831398010253906250000000 BEDEUTET vermutlich wird angegriffen, aber von Argumen, das von mind einem 1er Argument  angegriffen(kann gerader Kreis sein)
+
+0.50: Argument, das von 1 oder mehreren 1er Argumenten angegriffen
+
+0.6339523138115954214819591963719894: argumente in geschlossenem geraden oder kreis oder selbst-angreifer
+
+
+----------------------------------------------------------------------------------------
+zu Categorizer
+
+1 nicht angegriffen
+
+Argumente, die selbst eigene Angreifer: höchstens 0.6180555555555555555555555555555556, wenn noch andere Angreifer tiefere Werte z.B 0.4655617626703580843531289797873771
+
+Argumente, die nur von Selbstangreifern angegriffen: 0.6823178725614911278657787208368868
+
+Argumente in Kreis, von anderen Argumenten angegriffen, die nicht Selbstangreifer oder 1er: höchstens 0.6180555555555555555555555555555556
+
+Argumente, die von 1ern angegriffen: höchstens 0.5
+
+Argumente, die nur von Argumenten angegriffen, die von 1ern angegriffen: 0.6666666666666666666666666666666667, mindestens (oder höher)
+
+
+---------------------------------------------------------------------------------------------------
+
+zu nsa
+
+TODO!!!
+1 nicht angegriffen
+
+Argumente, die selbst eigene Angreifer: 0
+
+Argumente, die nur von Selbstangreifern angegriffen: 1
+
+Argumente in Kreis, von anderen Argumenten angegriffen, die nicht Selbstangreifer oder 1er: höchstens 0.6180257510729613733905579399141631
+
+Argumente, die von 1ern angegriffen: höchstens 0.5
+
+Argumente, die nur von Argumenten angegriffen, die von 1ern angegriffen: 0.6666666666666666666666666666666667, mindestens (oder höher)
+
+------------------------------------------------------------------------------------------------------
+ZU cOUNT
+
+NICHT ANGEGRIFFENE: 1
+
+Argumente, die selbst eigene Angreifer: 0.5263603925704956
+
+Argumente, die nur von Selbstangreifern angegriffen: 0.8015868663787842
+
+Argumente in Kreis, von anderen Argumenten angegriffen, die nicht Selbstangreifer oder von 1er angegriffen: höchstens 0.689645528793335
+
+Argumente, die von 1ern angegriffen: höchstens 0.10000002384185791
+
+Argumente, die nur von Argumenten angegriffen, die von 1ern angegriffen: A3=0.9099999666213989, mindestens (oder höher)
+
+----------------------------------------------------------------------------------------------------------
+ZU MT
+
+NICHT ANGEGRIFFENE: 1
+
+Argumente, die selbst eigene Angreifer: 0
+
+Argumente, die nur von Selbstangreifern angegriffen: 0.5
+
+Argumente in Kreis, von anderen Argumenten angegriffen, die nicht Selbstangreifer oder 1er: höchstens 0.4166666567325592
+
+Argumente, die von 1ern angegriffen: höchstens 0.25
+
+Argumente, die nur von Argumenten angegriffen, die von 1ern angegriffen: A3=0.5, mindestens (oder höher)
+
+
+---------------------------------------------------- Allgemein
+
+bei allen guten wird nur der Attacker mit höchstem Wert ausgewertet
+
+alle guten eigentlich identisch mit grounded, iDEE: Vergleich mit ideal extension auch
+ABER: anders wenn attacker genommen wird
+
+herausfinden, was mit relativer argument strength nicht/anders funktioniert
+
+
+Idee: Nicht mehrere Extensions als weiterer Ansatz (Verschieben in Anhang), sondern verschiedene Thresholds: Vorteil gegenüber grounded: wenn zu wenig Argument, dann Kriterien aufweichen
+-> VORTEIL!
+
+
+Überlegungen, wie man admissible extension bekommt:
+
+Keine self-attacking: IF B is self-attacking and has no other
+                      attackers. Then B is not contained in any conflict-free argument set
+
+
+
+1er sind Teil
+Argumente, die nur von Argumenten angegriffen, die von 1ern angegriffen müssten Teil sein
+Argumente, die nur von Selbstangreifern angegriffen auch
+
+
+undecided
+Argumente, die angegriffen von anderen, die keine selbstangreifer oder 1er
+vermutlich die über threshold dann noch okay, vielleicht odd/even als Unterschied?
+Idee: bei maximal-conflict free set eigentlich nur die undecided dazugenommen, dass es noch konfliktfrei
+

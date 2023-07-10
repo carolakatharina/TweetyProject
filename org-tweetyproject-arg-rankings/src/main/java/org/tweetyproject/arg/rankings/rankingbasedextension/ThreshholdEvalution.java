@@ -49,7 +49,7 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner
 public class ThreshholdEvalution {
     private static Collection<Principle> all_principles;
 
-    private static BigDecimal[] epsilon_values = {//BigDecimal.valueOf(0.01),BigDecimal.valueOf(0.001), BigDecimal.valueOf(0.00001),
+    private static BigDecimal[] epsilon_values = { //BigDecimal.valueOf(0.01),BigDecimal.valueOf(0.001), BigDecimal.valueOf(0.00001),
             BigDecimal.valueOf(0.0001)
     };
 
@@ -61,7 +61,7 @@ public class ThreshholdEvalution {
                     RankingBasedExtensionReasoner.Vorgehensweise.INC_BUDGET,
                      */
                     //ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.MAX_CF
-                    ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.CF
+                    ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
 
                     //ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF
             ));
@@ -74,18 +74,22 @@ public class ThreshholdEvalution {
     );
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX,
+            /*MAX,
             TRUST,
             COUNTING,
             MATT_TONI,
             CATEGORIZER,
-            NSA,
-            ITS,
+
+             */
+            NSA
+            /*ITS,
             EULER,
 
 
 
             MATT_TONI
+
+             */
             /* EULER,
             TRUST,
             ITS
@@ -200,9 +204,9 @@ public class ThreshholdEvalution {
             }
         }
 
-        new LineChartDrawing("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_cfmax", "Value for threshold delta", "Number of Principles fulfilled", data);
-        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_cfmax", "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
-        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_cfmax", "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
+        new LineChartDrawing("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_simpl2", "Value for threshold delta", "Number of Principles fulfilled", data);
+        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_simpl2", "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
+        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_simpl2all", "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
 
         //csv: givenDataArray_whenConvertToCSV_thenOutputCreated("Threshold_evaluation_" + rankingSemantics + "_absolute_argument_strength", "Value for threshold delta", "Number of Principles fulfilled", data);
     }

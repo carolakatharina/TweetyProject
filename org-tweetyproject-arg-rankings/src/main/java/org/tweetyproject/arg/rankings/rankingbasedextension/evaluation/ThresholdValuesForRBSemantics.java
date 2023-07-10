@@ -42,7 +42,7 @@ public class ThresholdValuesForRBSemantics {
         return switch (semantics) {
             case CATEGORIZER ->
                     new BigDecimal[]{
-                            BigDecimal.valueOf(0.9134), //admissibility
+                            //BigDecimal.valueOf(0.9134), //admissibility
                             BigDecimal.valueOf(0.917), //strong admissibility
                             //BigDecimal.valueOf(0.6181) //conflict-freeness
             };
@@ -58,8 +58,9 @@ public class ThresholdValuesForRBSemantics {
             case TRUST ->  new BigDecimal[]{
                     BigDecimal.valueOf(0.6680)}; //conflict-freeness + admissibility+am meisten
             case NSA ->   new BigDecimal[]{
-                    BigDecimal.valueOf(0.9134), //admissibility
-                    BigDecimal.valueOf(0.917), //strong admissibility
+                    //FALSCH!!! Nochmal berechnen!
+                    //BigDecimal.valueOf(0.9134), //admissibility
+                    BigDecimal.valueOf(0.68620) //cf und reduct admissbility
                     //BigDecimal.valueOf(0.6181) //conflict-freeness
             }; //conflict-freeness
             case ALPHABBS_0 -> null;

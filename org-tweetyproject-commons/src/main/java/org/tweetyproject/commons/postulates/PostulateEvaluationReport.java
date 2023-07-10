@@ -119,7 +119,7 @@ public class PostulateEvaluationReport<S extends Formula> {
 	}
 
 	/**
-	 * Returns the negative instances for the given postulate
+	 * Returns the positive instances for the given postulate
 	 * @param postulate some postulate
 	 * @return a collection of negative instances.
 	 */

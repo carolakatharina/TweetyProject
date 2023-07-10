@@ -78,7 +78,11 @@ public class ExactNsaReasoner extends AbstractExactNumericalPartialOrderRankingR
 		BigDecimal valuationsOld[] = new BigDecimal[n]; //Stores valuations of the last iteration
 
 		for (int i=0; i<n; i++) {
-			valuations[i]= BigDecimal.valueOf(1.);
+			if (directAttackMatrix.getEntry(i,i).doubleValue()>0.) {
+				valuations[i] =BigDecimal.valueOf(0.);
+			} else {
+				valuations[i] = BigDecimal.valueOf(1.);
+			}
 		}
 
 		//Keep computing valuations until the values stop changing much or converge
@@ -86,7 +90,7 @@ public class ExactNsaReasoner extends AbstractExactNumericalPartialOrderRankingR
 			valuationsOld = valuations.clone();
 			for (int i = 0; i < n; i++) 
 				valuations[i] = calculateCategorizerFunction(valuationsOld,directAttackMatrix,i);
-		} while (getDistance(valuationsOld, valuations).compareTo(this.epsilon)>0);
+		} while (getDistance(valuationsOld, valuations).compareTo(this.epsilon)>0.);
 	
 		//Use computed valuations as values for argument ranking
 		//Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
@@ -94,19 +98,15 @@ public class ExactNsaReasoner extends AbstractExactNumericalPartialOrderRankingR
 		ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
 		int i = 0;
 		for (Argument a : ((DungTheory)base)) {
-			if (directAttackMatrix.getEntry(i,i).doubleValue()>0.){
-				ranking.put(a, BigDecimal.valueOf(0.));
-				i++;
-			} else {
 				ranking.put(a, valuations[i++]);
-			}
 		}
 
 		return ranking;
 	}
 
 	public static BigDecimal getMinimalValue() {
-		return BigDecimal.valueOf(0.);
+
+		return BigDecimal.valueOf(0.0);
 	}
 
 	public static BigDecimal getMaximalValue() {
@@ -122,9 +122,22 @@ public class ExactNsaReasoner extends AbstractExactNumericalPartialOrderRankingR
 	 */
 	private BigDecimal calculateCategorizerFunction(BigDecimal[] vOld, Matrix directAttackMatrix, int i) {
 		BigDecimal c = BigDecimal.valueOf(1.0);
-		for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-			c = c.add(vOld[j].multiply(BigDecimal.valueOf(directAttackMatrix.getEntry(i,j).doubleValue()), MathContext.DECIMAL128));
+
+		if (directAttackMatrix.getEntry(i,i).doubleValue()>0.) {
+			return BigDecimal.valueOf(0.);
 		}
+
+		if (directAttackMatrix.getXDimension()==1 &&
+				directAttackMatrix.getEntry(i, 0).doubleValue()==0.) {
+			return BigDecimal.valueOf(vOld[i].doubleValue());
+		}
+
+		for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
+				c = c.add(vOld[j].multiply(BigDecimal.valueOf(directAttackMatrix.getEntry(i, j).doubleValue()), MathContext.DECIMAL128));
+
+		}
+
+
 		return (BigDecimal.valueOf(1.0).divide(c, MathContext.DECIMAL128));
 
 	}
