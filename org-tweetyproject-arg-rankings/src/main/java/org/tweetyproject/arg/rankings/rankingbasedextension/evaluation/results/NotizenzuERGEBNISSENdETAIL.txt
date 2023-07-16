@@ -12,6 +12,17 @@ zuMaxERGEBNISSEN
 
 1 nicht angegriffen
 
+
+wenn nur 1 self-attacking argument oder argument in Kreissituation, dann 0.6180556, wenn zwei dnn 0.6180257 etc
+Grenzfälle, die Peak erklären:
+0.6190476: b6-argument wird von argument b5 angegriffen, dass in even Kreis aber ein Argument des Kreises von 1er angegriffen (1er außerhalb), dadurch ein argument des kreises invalide, gebrochen
+Beispiel "<{ b2, a, b3, b4, b5, c, b6, d, b1 },[(b2,b3), (b4,b5), (b2,c), (a,b1), (b3,b4), (b5,b6), (c,d), (b1,b2), (b6,b1), (b1,c), (b6,c)]>","{b2,a,b4,b6,d}","{b2=0.6666666666666666666666666666666667, a=1, b3=0.5999999880000002399999952000000960, b4=0.625, b5=0.6153846153846153846153846153846154, c=0.5999999880000002399999952000000960, b6=0.6190476249433107137458163213887269, d=0.625, b1=0.5}","{b2,a,b4,b6,d}"
+
+-> andere Werte 0.625: von Argument angegriffen, das von 0.66667er angegriffen
+Beispiel: "<{ a, b, c, d, e },[(b,d), (e,b), (c,a), (a,b), (d,c)]>","{a,d,e}","{a=0.625, b=0.5, c=0.5999999880000002399999952000000960, d=0.6666666666666666666666666666666667, e=1}","{a,d,e}"
+
+
+Idee: für jedes einzelne Argument fixed point/epsilon nehmen!
 -----------------------------------------------------------
 zuEulerERGEBNISSEN
 
@@ -21,6 +32,16 @@ zuEulerERGEBNISSEN
 
 0.56711904005721490: argumente in geschlossenem geraden oder kreis oder selbst-angreifer
 1 nicht angegriffen
+
+Grenzfälle, die Peak erklären:
+
+0.57961233550337890: b6-argument wird von argument b5 angegriffen, dass in even Kreis aber ein Argument des Kreises von 1er angegriffen (1er außerhalb), dadurch ein argument des kreises invalide, gebrochen
+Beispiel "<{ b2, a, b3, b4, b5, c, b6, d, b1 },[(b2,b3), (b4,b5), (b2,c), (a,b1), (b3,b4), (b5,b6), (c,d), (b1,b2), (b6,b1), (b1,c), (b6,c)]>","{b2,a,b4,b6,d}","{b2=0.69220062755534630, a=1.00, b3=0.50047350056363690, b4=0.60624353508559730, b5=0.5453957859750270, c=0.50047350056363690, b6=0.57961233550337890, d=0.60624353508559730, b1=0.367879441171442330}",true
+
+
+-> andere Werte 0.606: von Argument angegriffen, das von 0.69220062755534630 angegriffen
+Beispiel: "<{ a, b, c, d, e },[(b,d), (e,b), (c,a), (a,b), (d,c)]>","{a,d,e}","{a=0.60624353508559730, b=0.367879441171442330, c=0.50047350056363690, d=0.69220062755534630, e=1.00}",true
+
 
 ----------------------------------------------------------------
 zu TrustErgebnissen
@@ -32,6 +53,17 @@ zu TrustErgebnissen
 0.50: Argument, das von 1 oder mehreren 1er Argumenten angegriffen
 
 0.66668701171875: argumente in geschlossenem geraden oder kreis oder selbst-angreifer
+
+
+Grenzfälle, die Peak erklären:
+
+0.671875: b6-argument wird von argument b5 angegriffen, dass in even Kreis aber ein Argument des Kreises von 1er angegriffen (1er außerhalb), dadurch ein argument des kreises invalide, gebrochen
+Beispiel "<{ b2, a, b3, b4, b5, c, b6, d, b1 },[(b2,b3), (b4,b5), (b2,c), (a,b1), (b3,b4), (b5,b6), (c,d), (b1,b2), (b6,b1), (b1,c), (b6,c)]>","{b2,a,b4,b6,d}","{b2=0.75, a=1.00, b3=0.625, b4=0.6875, b5=0.65625, c=0.625, b6=0.671875, d=0.6875, b1=0.50}",true
+
+
+-> andere Werte 0.6875: von Argument angegriffen, das von 0.75 angegriffen
+"<{ a, b, c, d, e },[(b,d), (e,b), (c,a), (a,b), (d,c)]>","{a,d,e}","{a=0.6875, b=0.50, c=0.625, d=0.75, e=1.00}",true
+
 
 
 -----------------------------------------------------------------------
@@ -47,8 +79,20 @@ zu ITS Ergebnissen
 0.6339523138115954214819591963719894: argumente in geschlossenem geraden oder kreis oder selbst-angreifer
 
 
+
+Grenzfälle, die Peak erklären:
+
+b6=0.6341209162562465164913308247936980: b6-argument wird von argument b5 angegriffen, dass in even Kreis aber ein Argument des Kreises von 1er angegriffen (1er außerhalb), dadurch ein argument des kreises invalide, gebrochen
+Beispiel "<{ b2, a, b3, b4, b5, c, b6, d, b1 },[(b2,b3), (b4,b5), (b2,c), (a,b1), (b3,b4), (b5,b6), (c,d), (b1,b2), (b6,b1), (b1,c), (b6,c)]>","{b2,a,b4,b6,d}","{b2=0.6666660308837890625000000000000000, a=1.00000000000000000000, b3=0.6249985701343340697965445140407141, b4=0.6363595363660509639017442892733287, b5=0.6333228414773293718202881332631853, c=0.6249985698543783924268211286016099, b6=0.6341209162562465164913308247936980, d=0.6363595260658560678294636893091279, b1=0.5000000000000000000000000000000000}",true
+
+
+
+-> andere Werte 0.6363474171294714428568984925716651: von Argument angegriffen, das von 0.6666666641831398010253906250000000 angegriffen
+"<{ a, b, c, d, e },[(b,d), (e,b), (c,a), (a,b), (d,c)]>","{a,d,e}","{a=0.6363474171294714428568984925716651, b=0.5000000000000000000000000000000000, c=0.6249942837772712314717851171093837, d=0.6666641235351562500000000000000000, e=1.000000000000000000}",true
+
 ----------------------------------------------------------------------------------------
 zu Categorizer
+TODO: schauen, welche Fälle anders als grounded, warum
 
 1 nicht angegriffen
 
@@ -62,11 +106,26 @@ Argumente, die von 1ern angegriffen: höchstens 0.5
 
 Argumente, die nur von Argumenten angegriffen, die von 1ern angegriffen: 0.6666666666666666666666666666666667, mindestens (oder höher)
 
+Welche Fälle anders als grounded, warum?
+"<{ a, b, d, e, y },[(y,b), (d,y), (e,b), (b,a)]>","{d,e}","{a=0.7142857142857142857142857142857143, y=0.5, b=0.4, d=1, e=1}",false
+-> a wäre Teil von admissible extension, aber threshold für admissible bei Categorizer bei 0.9x, wäre drin wenn nur conflictfreeness gewünscht (0.618)
 
+Warum Threshold so hoch für Admissibility?
+
+"<{ a, b, d, e, y },[(y,b), (d,y), (e,b), (b,a)]>","{d,e}","{a=0.7142857142857142857142857142857143, y=0.5, b=0.4, d=1, e=1}",false
+a wäre eigentlich noch okay, weil b von 1er angegriffen
+
+aber: 0.71 als threshold nicht möglich, weil?
+"<{ a, b, c, d, e },[(b,c), (b,e), (e,a), (e,c), (a,b), (c,d), (a,c)]>",{},"{a=0.6180257510729613733905579399141631, b=0.6180257510729613733905579399141631, c=0.3503649635036496350364963503649635, d=0.7405247813411078717201166180758017, e=0.6180257510729613733905579399141631}",true
+wenn threshold 0.71, dann wäre d dabei, aber geht nicht, weil sich die extension dann nicht gegen c verteidigt
+wenn threshold 0.618, dann a, b dabei, keine Konfliktfreiheit
+Vermutung: Ursache ist Kardinalität, Menge von Angreifern führt dazu, dass Argumente sehr schlecht bewertet, obwohl okay???
+
+vermutung: nicht stabiler threshold!!!
 ---------------------------------------------------------------------------------------------------
 
 zu nsa
-
+TODO: schauen, welche Fälle anders als grounded, warum
 TODO!!!
 1 nicht angegriffen
 
@@ -79,9 +138,12 @@ Argumente in Kreis, von anderen Argumenten angegriffen, die nicht Selbstangreife
 Argumente, die von 1ern angegriffen: höchstens 0.5
 
 Argumente, die nur von Argumenten angegriffen, die von 1ern angegriffen: 0.6666666666666666666666666666666667, mindestens (oder höher)
+SOWIESO NUR SCHWÄCHERE FORM VON ADMISSIBILITY; WEIL SELF-ATTACKING-ARGUMENTE AUSGEBLENDET?
 
+vermutung: nicht stabiler threshold!!!
 ------------------------------------------------------------------------------------------------------
 ZU cOUNT
+TODO: schauen, welche Fälle anders als grounded, warum
 
 NICHT ANGEGRIFFENE: 1
 
@@ -94,9 +156,13 @@ Argumente in Kreis, von anderen Argumenten angegriffen, die nicht Selbstangreife
 Argumente, die von 1ern angegriffen: höchstens 0.10000002384185791
 
 Argumente, die nur von Argumenten angegriffen, die von 1ern angegriffen: A3=0.9099999666213989, mindestens (oder höher)
+"<{ a, b, c, d, e },[(b,c), (b,e), (e,a), (e,c), (a,b), (c,d), (a,c)]>",{},"{a=0.7692261934280396, b=0.7692261934280396, c=0.3076786398887634, d=0.9076786637306213, e=0.7692261934280396}",true
+-> erklärt so hohen threshold, d wäre auch dabei sonst, obwohl nicht verteidigt, nicht zuverlässig vermutlich, bestimmt beispiel, wo noch höherer threshold eigentlich notendig!, wenn viele argumente!
 
+vermutung: nicht stabiler threshold!!!
 ----------------------------------------------------------------------------------------------------------
 ZU MT
+TODO: schauen, welche Fälle anders als grounded, warum
 
 NICHT ANGEGRIFFENE: 1
 
@@ -110,7 +176,9 @@ Argumente, die von 1ern angegriffen: höchstens 0.25
 
 Argumente, die nur von Argumenten angegriffen, die von 1ern angegriffen: A3=0.5, mindestens (oder höher)
 
+SOWIESO NUR SCHWÄCHERE FORM VON ADMISSIBILITY; WEIL SELF-ATTACKING-ARGUMENTE AUSGEBLENDET?
 
+vermutung: nicht stabiler threshold!!!
 ---------------------------------------------------- Allgemein
 
 bei allen guten wird nur der Attacker mit höchstem Wert ausgewertet

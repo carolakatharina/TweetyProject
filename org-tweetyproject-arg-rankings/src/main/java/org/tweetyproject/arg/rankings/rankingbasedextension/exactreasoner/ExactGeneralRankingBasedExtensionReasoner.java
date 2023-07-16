@@ -21,6 +21,8 @@ package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
  */
 
 import org.tweetyproject.arg.dung.reasoner.AbstractExtensionReasoner;
+import org.tweetyproject.arg.dung.reasoner.SimpleNaiveReasoner;
+import org.tweetyproject.arg.dung.reasoner.WeaklyAdmissibleReasoner;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
@@ -31,7 +33,10 @@ import java.util.stream.Collectors;
 
 
 public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtensionReasoner {
+
+    BigDecimal threshholdHelper;
     RankingSemantics rankingSemantics;
+    RankingSemantics rankingSemanticsHelp;
 
     Vorgehensweise vorgehensweise;
     BigDecimal threshhold;
@@ -45,11 +50,12 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     private Map<Argument, BigDecimal> ranking;
 
     private AbstractExactNumericalPartialOrderRankingReasoner reasoner;
+    private AbstractExactNumericalPartialOrderRankingReasoner reasonerHelper;
     private Collection<Extension<DungTheory>> finalAllExtensions;
 
 
     public enum Vorgehensweise {
-        STRONGEST_CF, MAX_CF, CF, INC_BUDGET, SIMPLE
+        STRONGEST_CF, MAX_CF, CF, INC_BUDGET, MAX_CF_ADMISSIBLE, SIMPLE
 
     }
 
@@ -79,7 +85,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
         COUNTING,
 
-        MAX,
+        MAX, MAX_NSA,
         TRUST, NSA, ALPHABBS_0, ALPHABBS_1, ALPHABBS_2, EULER, ITS, MATT_TONI
 
     }
@@ -95,7 +101,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
         this.threshhold = threshhold;
         this.vergleichsoperator=vergleichsoperator;
         this.epsilon=epsilon;
-        this.reasoner=getReasoner();
+        this.reasoner=getReasoner(semantics);
 
         System.out.println("Ranking Semantic: "+this.rankingSemantics);
         System.out.println("Vorgehen: "+this.vorgehensweise);
@@ -106,10 +112,41 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     }
 
 
-    public AbstractExactNumericalPartialOrderRankingReasoner getReasoner() {
-        return switch (this.rankingSemantics) {
+    public ExactGeneralRankingBasedExtensionReasoner(Akzeptanzbedingung akzeptanzbedingung,
+                                                     Vorgehensweise vorgehensweise,
+                                                     Vergleichsoperator vergleichsoperator, BigDecimal epsilon,
+                                                     BigDecimal threshhold, BigDecimal threshholdHelper, RankingSemantics semantics,
+                                                     RankingSemantics rankingSemanticsHelp) {
+
+
+        this.rankingSemantics = semantics;
+        this.akzeptanzbedingung = akzeptanzbedingung;
+        this.vorgehensweise = vorgehensweise;
+        this.threshhold = threshhold;
+        this.vergleichsoperator = vergleichsoperator;
+        this.epsilon = epsilon;
+        this.reasoner = getReasoner(semantics);
+        this.rankingSemanticsHelp = rankingSemanticsHelp;
+        this.reasonerHelper = getReasoner(rankingSemanticsHelp);
+        this.threshholdHelper = threshholdHelper;
+
+
+
+
+        System.out.println("Ranking Semantic: " + this.rankingSemantics);
+        System.out.println("Vorgehen: " + this.vorgehensweise);
+        System.out.println("Akzeptanzbedingung: " + this.akzeptanzbedingung);
+        System.out.println("Schwellwert: " + this.threshhold);
+        System.out.println("Vergleichsoperator: " + this.vergleichsoperator);
+        System.out.println("Epsilon: " + this.epsilon);
+    }
+
+
+    public AbstractExactNumericalPartialOrderRankingReasoner getReasoner(RankingSemantics rankingSemantics) {
+        return switch (rankingSemantics) {
             case CATEGORIZER -> new ExactCategorizerRankingReasoner(epsilon);
             case EULER -> new ExactEulerMaxBasedRankingReasoner(epsilon);
+            case MAX_NSA -> new ExactMaxBasedRankingReasoner_NSA(epsilon);
             case ITS -> new ExactIterativeSchemaRankingReasoner(epsilon);
             case COUNTING -> new ExactCountingRankingReasoner(BigDecimal.valueOf(0.9), epsilon);
             case MAX -> new ExactMaxBasedRankingReasoner(epsilon);
@@ -139,25 +176,65 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
             case INC_BUDGET -> null;
             case MAX_CF -> getExtensionsForSemantics_MaxConflictfree(ranking, bbase);
             case CF -> getExtensionsForSemantics_Conflictfree(ranking, bbase);
+            case MAX_CF_ADMISSIBLE -> getMaximalAdmissibleExts(ranking, bbase);
             case SIMPLE -> getExtensionsForSemantics_Simple(ranking, bbase);
             case STRONGEST_CF -> getStrongest(ranking, getExtensionsForSemantics_MaxConflictfree(ranking, bbase));
         };
 
     }
 
+    private Set<Extension<DungTheory>> getMaximalAdmissibleExts(Map<Argument, BigDecimal> ranking, DungTheory bbase) {
+        var exts = getExtensionsForSemantics_MaxConflictfree(ranking, bbase)
+                .stream().map(ext -> getAdmissibleExt(bbase, ext))
+                .filter(ext -> ext != null)
+                .collect(Collectors.toCollection(HashSet::new));
+        if (exts.size() == 0) {
+            return Set.of(new Extension());
+        }
+        return exts;
+    }
+
+    private Extension<DungTheory> getAdmissibleExt(DungTheory bbase, Extension<DungTheory> ext) {
+        if (ext.size() == 0) {
+            return null;
+        }
+        if (bbase.isAdmissable(ext)) {
+            return ext;
+        }
+
+        if (ext.size() == 1) {
+            return null;
+        }
+
+        var ranking_neu = this.getRanking(bbase, this.reasonerHelper);
+
+        var removableArgs = ext.stream().filter(arg -> !useThresholdArg_Helper(ranking_neu.get(arg), threshholdHelper))
+                .collect(Collectors.toList());
+
+        var extNeu = new Extension<DungTheory>(ext);
+        extNeu.removeAll(removableArgs);
+        if (bbase.isAdmissable(extNeu)) {
+            return extNeu;
+        }
+        return null;
+
+    }
+
     private Collection<Extension<DungTheory>> getStrongest(Map<Argument, BigDecimal> ranking, Collection<Extension<DungTheory>> extensionsForSemanticsMaxConflictfree) {
-        var strongestExt= extensionsForSemanticsMaxConflictfree.stream()
+        var strongestExt = extensionsForSemanticsMaxConflictfree.stream()
                 .findFirst().get();
         var sumStrongest = strongestExt.stream().mapToDouble(arg -> ranking.get(arg).doubleValue()).sum();
-        for (var ext: extensionsForSemanticsMaxConflictfree) {
-                var sum =ext.stream().mapToDouble(arg -> ranking.get(arg).doubleValue()).sum();
-                if (sum>sumStrongest) {
-                    strongestExt=ext;
-                }
+        for (var ext : extensionsForSemanticsMaxConflictfree) {
+            var sum = ext.stream().mapToDouble(arg -> ranking.get(arg).doubleValue()).sum();
+            if (sum > sumStrongest) {
+                strongestExt = ext;
+            }
 
         }
         return List.of(strongestExt);
     }
+
+
 
     public Map<Argument, BigDecimal> getRanking(DungTheory bbase) {
 
@@ -166,45 +243,17 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
     }
 
-    public Collection<Extension<DungTheory>> getMaximalConflictFreeSets(DungTheory bbase, Collection<Argument> candidates) {
-        Set<Argument> candidatesWithouSA = new HashSet<>(candidates);
-        for (Argument argument : bbase) {
-            if (bbase.isAttackedBy(argument, argument)) {
-                candidatesWithouSA.remove(argument);
-            }
-        }
+    public Map<Argument, BigDecimal> getRanking(DungTheory bbase, AbstractExactNumericalPartialOrderRankingReasoner reasonerhelp) {
 
-        Collection<Extension<DungTheory>> cfSubsets = new HashSet<>();
-        if (candidatesWithouSA.size() == 0 || bbase.size() == 0) {
-            cfSubsets.add(new Extension<>());
-        } else {
-            for (Argument element : candidatesWithouSA) {
-                DungTheory remainingTheory = new DungTheory(bbase);
-                remainingTheory.remove(element);
-                remainingTheory.removeAll(bbase.getAttacked(element));
+        return new HashMap<>(reasonerhelp.getModel(bbase));
 
-                Set<Argument> remainingCandidates = new HashSet<Argument>(candidates);
-                remainingCandidates.remove(element);
-                remainingCandidates.removeAll(bbase.getAttacked(element));
-                remainingCandidates.removeAll(bbase.getAttackers(element));
 
-                Collection<Extension<DungTheory>> subsubsets = this.getMaximalConflictFreeSets(remainingTheory, remainingCandidates);
-
-                for (Extension<DungTheory> subsubset : subsubsets) {
-                    //cfSubsets.add(new Extension(subsubset));
-                    subsubset.add(element);
-                    cfSubsets.add(new Extension<DungTheory>(subsubset));
-                }
-            }
-        }
-        return cfSubsets;
     }
 
 
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_Simple(Map<Argument, BigDecimal> ranking,
                                                                                DungTheory bbase) {
         finalAllExtensions = new ArrayList<>();
-
 
 
         finalAllExtensions.add(getSetForSemantics(ranking, bbase, bbase));
@@ -225,22 +274,25 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_MaxConflictfree(Map<Argument, BigDecimal> ranking,
                                                                                         DungTheory bbase) {
 
-
-        var restrictedtheory = new DungTheory(bbase);
+        var simplereasoner = new SimpleNaiveReasoner();
 
 
         //alle Kandidaten erhalten, die Rankingkriterien erfüllen:
-        var candidates = getSetForSemantics(ranking, restrictedtheory, bbase);
+        var candidates = getSetForSemantics(ranking, bbase, bbase);
+        Set<Argument> candidatesWithouSA = new HashSet<>(candidates);
+        for (Argument argument : bbase) {
+            if (bbase.isAttackedBy(argument, argument)) {
+                candidatesWithouSA.remove(argument);
+            }
+        }
 
-
-        return this.getMaximalConflictFreeSets(bbase, ranking.keySet().stream()
-                .filter(candidates::contains).collect(Collectors.toList()));
+        return simplereasoner.getMaximalConflictFreeSets(bbase, candidatesWithouSA);
 
     }
 
 
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_Conflictfree(Map<Argument, BigDecimal> ranking,
-                                                                      DungTheory bbase) {
+                                                                                     DungTheory bbase) {
 
 
         var restrictedtheory = new DungTheory(bbase);
@@ -270,32 +322,9 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
                 candidatesWithouSA.remove(argument);
             }
         }
+        return (Set<Extension<DungTheory>>) new WeaklyAdmissibleReasoner().getConflictFreeSets(bbase, candidatesWithouSA)
+                .stream().map(ext -> new Extension<DungTheory>(ext)).collect(Collectors.toSet());
 
-        Collection<Extension<DungTheory>> subsets = new HashSet<>();
-        if (candidatesWithouSA.size() == 0 || bbase.size() == 0) {
-            subsets.add(new Extension<>());
-        } else {
-            for (Argument element : candidatesWithouSA) {
-                DungTheory remainingTheory = new DungTheory(bbase);
-                remainingTheory.remove(element);
-                remainingTheory.removeAll(bbase.getAttacked(element));
-
-                Set<Argument> remainingCandidates = new HashSet<>(candidatesWithouSA);
-                remainingCandidates.remove(element);
-                remainingCandidates.removeAll(bbase.getAttacked(element));
-                remainingCandidates.removeAll(bbase.getAttackers(element));
-
-                Collection<Extension<DungTheory>> subsubsets = this.getConflictFreeSets(remainingTheory, remainingCandidates);
-
-                for (Extension<DungTheory> subsubset : subsubsets) {
-                    subsets.add(new Extension<>(subsubset));
-                    subsubset.add(element);
-                    subsets.add(new Extension<>(subsubset));
-                }
-            }
-        }
-
-        return subsets;
     }
 
 
@@ -449,10 +478,27 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
 
         return switch (this.rankingSemantics) {
-            case MATT_TONI, COUNTING, NSA, CATEGORIZER, TRUST, MAX, EULER, ITS, ALPHABBS_0->
-                    vergleichsoperator== Vergleichsoperator.STRICT? value.compareTo(thresh)>0:value.compareTo(thresh)>=0;
-            case ALPHABBS_1, ALPHABBS_2 -> vergleichsoperator == Vergleichsoperator.STRICT? value.compareTo(thresh)==-1
-            : value.compareTo(thresh)<=0;
+            case MATT_TONI, COUNTING, NSA, CATEGORIZER, TRUST, MAX, MAX_NSA, EULER, ITS, ALPHABBS_0 ->
+                    vergleichsoperator == Vergleichsoperator.STRICT ? value.compareTo(thresh) > 0 : value.compareTo(thresh) >= 0;
+            case ALPHABBS_1, ALPHABBS_2 ->
+                    vergleichsoperator == Vergleichsoperator.STRICT ? value.compareTo(thresh) == -1
+                            : value.compareTo(thresh) <= 0;
+
+
+        };
+
+
+    }
+
+    private boolean useThresholdArg_Helper(BigDecimal value, BigDecimal thresh) {
+
+
+        return switch (this.rankingSemanticsHelp) {
+            case MATT_TONI, COUNTING, NSA, CATEGORIZER, TRUST, MAX, MAX_NSA, EULER, ITS, ALPHABBS_0 ->
+                    vergleichsoperator == Vergleichsoperator.STRICT ? value.compareTo(thresh) > 0 : value.compareTo(thresh) >= 0;
+            case ALPHABBS_1, ALPHABBS_2 ->
+                    vergleichsoperator == Vergleichsoperator.STRICT ? value.compareTo(thresh) == -1
+                            : value.compareTo(thresh) <= 0;
 
 
         };
@@ -465,10 +511,11 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
 
         return switch (this.rankingSemantics) {
-            case NSA, CATEGORIZER, TRUST, MAX, MATT_TONI, COUNTING, EULER, ITS ->
-                    vergleichsoperator == Vergleichsoperator.STRICT ? att.compareTo(thresh) < 0 : att.compareTo(thresh)<=0;
-            case ALPHABBS_1, ALPHABBS_2,  ALPHABBS_0 -> vergleichsoperator == Vergleichsoperator.STRICT? att.compareTo(thresh) >= 0
-            :att.compareTo(thresh)>0;
+            case NSA, CATEGORIZER, TRUST, MAX, MAX_NSA, MATT_TONI, COUNTING, EULER, ITS ->
+                    vergleichsoperator == Vergleichsoperator.STRICT ? att.compareTo(thresh) < 0 : att.compareTo(thresh) <= 0;
+            case ALPHABBS_1, ALPHABBS_2, ALPHABBS_0 ->
+                    vergleichsoperator == Vergleichsoperator.STRICT ? att.compareTo(thresh) >= 0
+                            : att.compareTo(thresh) > 0;
 
         };
 

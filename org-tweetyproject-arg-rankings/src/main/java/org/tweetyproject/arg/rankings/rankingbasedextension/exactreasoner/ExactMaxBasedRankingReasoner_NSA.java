@@ -20,7 +20,6 @@ package org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 import org.tweetyproject.math.matrix.Matrix;
 
@@ -40,7 +39,7 @@ import java.util.HashSet;
  * @author Carola Bauer
  */
 
-public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
+public class ExactMaxBasedRankingReasoner_NSA extends AbstractExactNumericalPartialOrderRankingReasoner {
 
     private final BigDecimal epsilon;
     //muss zu schwellwert passen, wenn 0.00001 dann 0.6180339887498588 und 0.6180339887498948 und  0.618034 okay
@@ -55,7 +54,7 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
     private Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks;
     private ExactNumericalPartialOrder<Argument, DungTheory> ranking;
 
-    public ExactMaxBasedRankingReasoner(BigDecimal epsilon) {
+    public ExactMaxBasedRankingReasoner_NSA(BigDecimal epsilon) {
         this.epsilon = epsilon;
     }
 
@@ -75,7 +74,11 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
         int n = directAttackMatrix.getXDimension();
         valuations = new BigDecimal[n];	 //Stores valuations of the current iteration
         for (int i=0; i<n; i++) {
-            valuations[i]=BigDecimal.valueOf(1.);
+            if (directAttackMatrix.getEntry(i,i).doubleValue()>0.) {
+                valuations[i] =BigDecimal.valueOf(0.5);
+            } else {
+                valuations[i] = BigDecimal.valueOf(1.);
+            }
         }
 
 
@@ -115,6 +118,10 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
      */
     private BigDecimal calculateMaxBasedFunction(BigDecimal[] vOld, Matrix directAttackMatrix, int i) {
         var max = BigDecimal.valueOf(0.);
+
+        if (directAttackMatrix.getEntry(i,i).doubleValue()>0.) {
+            return BigDecimal.valueOf(0.5);
+        }
 
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {

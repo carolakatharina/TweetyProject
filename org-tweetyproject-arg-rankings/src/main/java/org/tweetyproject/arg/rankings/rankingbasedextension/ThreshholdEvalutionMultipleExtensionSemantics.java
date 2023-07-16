@@ -22,7 +22,6 @@ import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
 import org.tweetyproject.arg.dung.parser.ApxParser;
 import org.tweetyproject.arg.dung.principles.ExtensionbasedPrincipleEvaluator;
 import org.tweetyproject.arg.dung.principles.Principle;
-import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.rankingbasedextension.evaluation.CsvThreshholdEvaluationWriter;
 import org.tweetyproject.arg.rankings.rankingbasedextension.evaluation.LineChartDrawing;
@@ -34,8 +33,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.*;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Vergleichsoperator.STRICT;
 
@@ -46,42 +45,61 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner
  *
  * @author Carola Bauer
  */
-public class NewSemanticsCompleteEvalution {
+public class ThreshholdEvalutionMultipleExtensionSemantics {
     private static Collection<Principle> all_principles;
 
-    private static BigDecimal[] epsilon_values = {
+    private static BigDecimal[] epsilon_values = { //BigDecimal.valueOf(0.01),BigDecimal.valueOf(0.001), BigDecimal.valueOf(0.00001),
             BigDecimal.valueOf(0.0001)
     };
 
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
-            List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
-                    //ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF
+            List.of(/*ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
 
+                    RankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF,
+                    RankingBasedExtensionReasoner.Vorgehensweise.INC_BUDGET,
+                     */
+                    //ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.MAX_CF
+                    ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.MAX_CF_ADMISSIBLE
+                    //ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF
             ));
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = Arrays.asList(
 
-            ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH
-            //ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_REL_STRENGTH,
-            //ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ATT_ABS_STRENGTH
-
+            //RankingBasedExtensionReasoner.Akzeptanzbedingung.values()
+            RB_ARG_ABS_STRENGTH
+            //RB_ATT_ABS_STRENGTH
     );
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            //MAX,
-            CATEGORIZER
-            /*, NSA,
-            COUNTING,
-            EULER,
+            /*MAX,
             TRUST,
             COUNTING,
-            ITS,
+            MATT_TONI,
+            CATEGORIZER,
+
+             */
+            MAX
+            /*ITS,
+            EULER,
+
+
 
             MATT_TONI
 
              */
+            /* EULER,
+            TRUST,
+            ITS
 
+             */
+
+
+
+            /*,ALPHABBS_1,
+             ALPHABBS_0,
+            ALPHABBS_2*/
+            //CATEGORIZER
 
     ));
 
@@ -89,10 +107,10 @@ public class NewSemanticsCompleteEvalution {
         all_principles = new HashSet<>();
 
         all_principles.add(Principle.ADMISSIBILITY);
-        /*all_principles.add(Principle.STRONG_ADMISSIBILITY);
+        all_principles.add(Principle.STRONG_ADMISSIBILITY);
         all_principles.add(Principle.REDUCT_ADM);
         all_principles.add(Principle.SEMIQUAL_ADM);
-        all_principles.add(Principle.WEAK_ADMISSIBILITY);
+        //all_principles.add(Principle.WEAK_ADMISSIBILITY);
         all_principles.add(Principle.CONFLICT_FREE);
         all_principles.add(Principle.DEFENCE);
         all_principles.add(Principle.NAIVETY);
@@ -103,12 +121,9 @@ public class NewSemanticsCompleteEvalution {
         all_principles.add(Principle.INRA);
         all_principles.add(Principle.MODULARIZATION);
         all_principles.add(Principle.SCC_RECURSIVENESS);
+
+
         all_principles.add(Principle.DIRECTIONALITY);
-
-         */
-
-
-
 
 
         List<String[]> pathsuffixe = new ArrayList<>();
@@ -130,13 +145,16 @@ public class NewSemanticsCompleteEvalution {
     }
 
     public static void Example(ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics, String[] pathsuffix) throws IOException {
-        var threshholds = ThresholdValuesForRBSemantics.getThresholdForSemantics(rankingSemantics, akzeptanzbedingung);
+        List<BigDecimal> threshholds = new ArrayList<>();
+        for (BigDecimal bigDecimal : ThresholdValuesForRBSemantics.getThresholdForSemantics(rankingSemantics, akzeptanzbedingung)) {
+            threshholds.add(bigDecimal);
+        }
 
 
         File[] apxFiles;
         List<ThresholdEvaluationObject> data = new ArrayList<>();
         apxFiles = new File(
-                "C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all_withoutbigafs")
+                "C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data_results")
                 .listFiles(new ApxFilenameFilter());
         for (var vorg : vorgehen) {
             for (var epsilon : epsilon_values) {
@@ -153,14 +171,18 @@ public class NewSemanticsCompleteEvalution {
                     for (var vergleichsop : List.of(STRICT)) {
 
                         reasoner = new ExactGeneralRankingBasedExtensionReasoner(akzeptanzbedingung,
-                                rankingSemantics, vorg, thresh, vergleichsop, epsilon);
+                                vorg, vergleichsop, epsilon,thresh,
+                                ThresholdValuesForRBSemantics.getThresholdForSemantics(CATEGORIZER, RB_ARG_ABS_STRENGTH)[0],
+                                rankingSemantics, CATEGORIZER);
                         ExtensionbasedPrincipleEvaluator evaluator = new ExtensionbasedPrincipleEvaluator(dg,
                                 reasoner, all_principles);
+                        DetailedRankingExtensionbasedEvaluator ev2 = new DetailedRankingExtensionbasedEvaluator(dg, reasoner, List.of());
 
                         List<Principle> principlesNotFulfilled = new ArrayList<>();
                         List<Double> nodePercentageExt = new ArrayList<>();
 
-                        var ev = evaluator.evaluate(apxFiles.length, false);
+                        var ev = evaluator.evaluate(apxFiles.length);
+                        var rep =ev2.evaluateForMultiple(apxFiles.length);
                         List<Principle> principlesFulfilled = new ArrayList<>();
 
 
@@ -168,15 +190,13 @@ public class NewSemanticsCompleteEvalution {
 
                             if (ev.getNegativeInstances(princ).size() > 0) {
                                 principlesNotFulfilled.add(princ);
-                                System.out.print("negativ");
-                                ev.getNegativeInstances(princ)
-                                        .stream().forEach(str -> System.out.println(str));
                             } else {
                                 principlesFulfilled.add(princ);
 
                             }
                         }
                         System.out.println(ev.prettyPrint());
+                        rep.printForMultiple(rankingSemantics, thresh);
 
                         principles_fulfilled.add(principlesFulfilled);
                         principles_not_fulfilled.add(principlesNotFulfilled);
@@ -185,26 +205,19 @@ public class NewSemanticsCompleteEvalution {
 
                         //System.out.println(evaluator.evaluate(1000, true).prettyPrint());
                     }
-
-                    data.add(new ThresholdEvaluationObject(bezeichnung, principles_fulfilled, principles_not_fulfilled, List.of(threshholds), percentage_of_ext_nodes));
                 }
+                data.add(new ThresholdEvaluationObject(bezeichnung, principles_fulfilled, principles_not_fulfilled, threshholds, percentage_of_ext_nodes));
 
             }
-
-
-            new LineChartDrawing("Complete_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + vorg, "Value for threshold delta", "Number of Principles fulfilled", data);
-            new CsvThreshholdEvaluationWriter("Complete_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + vorg, "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
-            new CsvThreshholdEvaluationWriter("Complete_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + vorg, "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
-
         }
+
+        new LineChartDrawing("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] +Math.random() + "_maxcfNEU", "Value for threshold delta", "Number of Principles fulfilled", data);
+        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] +Math.random() +"_maxcfNEU", "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
+        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + Math.random() +"_maxcfNEU", "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
+
         //csv: givenDataArray_whenConvertToCSV_thenOutputCreated("Threshold_evaluation_" + rankingSemantics + "_absolute_argument_strength", "Value for threshold delta", "Number of Principles fulfilled", data);
     }
-
-
-
-
-    }
-
+}
 
 
         /*

@@ -14,7 +14,7 @@ public class ThresholdValuesForRBSemantics {
         BigDecimal lastValue = startValue;
         values.add(startValue);
         do {
-            var newValue = lastValue.add(BigDecimal.valueOf(0.001));
+            var newValue = lastValue.add(BigDecimal.valueOf(0.01));
             values.add(newValue);
             lastValue = newValue;
         } while (lastValue.compareTo(endValue) < 0);
@@ -25,7 +25,7 @@ public class ThresholdValuesForRBSemantics {
         return switch (semantics) {
             case CATEGORIZER -> new BigDecimal[]{ExactCategorizerRankingReasoner.getMinimalValue(), ExactCategorizerRankingReasoner.getMaximalValue()};
             case COUNTING -> new BigDecimal[]{ExactCountingRankingReasoner.getMinimalValue(), ExactCountingRankingReasoner.getMaximalValue()};
-            case MAX -> new BigDecimal[]{ExactMaxBasedRankingReasoner.getMinimalValue(), ExactMaxBasedRankingReasoner.getMaximalValue()};
+            case MAX, MAX_NSA -> new BigDecimal[]{BigDecimal.valueOf(0.61), BigDecimal.valueOf(0.63)};
             case TRUST -> new BigDecimal[]{ExactTrustBasedRankingReasoner.getMinimalValue(), ExactTrustBasedRankingReasoner.getMaximalValue()};
             case NSA -> new BigDecimal[]{ExactNsaReasoner.getMinimalValue(), ExactNsaReasoner.getMaximalValue()};
             case ALPHABBS_0 -> null;
@@ -51,9 +51,9 @@ public class ThresholdValuesForRBSemantics {
                             //BigDecimal.valueOf(0.9638)  //conflict-freeness
             };
 
-            case MAX ->
+            case MAX, MAX_NSA ->
                     new BigDecimal[]{
-                            BigDecimal.valueOf(0.6181)}; //conflict-freeness+admissibility+mostprinciples
+                            BigDecimal.valueOf(0.618)}; //conflict-freeness+admissibility+mostprinciples
 
             case TRUST ->  new BigDecimal[]{
                     BigDecimal.valueOf(0.6680)}; //conflict-freeness + admissibility+am meisten
@@ -98,7 +98,7 @@ public class ThresholdValuesForRBSemantics {
                             BigDecimal.valueOf(0.285) //admissibility
                     };
 
-            case MAX ->
+            case MAX, MAX_NSA ->
                     new BigDecimal[]{
                             BigDecimal.valueOf(0.618)};
             case TRUST ->  new BigDecimal[]{

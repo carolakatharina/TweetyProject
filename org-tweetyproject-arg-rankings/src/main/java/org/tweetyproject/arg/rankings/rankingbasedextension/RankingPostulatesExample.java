@@ -169,6 +169,7 @@ public class RankingPostulatesExample {
             case ITS -> new ExactIterativeSchemaRankingReasoner(epsilon);
             case COUNTING -> new ExactCountingRankingReasoner(BigDecimal.valueOf(0.9), epsilon);
             case MAX -> new ExactMaxBasedRankingReasoner(epsilon);
+            case MAX_NSA -> new ExactMaxBasedRankingReasoner_NSA(epsilon);
             case TRUST -> new ExactTrustBasedRankingReasoner(epsilon);
             case NSA -> new ExactNsaReasoner(epsilon);
             case ALPHABBS_0 -> new ExactAlphaBurdenBasedRankingReasoner(epsilon, BigDecimal.valueOf(1.));
