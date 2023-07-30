@@ -97,11 +97,11 @@ public class RaDistDefensePrecedence extends RankingPostulate {
 				kb.getAttackers(x).stream().filter(att -> kb.isAttackedBy(att, def)).collect(Collectors.toList()).size()==1);
 	}
 
-	/*The defense of an argument x is distributed iff every attacker of x is attacked by at least
+	/*The defense of an argument x is distributed iff every attacker of x is attacked by at most
 	one argument */
 	private boolean defenseIsDistributed(Argument x, DungTheory kb) {
 		var attackers= kb.getAttackers(x);
-		return attackers.stream().allMatch(att -> kb.getAttackers(att).size()>0);
+		return attackers.stream().allMatch(att -> kb.getAttackers(att).size()<=1);
 	}
 
 }

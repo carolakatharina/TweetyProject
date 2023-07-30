@@ -14,7 +14,7 @@ public class ThresholdValuesForRBSemantics {
         BigDecimal lastValue = startValue;
         values.add(startValue);
         do {
-            var newValue = lastValue.add(BigDecimal.valueOf(0.01));
+            var newValue = lastValue.add(BigDecimal.valueOf(0.1));
             values.add(newValue);
             lastValue = newValue;
         } while (lastValue.compareTo(endValue) < 0);
@@ -25,7 +25,7 @@ public class ThresholdValuesForRBSemantics {
         return switch (semantics) {
             case CATEGORIZER -> new BigDecimal[]{ExactCategorizerRankingReasoner.getMinimalValue(), ExactCategorizerRankingReasoner.getMaximalValue()};
             case COUNTING -> new BigDecimal[]{ExactCountingRankingReasoner.getMinimalValue(), ExactCountingRankingReasoner.getMaximalValue()};
-            case MAX, MAX_NSA -> new BigDecimal[]{BigDecimal.valueOf(0.61), BigDecimal.valueOf(0.63)};
+            case MAX, MAX_NSA -> new BigDecimal[]{ExactCountingRankingReasoner.getMinimalValue(), ExactCountingRankingReasoner.getMaximalValue()};
             case TRUST -> new BigDecimal[]{ExactTrustBasedRankingReasoner.getMinimalValue(), ExactTrustBasedRankingReasoner.getMaximalValue()};
             case NSA -> new BigDecimal[]{ExactNsaReasoner.getMinimalValue(), ExactNsaReasoner.getMaximalValue()};
             case ALPHABBS_0 -> null;
@@ -42,9 +42,9 @@ public class ThresholdValuesForRBSemantics {
         return switch (semantics) {
             case CATEGORIZER ->
                     new BigDecimal[]{
-                            //BigDecimal.valueOf(0.9134), //admissibility
-                            BigDecimal.valueOf(0.917), //strong admissibility
-                            //BigDecimal.valueOf(0.6181) //conflict-freeness
+                            BigDecimal.valueOf(0.9134),
+
+                            //BigDecimal.valueOf(0.72)
             };
             case COUNTING ->
                     new BigDecimal[]{BigDecimal.valueOf(0.9939) //admissibility
@@ -53,15 +53,13 @@ public class ThresholdValuesForRBSemantics {
 
             case MAX, MAX_NSA ->
                     new BigDecimal[]{
-                            BigDecimal.valueOf(0.618)}; //conflict-freeness+admissibility+mostprinciples
+                            BigDecimal.valueOf(0.6181)}; //conflict-freeness+admissibility+mostprinciples
 
             case TRUST ->  new BigDecimal[]{
-                    BigDecimal.valueOf(0.6680)}; //conflict-freeness + admissibility+am meisten
+                    BigDecimal.valueOf(0.5)}; //conflict-freeness + admissibility+am meisten
             case NSA ->   new BigDecimal[]{
-                    //FALSCH!!! Nochmal berechnen!
-                    //BigDecimal.valueOf(0.9134), //admissibility
-                    BigDecimal.valueOf(0.68620) //cf und reduct admissbility
-                    //BigDecimal.valueOf(0.6181) //conflict-freeness
+
+                    BigDecimal.valueOf(0.687) //cf, sq und reduct admissbility
             }; //conflict-freeness
             case ALPHABBS_0 -> null;
             case ALPHABBS_1 -> null;
@@ -69,7 +67,7 @@ public class ThresholdValuesForRBSemantics {
             case EULER ->  new BigDecimal[]{
                     BigDecimal.valueOf(0.5672)}; //conflict-freeness+admissibility+mostprinciples
             case ITS ->
-                    new BigDecimal[]{BigDecimal.valueOf(0.6341) };//conflict-freeness+admissibility+mostprinciples
+                    new BigDecimal[]{BigDecimal.valueOf(0.5) };//conflict-freeness+admissibility+mostprinciples
             case MATT_TONI ->
                     new BigDecimal[]{BigDecimal.valueOf(0.5556) };
         };
@@ -102,7 +100,7 @@ public class ThresholdValuesForRBSemantics {
                     new BigDecimal[]{
                             BigDecimal.valueOf(0.618)};
             case TRUST ->  new BigDecimal[]{
-                    BigDecimal.valueOf(0.6666)};
+                    BigDecimal.valueOf(0.49999)};
             case NSA ->  new BigDecimal[]{BigDecimal.valueOf(0.726)
             };
             case ALPHABBS_0 -> null;
@@ -110,8 +108,8 @@ public class ThresholdValuesForRBSemantics {
             case ALPHABBS_2 -> null;
             case EULER ->  new BigDecimal[]{
                     BigDecimal.valueOf(0.567)};
-            case ITS ->
-                    new BigDecimal[]{BigDecimal.valueOf(0.633333) };
+            case ITS -> new BigDecimal[]{
+                    BigDecimal.valueOf(0.49999)};
             case MATT_TONI ->
                     new BigDecimal[]{BigDecimal.valueOf(0.251) };
         };

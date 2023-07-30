@@ -107,7 +107,7 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractExactNumericalP
         BigDecimal max = BigDecimal.valueOf(0.);
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL128);
+            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL32);
             if (attacker.compareTo(max)>0) {
                 max = attacker;
             }
@@ -116,7 +116,8 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractExactNumericalP
         var var2 = BigDecimal.valueOf(1.).subtract(max);
 
 
-        return (var1.multiply(var2.min(BigDecimal.valueOf(0.5))).add(var2.max(BigDecimal.valueOf(0.5)), MathContext.DECIMAL128));
+        return (var1.multiply(var2.min(BigDecimal.valueOf(0.5)))
+                .add(vOld[i].multiply(var2.max(BigDecimal.valueOf(0.5))), MathContext.DECIMAL32));
 
     }
 
@@ -132,10 +133,10 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractExactNumericalP
         var sum = BigDecimal.valueOf(0.0);
         for (int i = 0; i < v.length; i++) {
             var distance = v[i].subtract(vOld[i]);
-            sum = sum.add(distance.pow(2), MathContext.DECIMAL128);
+            sum = sum.add(distance.pow(2), MathContext.DECIMAL32);
         }
 
-        BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
+        BigDecimal result = sum.sqrt(MathContext.DECIMAL32);
         return result;
     }
 

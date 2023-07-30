@@ -73,6 +73,8 @@ public abstract class RankingPostulate implements Postulate<Argument> {
 	public static final RankingPostulate TOTAL = new RaTotal();
 	/** The VOIDPRECEDENCE postulate **/
 	public static final RankingPostulate VOIDPRECEDENCE = new RaVoidPrecedence();
+
+	public static final RankingPostulate COUNTING = new RaCounting();
 	
 	/* (non-Javadoc)
 	 * @see org.tweetyproject.commons.postulates.Postulate#isApplicable(java.util.Collection)

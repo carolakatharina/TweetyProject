@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.*;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Vergleichsoperator.NOT_STRICT;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Vergleichsoperator.STRICT;
 
 /**
@@ -55,8 +56,9 @@ public class NewSemanticsCompleteEvalution {
 
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
-            List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
+            //List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
                     //ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF
+            List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
 
             ));
 
@@ -69,18 +71,20 @@ public class NewSemanticsCompleteEvalution {
     );
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            //MAX,
-            CATEGORIZER
-            /*, NSA,
-            COUNTING,
+            MAX,
+            //CATEGORIZER
+            //, NSA,
+            //COUNTING,
             EULER,
             TRUST,
-            COUNTING,
-            ITS,
+
+            ITS /*,
 
             MATT_TONI
 
              */
+
+
 
 
     ));
@@ -160,7 +164,7 @@ public class NewSemanticsCompleteEvalution {
                         List<Principle> principlesNotFulfilled = new ArrayList<>();
                         List<Double> nodePercentageExt = new ArrayList<>();
 
-                        var ev = evaluator.evaluate(apxFiles.length, false);
+                        var ev = evaluator.evaluate(apxFiles.length, true);
                         List<Principle> principlesFulfilled = new ArrayList<>();
 
 
@@ -180,7 +184,7 @@ public class NewSemanticsCompleteEvalution {
 
                         principles_fulfilled.add(principlesFulfilled);
                         principles_not_fulfilled.add(principlesNotFulfilled);
-                        percentage_of_ext_nodes.add(ev.getPercentagesNodes().stream().mapToDouble(perc -> (double) perc).sum() / Double.valueOf(ev.getPercentagesNodes().size()));
+                        //percentage_of_ext_nodes.add(ev.getPercentagesNodes().stream().mapToDouble(perc -> (double) perc).sum() / Double.valueOf(ev.getPercentagesNodes().size()));
 
 
                         //System.out.println(evaluator.evaluate(1000, true).prettyPrint());
@@ -192,9 +196,9 @@ public class NewSemanticsCompleteEvalution {
             }
 
 
-            new LineChartDrawing("Complete_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + vorg, "Value for threshold delta", "Number of Principles fulfilled", data);
-            new CsvThreshholdEvaluationWriter("Complete_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + vorg, "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
-            new CsvThreshholdEvaluationWriter("Complete_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + vorg, "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
+            new LineChartDrawing("Complete_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0]+Math.random() + vorg, "Value for threshold delta", "Number of Principles fulfilled", data);
+            new CsvThreshholdEvaluationWriter("Complete_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0]+Math.random() + vorg, "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
+            new CsvThreshholdEvaluationWriter("Complete_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] +Math.random()+ vorg, "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
 
         }
         //csv: givenDataArray_whenConvertToCSV_thenOutputCreated("Threshold_evaluation_" + rankingSemantics + "_absolute_argument_strength", "Value for threshold delta", "Number of Principles fulfilled", data);

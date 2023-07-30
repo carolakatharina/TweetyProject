@@ -22,6 +22,8 @@ import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
 import org.tweetyproject.arg.dung.parser.ApxParser;
 import org.tweetyproject.arg.dung.principles.ExtensionbasedPrincipleEvaluator;
 import org.tweetyproject.arg.dung.principles.Principle;
+import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
+import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.rankingbasedextension.evaluation.CsvThreshholdEvaluationWriter;
 import org.tweetyproject.arg.rankings.rankingbasedextension.evaluation.LineChartDrawing;
@@ -34,9 +36,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH;
-import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ATT_ABS_STRENGTH;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.*;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.*;
+import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Vergleichsoperator.NOT_STRICT;
 import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Vergleichsoperator.STRICT;
 
 /**
@@ -49,8 +51,11 @@ import static org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner
 public class ThreshholdEvalution {
     private static Collection<Principle> all_principles;
 
-    private static BigDecimal[] epsilon_values = { //BigDecimal.valueOf(0.01),BigDecimal.valueOf(0.001), BigDecimal.valueOf(0.00001),
+    private static BigDecimal[] epsilon_values = {
+            //BigDecimal.valueOf(0.01),BigDecimal.valueOf(0.001),
             BigDecimal.valueOf(0.0001)
+            //, BigDecimal.valueOf(0.00001)
+
     };
 
 
@@ -71,6 +76,7 @@ public class ThreshholdEvalution {
             //RankingBasedExtensionReasoner.Akzeptanzbedingung.values()
             RB_ARG_ABS_STRENGTH
             //RB_ATT_ABS_STRENGTH
+            //RB_ARG_REL_STRENGTH
     );
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
@@ -81,7 +87,7 @@ public class ThreshholdEvalution {
             CATEGORIZER,
 
              */
-            NSA
+            //NSA
             /*ITS,
             EULER,
 
@@ -96,11 +102,25 @@ public class ThreshholdEvalution {
 
              */
 
+            CATEGORIZER,
+            COUNTING,
+            NSA
+            /*ITS,
+
+            TRUST,
+            MAX,
+            EULER,
+            MATT_TONI
+
+             */
+
+
 
 
             /*,ALPHABBS_1,
              ALPHABBS_0,
             ALPHABBS_2*/
+
 
     ));
 
@@ -124,7 +144,7 @@ public class ThreshholdEvalution {
         all_principles.add(Principle.SCC_RECURSIVENESS);
 
 
-        all_principles.add(Principle.DIRECTIONALITY);
+        //all_principles.add(Principle.DIRECTIONALITY);
 
 
         List<String[]> pathsuffixe = new ArrayList<>();
@@ -151,13 +171,17 @@ public class ThreshholdEvalution {
 
         File[] apxFiles;
         List<ThresholdEvaluationObject> data = new ArrayList<>();
-        apxFiles = new File(
+        /*apxFiles = new File(
                 "C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data_results")
                 .listFiles(new ApxFilenameFilter());
+
+         */
+
         for (var vorg : vorgehen) {
             for (var epsilon : epsilon_values) {
 
-                var dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
+                //var dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
+                var dg = new EnumeratingDungTheoryGenerator();
                 String bezeichnung = rankingSemantics + " mit Epsilon=" + epsilon;
                 List<List<Principle>> principles_fulfilled = new ArrayList<>();
                 List<List<Principle>> principles_not_fulfilled = new ArrayList<>();
@@ -174,9 +198,11 @@ public class ThreshholdEvalution {
                                 reasoner, all_principles);
 
                         List<Principle> principlesNotFulfilled = new ArrayList<>();
-                        List<Double> nodePercentageExt = new ArrayList<>();
 
-                        var ev = evaluator.evaluate(apxFiles.length, true);
+                        var ev = evaluator.evaluate(
+                                10000,
+                                //apxFiles.length,
+                                true);
                         List<Principle> principlesFulfilled = new ArrayList<>();
 
 
@@ -204,9 +230,9 @@ public class ThreshholdEvalution {
             }
         }
 
-        new LineChartDrawing("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_simpl2", "Value for threshold delta", "Number of Principles fulfilled", data);
-        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_simpl2", "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
-        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + "_simpl2all", "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
+        new LineChartDrawing("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + Math.random()+"_numbersversuch", "Value for threshold delta", "Number of Principles fulfilled", data);
+        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + Math.random()+"_numbersversuch", "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
+        new CsvThreshholdEvaluationWriter("Threshold_evaluation_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + pathsuffix[0] + Math.random()+"_numbersversuch", "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
 
         //csv: givenDataArray_whenConvertToCSV_thenOutputCreated("Threshold_evaluation_" + rankingSemantics + "_absolute_argument_strength", "Value for threshold delta", "Number of Principles fulfilled", data);
     }

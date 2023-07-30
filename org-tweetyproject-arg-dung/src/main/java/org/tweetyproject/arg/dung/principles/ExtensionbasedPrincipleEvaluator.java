@@ -83,9 +83,10 @@ public class ExtensionbasedPrincipleEvaluator extends PostulateEvaluator {
 		DungTheory instance;
 		for(int i = 0; i < num; i++) {
 			instance = (DungTheory) this.getIterator().next();
+			var maxAttacks = instance.countAttacks();
 
 			exts = ((AbstractExtensionReasoner) ev).getModels(instance);
-			//rep.addPercentage(Double.valueOf(exts.stream().findFirst().get().size())/Double.valueOf(instance.getNumberOfNodes()));
+			rep.addPercentage(Double.valueOf(exts.stream().findFirst().get().size())/Double.valueOf(instance.getNumberOfNodes()));
 			for(var principle: (List<Principle>)this.getPostulates()) {
 				System.out.println(principle);
 				if(stopWhenFailed && failedPrinciples.contains(principle))

@@ -22,13 +22,10 @@ import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
 import org.tweetyproject.arg.dung.parser.ApxParser;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.dung.util.DungTheoryGenerator;
-import org.tweetyproject.arg.dung.util.EnumeratingDungTheoryGenerator;
 import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
 import org.tweetyproject.arg.rankings.postulates.RankingPostulate;
 import org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.*;
 import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
-import org.tweetyproject.arg.rankings.reasoner.TrustBasedRankingReasoner;
 import org.tweetyproject.commons.postulates.PostulateEvaluator;
 import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 
@@ -53,12 +50,16 @@ public class RankingPostulatesExample {
     private static BigDecimal epsilon = BigDecimal.valueOf(0.0001);
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            MAX, MATT_TONI
-            /*CATEGORIZER,
-            NSA , ITS, COUNTING, TRUST//, ALPHABBS_1, ALPHABBS_2
-            MATT_TONI
+            //MATT_TONI,
+            CATEGORIZER,
+            COUNTING,
+            EULER,  ITS, TRUST, MAX, NSA
 
-             */
+            //NSA , ITS, TRUST, MAX
+
+
+            //, ALPHABBS_1, ALPHABBS_2
+
 
     ));
 
@@ -66,16 +67,21 @@ public class RankingPostulatesExample {
     public static void main(String[] args) {
         all_postulates = new HashSet<>();
 
-        all_postulates.add(RankingPostulate.ABSTRACTION);
+        /*all_postulates.add(RankingPostulate.ABSTRACTION);
         all_postulates.add(RankingPostulate.ADDITIONOFATTACKBRANCH);
         all_postulates.add(RankingPostulate.ADDITIONOFDEFENSEBRANCH);
-        all_postulates.add(RankingPostulate.ATTACKVSFULLDEFENSE);
-        all_postulates.add(RankingPostulate.CARDINALITYPRECEDENCE);
+
+
+         */
+        //all_postulates.add(RankingPostulate.ATTACKVSFULLDEFENSE);
+        /*all_postulates.add(RankingPostulate.CARDINALITYPRECEDENCE);
         all_postulates.add(RankingPostulate.COUNTERTRANSITIVITY);
 
-
-        all_postulates.add(RankingPostulate.DEFENSEPRECEDENCE);
-        all_postulates.add(RankingPostulate.DISTDEFENSEPRECEDENCE);
+         */
+        all_postulates.add(RankingPostulate.COUNTING);
+        //all_postulates.add(RankingPostulate.DEFENSEPRECEDENCE);
+        //all_postulates.add(RankingPostulate.DISTDEFENSEPRECEDENCE);
+        /*
 
         all_postulates.add(RankingPostulate.INCREASEOFATTACKBRANCH);
         all_postulates.add(RankingPostulate.INCREASEOFDEFENSEBRANCH);
@@ -89,12 +95,18 @@ public class RankingPostulatesExample {
         all_postulates.add(RankingPostulate.STRICTADDITIONOFDEFENSEBRANCH);
         all_postulates.add(RankingPostulate.STRICTCOUNTERTRANSITIVITY);
         all_postulates.add(RankingPostulate.TOTAL);
-        all_postulates.add(RankingPostulate.VOIDPRECEDENCE);
+
+         */
+        //all_postulates.add(RankingPostulate.VOIDPRECEDENCE);
+        File[] apxFiles;
+        apxFiles = new File(
+                "C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all_withoutbigafs")
+                .listFiles(new ApxFilenameFilter());
 
 
         for (var rank : rank_semantics) {
 
-            Example(rank);
+            Example(rank, apxFiles);
 
         }
 
@@ -102,15 +114,15 @@ public class RankingPostulatesExample {
     }
 
 
-    public static void Example(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics) {
+    public static void Example(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics, File[] apxFiles) {
 
-        DungTheoryGenerator dg = new EnumeratingDungTheoryGenerator();
+        var dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
         PostulateEvaluator<Argument, DungTheory> evaluator;
         evaluator = new PostulateEvaluator<>(dg,
                 getReasoner(
                         rankingSemantics));
         evaluator.addAllPostulates(all_postulates);
-        System.out.println(evaluator.evaluate(20, true).prettyPrint());
+        System.out.println(evaluator.evaluate(apxFiles.length, true).prettyPrint());
 
          /*
 

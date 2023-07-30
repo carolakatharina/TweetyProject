@@ -70,7 +70,6 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
     @Override
     public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
 
-        System.out.println(kb.getNumberOfNodes());
         directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
         valuations = new BigDecimal[n];	 //Stores valuations of the current iteration
@@ -143,7 +142,7 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
         }
 
         //BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
-        System.out.println(sum);
+        //System.out.println(sum);
         return sum;
     }
 

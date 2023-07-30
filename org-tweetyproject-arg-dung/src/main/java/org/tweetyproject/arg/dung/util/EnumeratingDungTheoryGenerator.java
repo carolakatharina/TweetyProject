@@ -80,6 +80,7 @@ public class EnumeratingDungTheoryGenerator implements DungTheoryGenerator {
 	 */
 	private List<Attack> generatePossibleAttacks(Set<Argument> arguments){
 		List<Attack> result = new LinkedList<Attack>();
+
 		for(Argument a: arguments)
 			for(Argument b: arguments)
 				result.add(new Attack(a,b));

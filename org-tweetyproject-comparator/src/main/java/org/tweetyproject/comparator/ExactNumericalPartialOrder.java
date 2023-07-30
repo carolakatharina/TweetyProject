@@ -109,15 +109,15 @@ public class ExactNumericalPartialOrder<T extends Formula, R extends BeliefBase>
 	@Override
 	public boolean isStrictlyLessOrEquallyAcceptableThan(T a, T b) {
 		if (sortingType == SortingType.LEXICOGRAPHIC) {
-			BigDecimal bda = new BigDecimal((Double) (this.objectToValue.get(a).doubleValue()));
-			BigDecimal bdb = new BigDecimal((Double) (this.objectToValue.get(b).doubleValue()));
+			BigDecimal bda = this.objectToValue.get(a);
+			BigDecimal bdb = this.objectToValue.get(b);
 			bda = bda.setScale(5, RoundingMode.HALF_UP);
 			bdb = bdb.setScale(5, RoundingMode.HALF_UP);
 			return (bda.toString().compareTo(bdb.toString()) >= 0.0);
 		} else if (sortingType == SortingType.ASCENDING)
-			return this.objectToValue.get(b).doubleValue() <= this.objectToValue.get(a).doubleValue() + NumericalPartialOrder.PRECISION;
+			return this.objectToValue.get(b).doubleValue() <= this.objectToValue.get(a).doubleValue();
 		else if (sortingType == SortingType.DESCENDING)
-			return this.objectToValue.get(a).doubleValue() <= this.objectToValue.get(b).doubleValue() + NumericalPartialOrder.PRECISION;
+			return this.objectToValue.get(a).doubleValue() <= this.objectToValue.get(b).doubleValue();
 		else
 			throw new IllegalArgumentException("Unknown sorting type " + sortingType);
 

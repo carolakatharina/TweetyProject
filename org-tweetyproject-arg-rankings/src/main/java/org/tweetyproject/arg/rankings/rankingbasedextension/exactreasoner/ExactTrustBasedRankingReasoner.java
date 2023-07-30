@@ -102,17 +102,17 @@ public class ExactTrustBasedRankingReasoner extends AbstractExactNumericalPartia
         BigDecimal max = BigDecimal.valueOf(0.);
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
-            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL128);
+            BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL32);
             if (attacker.compareTo(max)>0) {
                 max = attacker;
             }
         }
 
-        var var1= BigDecimal.valueOf(0.5);
+        var var1= BigDecimal.valueOf(0.5).multiply(vOld[i]);
         var var2 =  BigDecimal.valueOf(1.).subtract(max);
         var var3 = BigDecimal.valueOf(Math.min(1., (var2.doubleValue())));
 
-        return var1.add(BigDecimal.valueOf(0.5).multiply(var3, MathContext.DECIMAL128));
+        return var1.add(BigDecimal.valueOf(0.5).multiply(var3, MathContext.DECIMAL32));
 
     }
 
@@ -130,7 +130,7 @@ public class ExactTrustBasedRankingReasoner extends AbstractExactNumericalPartia
             sum = sum.add(distance.pow(2));
         }
 
-        BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
+        BigDecimal result = sum.sqrt(MathContext.DECIMAL32);
         return result;
     }
 
