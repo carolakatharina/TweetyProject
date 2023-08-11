@@ -115,9 +115,9 @@ public class ExactNumericalPartialOrder<T extends Formula, R extends BeliefBase>
 			bdb = bdb.setScale(5, RoundingMode.HALF_UP);
 			return (bda.toString().compareTo(bdb.toString()) >= 0.0);
 		} else if (sortingType == SortingType.ASCENDING)
-			return this.objectToValue.get(b).doubleValue() <= this.objectToValue.get(a).doubleValue();
+			return this.objectToValue.get(b).compareTo(this.objectToValue.get(a))<=0;
 		else if (sortingType == SortingType.DESCENDING)
-			return this.objectToValue.get(a).doubleValue() <= this.objectToValue.get(b).doubleValue();
+			return this.objectToValue.get(a).compareTo(this.objectToValue.get(b))<=0;
 		else
 			throw new IllegalArgumentException("Unknown sorting type " + sortingType);
 

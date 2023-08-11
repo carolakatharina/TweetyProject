@@ -52,8 +52,8 @@ public class RankingPostulatesExample {
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
             //MATT_TONI,
             CATEGORIZER,
-            COUNTING,
-            EULER,  ITS, TRUST, MAX, NSA
+            COUNTING
+            //EULER,  ITS, TRUST, MAX, NSA
 
             //NSA , ITS, TRUST, MAX
 
@@ -67,6 +67,8 @@ public class RankingPostulatesExample {
     public static void main(String[] args) {
         all_postulates = new HashSet<>();
 
+        all_postulates.add(RankingPostulate.STRICTCOUNTERTRANSITIVITY);
+
         /*all_postulates.add(RankingPostulate.ABSTRACTION);
         all_postulates.add(RankingPostulate.ADDITIONOFATTACKBRANCH);
         all_postulates.add(RankingPostulate.ADDITIONOFDEFENSEBRANCH);
@@ -76,9 +78,10 @@ public class RankingPostulatesExample {
         //all_postulates.add(RankingPostulate.ATTACKVSFULLDEFENSE);
         /*all_postulates.add(RankingPostulate.CARDINALITYPRECEDENCE);
         all_postulates.add(RankingPostulate.COUNTERTRANSITIVITY);
+        all_postulates.add(RankingPostulate.STRICTCOUNTERTRANSITIVITY);
 
          */
-        all_postulates.add(RankingPostulate.COUNTING);
+        //all_postulates.add(RankingPostulate.COUNTING);
         //all_postulates.add(RankingPostulate.DEFENSEPRECEDENCE);
         //all_postulates.add(RankingPostulate.DISTDEFENSEPRECEDENCE);
         /*
@@ -122,7 +125,7 @@ public class RankingPostulatesExample {
                 getReasoner(
                         rankingSemantics));
         evaluator.addAllPostulates(all_postulates);
-        System.out.println(evaluator.evaluate(apxFiles.length, true).prettyPrint());
+        System.out.println(evaluator.evaluate(apxFiles.length, false).prettyPrint());
 
          /*
 
