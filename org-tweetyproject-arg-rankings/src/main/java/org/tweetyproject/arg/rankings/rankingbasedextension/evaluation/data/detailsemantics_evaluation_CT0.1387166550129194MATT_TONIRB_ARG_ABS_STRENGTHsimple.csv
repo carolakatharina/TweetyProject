@@ -1,0 +1,22 @@
+"AF,Ext,Ranking,grounded,Ideal,Stable,,Pref, Compl""+""
+"
+"<{ a1, a2, a3, a0 },[(a1,a2), (a2,a1), (a2,a3)]>",{a0},"{a1=0.5, a2=0.5, a3=0.4166666567325592, a0=1.0}",{a0},{a0},"[{a1,a3,a0}, {a2,a0}]","[{a1,a3,a0}, {a2,a0}]","[{a1,a3,a0}, {a0}, {a2,a0}]"
+"ExactGeneralRankingBasedExtensionReasoner RESULTS
+----------
+Postulate                                            posInstances notApplicable negInstances
+Admissibility                                        1            0             0
+CF-Reinstatement                                     1            0             0
+Conflict-Free                                        1            0             0
+Defence                                              1            0             0
+Directionality                                       0            0             1
+I-Maximality                                         1            0             0
+Irrelevance of Necessarily Rejected Arguments (INRA) 1            0             0
+Modularization                                       1            0             0
+Naivety                                              0            0             1
+Reduct Admissibility                                 1            0             0
+Reinstatement                                        1            0             0
+SCC Decomposability                                  0            0             1
+Semi-Qualified Admissibility                         1            0             0
+Strong Admissibility                                 1            0             0
+Weak Reinstatement                                   1            0             0
+"
