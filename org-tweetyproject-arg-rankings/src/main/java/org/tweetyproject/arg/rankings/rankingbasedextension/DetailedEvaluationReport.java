@@ -33,7 +33,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Summarises the results of a postulate evaluation.
@@ -115,17 +118,17 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 	 * @return an easy-to-read string representation of the report in which
 	 * the results are ordered alphabetically by postulate name.
 	 */
-	public void printForSimple(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics) throws IOException {
+	public void printForSimple(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung) throws IOException {
 
-		var headers = "AF,"+"Ext,"+"Ranking,"+"equalsgrounded,"+"equalsIdeal"+"equalsStable"+"\n";
+		var headers = "AF,"+"Ext,"+"Ranking,"+"grounded,"+"Ideal,"+"Stable,"+",Pref, Compl, Percentage\"+\"\n";
 
 
 
-		createCsvForSimple(headers, semantics );
+		createCsvForSimple(headers, semantics, akzeptanzbedingung );
 	}
-	public void createCsvForSimple(String headers, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics) throws IOException {
-		BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\detailsemantics_evaluation_argmaxcf" +
-				Math.random() + semantics+".csv"));
+	public void createCsvForSimple(String headers, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung) throws IOException {
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\detailsemantics_evaluation_CT" +
+				Math.random() + semantics+akzeptanzbedingung+".csv"));
 
 		CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
 				.setHeader(headers)
@@ -134,18 +137,24 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 		var simpleGroundedReasoner = new SimpleGroundedReasoner();
 		var simpleIdealReasoner = new SimpleIdealReasoner();
 		var simpleStableReasoner = new SimpleStableReasoner();
+		var simplePrefReasoner = new SimplePreferredReasoner();
+		var simpleCompleteReasoner = new SimpleCompleteReasoner();
 
 		try (final CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
 			try {
 				for (int i = 0; i < this.allAfs.size(); i++) {
 					var af = (DungTheory) this.allAfs.get(i);
 					var ranking = this.rankings.get(i);
-					var grounded = simpleGroundedReasoner.getModels(af);
-					var ideal = simpleIdealReasoner.getModels(af);
+					Extension grounded = simpleGroundedReasoner.getModel(af);
+					Extension ideal = simpleIdealReasoner.getModel(af);
+					var pref = simplePrefReasoner.getModels(af);
+					var compl = simpleCompleteReasoner.getModels(af);
 					var ext = (Extension) this.getAllExtensions().get(i);
 					var stab = simpleStableReasoner.getModels(af);
-					printer.printRecord(af, ext,ranking, grounded.equals(ext), ideal.equals(ext), stab==null?false:stab.equals(ext));
+					printer.printRecord(af, ext,ranking, grounded, ideal, stab, pref, compl);
+					//printer.printRecord(af, ranking, ext);
 				}
+				printer.print(this.prettyPrint());
 
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -169,7 +178,7 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 		createCsvForMultiple(headers, semantics, threshold );
 	}
 	public void createCsvForMultiple(String headers, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, BigDecimal threshold) throws IOException {
-		BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\prefmultiple\\detailsemantics_evaluation_att" +
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\detailsemantics_evaluation_arg" +
 				Math.random() + "_threshold"+threshold+semantics+".csv"));
 
 		CSVFormat csvFormat = CSVFormat.DEFAULT.builder()

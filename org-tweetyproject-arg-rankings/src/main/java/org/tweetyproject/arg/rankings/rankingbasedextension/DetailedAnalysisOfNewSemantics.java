@@ -52,29 +52,51 @@ public class DetailedAnalysisOfNewSemantics {
 
 
         private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
-                List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
+                List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.ADMISSIBLE
 
                 ));
 
         private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = Arrays.asList(
 
-                //ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH
+                ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH
+
                 //ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_REL_STRENGTH,
-                ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ATT_ABS_STRENGTH
+                //ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ATT_ABS_STRENGTH
+
+
+
 
         );
 
         private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-                //NSA,
-                //CATEGORIZER,
+                CATEGORIZER,
+
+
+
+               NSA,
+
+
+
+                COUNTING,
 
 
                 MAX,
-                //COUNTING,
+
+
+
+
+
+
+
                 EULER,
                 TRUST,
-                //COUNTING,
-                ITS//, MATT_TONI
+
+
+
+
+                MATT_TONI
+
+
 
 
 
@@ -87,14 +109,19 @@ public class DetailedAnalysisOfNewSemantics {
 
         public static void main(String[] args) throws IOException {
             all_principles = new HashSet<>();
+            all_principles.add(Principle.REINSTATEMENT);
+            all_principles.add(Principle.WEAK_REINSTATEMENT);
+            all_principles.add(Principle.CF_REINSTATEMENT);
 
             all_principles.add(Principle.ADMISSIBILITY);
             all_principles.add(Principle.STRONG_ADMISSIBILITY);
             all_principles.add(Principle.REDUCT_ADM);
+
+
             all_principles.add(Principle.SEMIQUAL_ADM);
             //all_principles.add(Principle.WEAK_ADMISSIBILITY);
             all_principles.add(Principle.CONFLICT_FREE);
-            /*all_principles.add(Principle.DEFENCE);
+            all_principles.add(Principle.DEFENCE);
             all_principles.add(Principle.NAIVETY);
             all_principles.add(Principle.I_MAXIMALITY);
             all_principles.add(Principle.REINSTATEMENT);
@@ -104,17 +131,17 @@ public class DetailedAnalysisOfNewSemantics {
             all_principles.add(Principle.MODULARIZATION);
             all_principles.add(Principle.SCC_RECURSIVENESS);
 
-             */
-
-
-            //all_principles.add(Principle.DIRECTIONALITY);
 
 
 
+
+
+
+            all_principles.add(Principle.DIRECTIONALITY);
 
             List<String[]> pathsuffixe = new ArrayList<>();
             pathsuffixe.add(new String[]{"all_withoutbigafs"});
-            //new String []{"\\iccma\\", "iccma19", "\\A"},
+            //>new String []{"\\iccma\\", "iccma19", "\\A"},
             //new String []{"\\iccma\\", "iccma19", "\\B"},
             //new String []{"\\iccma\\", "iccma19", "\\C"},
             //new String[] {"\\iccma\\", "iccma19", "\\selected"});
@@ -161,7 +188,7 @@ public class DetailedAnalysisOfNewSemantics {
 
 
                             System.out.println(ev.prettyPrint());
-                            ev.printForSimple(rankingSemantics);
+                            ev.printForSimple(rankingSemantics, akzeptanzbedingung);
 
 
 

@@ -26,6 +26,7 @@ import org.tweetyproject.arg.dung.reasoner.WeaklyAdmissibleReasoner;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.comparator.ExactNumericalPartialOrder;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 
 public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
-    BigDecimal threshholdHelper;
+
     RankingSemantics rankingSemantics;
     RankingSemantics rankingSemanticsHelp;
 
@@ -50,12 +51,11 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     private Map<Argument, BigDecimal> ranking;
 
     private AbstractExactNumericalPartialOrderRankingReasoner reasoner;
-    private AbstractExactNumericalPartialOrderRankingReasoner reasonerHelper;
     private Collection<Extension<DungTheory>> finalAllExtensions;
 
 
     public enum Vorgehensweise {
-        STRONGEST_CF, MAX_CF, CF, INC_BUDGET, MAX_CF_ADMISSIBLE, SIMPLE
+        STRONGEST_CF, MAX_CF, CF, INC_BUDGET, ADMISSIBLE, SIMPLE
 
     }
 
@@ -94,7 +94,6 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
                                                      RankingSemantics semantics, Vorgehensweise vorgehensweise, BigDecimal threshhold,
                                                      Vergleichsoperator vergleichsoperator, BigDecimal epsilon) {
 
-
         this.rankingSemantics = semantics;
         this.akzeptanzbedingung=akzeptanzbedingung;
         this.vorgehensweise = vorgehensweise;
@@ -127,8 +126,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
         this.epsilon = epsilon;
         this.reasoner = getReasoner(semantics);
         this.rankingSemanticsHelp = rankingSemanticsHelp;
-        this.reasonerHelper = getReasoner(rankingSemanticsHelp);
-        this.threshholdHelper = threshholdHelper;
+
 
 
 
@@ -171,52 +169,63 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
         ranking = getRanking(bbase);
         System.out.println(ranking);
 
-        //TODO: Carola implement missing branches
-        return switch (this.vorgehensweise) {
+        var exts = switch (this.vorgehensweise) {
             case INC_BUDGET -> null;
             case MAX_CF -> getExtensionsForSemantics_MaxConflictfree(ranking, bbase);
             case CF -> getExtensionsForSemantics_Conflictfree(ranking, bbase);
-            case MAX_CF_ADMISSIBLE -> getMaximalAdmissibleExts(ranking, bbase);
+            case ADMISSIBLE -> getAdmissibleExt(bbase);
             case SIMPLE -> getExtensionsForSemantics_Simple(ranking, bbase);
             case STRONGEST_CF -> getStrongest(ranking, getExtensionsForSemantics_MaxConflictfree(ranking, bbase));
         };
 
-    }
 
-    private Set<Extension<DungTheory>> getMaximalAdmissibleExts(Map<Argument, BigDecimal> ranking, DungTheory bbase) {
-        var exts = getExtensionsForSemantics_MaxConflictfree(ranking, bbase)
-                .stream().map(ext -> getAdmissibleExt(bbase, ext))
-                .filter(ext -> ext != null)
-                .collect(Collectors.toCollection(HashSet::new));
-        if (exts.size() == 0) {
-            return Set.of(new Extension());
-        }
+
         return exts;
+
     }
 
-    private Extension<DungTheory> getAdmissibleExt(DungTheory bbase, Extension<DungTheory> ext) {
-        if (ext.size() == 0) {
-            return null;
-        }
-        if (bbase.isAdmissable(ext)) {
-            return ext;
+
+
+    private HashSet<Extension<DungTheory>> getAdmissibleExt(DungTheory bbase) {
+
+        HashSet<Extension<DungTheory>> exts = new HashSet<>();
+        var rankingOrdered = this.sortByValue(new HashMap<>(ranking));
+        Collections.reverse(rankingOrdered);
+        var candidates = new ArrayList<>();
+        Extension<DungTheory> ext = new Extension();
+
+        var rankingValues = rankingOrdered.stream().map(Map.Entry::getValue).distinct().collect(Collectors.toList());
+
+            for (var val : rankingValues) {
+
+                    candidates
+                            .addAll(rankingOrdered.stream()
+                                    .filter(arg -> Objects.equals(arg.getValue(), val)).map(Map.Entry::getKey).collect(Collectors.toList()));
+
+                    ext = new Extension(candidates);
+                    if (!bbase.isAdmissable(ext)) {
+                        candidates
+                                .removeAll(rankingOrdered.stream()
+                                        .filter(arg -> Objects.equals(arg.getValue(), val)).map(Map.Entry::getKey).collect(Collectors.toList()));
+                        ext = new Extension(candidates);
+                        break;
+                    }
+
+
+            }
+
+            exts.add(ext);
+
+
+
+
+        if (exts.size()==0) {
+            exts.add(new Extension<DungTheory>());
         }
 
-        if (ext.size() == 1) {
-            return null;
-        }
 
-        var ranking_neu = this.getRanking(bbase, this.reasonerHelper);
 
-        var removableArgs = ext.stream().filter(arg -> !useThresholdArg_Helper(ranking_neu.get(arg), threshholdHelper))
-                .collect(Collectors.toList());
-
-        var extNeu = new Extension<DungTheory>(ext);
-        extNeu.removeAll(removableArgs);
-        if (bbase.isAdmissable(extNeu)) {
-            return extNeu;
-        }
-        return null;
+        return exts;
 
     }
 
@@ -236,36 +245,37 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
 
 
-    public Map<Argument, BigDecimal> getRanking(DungTheory bbase) {
-
-        return new HashMap<>(reasoner.getModel(bbase));
+    public ExactNumericalPartialOrder<Argument, DungTheory> getRanking(DungTheory bbase) {
 
 
-    }
-
-    public Map<Argument, BigDecimal> getRanking(DungTheory bbase, AbstractExactNumericalPartialOrderRankingReasoner reasonerhelp) {
-
-        return new HashMap<>(reasonerhelp.getModel(bbase));
+        return reasoner.getModel(bbase);
 
 
     }
+
+
+
+        public List<Map.Entry<Argument, BigDecimal>> sortByValue(Map<Argument, BigDecimal> map) {
+
+            List<Map.Entry<Argument, BigDecimal>> list = new ArrayList<>(map.entrySet());
+            list.sort(Map.Entry.comparingByValue());
+
+
+
+            return list;
+
+    }
+
 
 
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_Simple(Map<Argument, BigDecimal> ranking,
                                                                                DungTheory bbase) {
-        finalAllExtensions = new ArrayList<>();
+        finalAllExtensions =  new HashSet<Extension<DungTheory>>();
 
 
         finalAllExtensions.add(getSetForSemantics(ranking, bbase, bbase));
 
 
-        //var grounded = new SimpleGroundedReasoner().getModel(bbase);
-        /*
-        if (!grounded.equals(maxExtension) && !maxExtension.stream().anyMatch(arg -> arg.getName().startsWith("_aux"))) {
-            System.out.println(bbase+"------- "+ranking+"------- "+maxExtension+"-------"+grounded);
-        }
-
-         */
 
         return finalAllExtensions;
     }
@@ -336,8 +346,8 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
             // absolute argument strength
             case RB_ARG_ABS_STRENGTH -> {
-                return new Extension<>(e.stream().filter(arg ->
-                        useThresholdArg(ranking.get(arg), threshhold)).collect(Collectors.toList()));
+                return new Extension<DungTheory>(e.stream().filter(arg ->
+                        useThresholdArg(ranking.get(arg), threshhold)).collect(Collectors.toSet()));
 
 
             }
@@ -347,7 +357,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
                     return attackers.stream().allMatch(att -> useThresholdArg(ranking.get(arg), ranking.get(att)));
-                }).collect(Collectors.toList()));
+                }).collect(Collectors.toSet()));
 
             }
 
@@ -356,7 +366,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
                     return attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold));
-                }).collect(Collectors.toList()));
+                }).collect(Collectors.toSet()));
             }
             // absolute argument strength and absolute attack strength
             case RB_ATT_ABS_ARG_ABS_STRENGTH -> {

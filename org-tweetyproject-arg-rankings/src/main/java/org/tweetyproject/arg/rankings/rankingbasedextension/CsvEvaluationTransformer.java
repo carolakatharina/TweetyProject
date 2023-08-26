@@ -34,12 +34,12 @@ public class CsvEvaluationTransformer {
     }
 
     public static void readAndWriteCsv() throws IOException {
-        File[] files = new File(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\results\\neuegrafiken\\").listFiles();
+        File[] files = new File(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\results\\neuegrafiken\\count").listFiles();
         for (var file : files) {
 
             var filename = file.getName();
-            if (filename.contains("korrigall") || filename.contains("simple33all") || filename.contains("simple2all")) {
-                BufferedReader reader = Files.newBufferedReader(Paths.get(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\results\\neuegrafiken\\" + filename));
+
+                BufferedReader reader = Files.newBufferedReader(Paths.get(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\results\\neuegrafiken\\count\\" + filename));
                 BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\results\\neuegrafiken\\grafik\\"+ "GRAFIK" + filename));
                 var headers = new String[all_principles.size() + 1];
                 headers[0] = "threshold delta";
@@ -90,7 +90,7 @@ public class CsvEvaluationTransformer {
                     e.printStackTrace();
                 }
 
-            }
+
         }
     }
 }
