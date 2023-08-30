@@ -50,6 +50,8 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
     private Map<Argument, BigDecimal> ranking;
 
+
+
     private AbstractExactNumericalPartialOrderRankingReasoner reasoner;
     private Collection<Extension<DungTheory>> finalAllExtensions;
 
@@ -192,23 +194,27 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
         var rankingOrdered = this.sortByValue(new HashMap<>(ranking));
         Collections.reverse(rankingOrdered);
         var candidates = new ArrayList<>();
-        Extension<DungTheory> ext = new Extension();
+        Extension ext = new Extension();
+
 
         var rankingValues = rankingOrdered.stream().map(Map.Entry::getValue).distinct().collect(Collectors.toList());
 
+        System.out.println("ranking"+rankingValues);
+
             for (var val : rankingValues) {
+                var args = rankingOrdered.stream()
+                        .filter(arg -> Objects.equals(arg.getValue(), val)).map(Map.Entry::getKey).collect(Collectors.toList());
 
                     candidates
-                            .addAll(rankingOrdered.stream()
-                                    .filter(arg -> Objects.equals(arg.getValue(), val)).map(Map.Entry::getKey).collect(Collectors.toList()));
+                            .addAll(args);
 
                     ext = new Extension(candidates);
                     if (!bbase.isAdmissable(ext)) {
                         candidates
-                                .removeAll(rankingOrdered.stream()
-                                        .filter(arg -> Objects.equals(arg.getValue(), val)).map(Map.Entry::getKey).collect(Collectors.toList()));
+                                .removeAll(args);
                         ext = new Extension(candidates);
-                        break;
+                        exts.add(ext);
+                        return exts;
                     }
 
 
@@ -217,11 +223,6 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
             exts.add(ext);
 
 
-
-
-        if (exts.size()==0) {
-            exts.add(new Extension<DungTheory>());
-        }
 
 
 

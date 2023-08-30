@@ -60,7 +60,7 @@ public class ThreshholdEvalutionMultipleExtensionSemantics {
                     RankingBasedExtensionReasoner.Vorgehensweise.INC_BUDGET,
                      */
                     //ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.MAX_CF
-                    ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.MAX_CF_ADMISSIBLE
+                    ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.ADMISSIBLE
                     //ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.STRONGEST_CF
             ));
 
@@ -179,7 +179,6 @@ public class ThreshholdEvalutionMultipleExtensionSemantics {
                         DetailedRankingExtensionbasedEvaluator ev2 = new DetailedRankingExtensionbasedEvaluator(dg, reasoner, List.of());
 
                         List<Principle> principlesNotFulfilled = new ArrayList<>();
-                        List<Double> nodePercentageExt = new ArrayList<>();
 
                         var ev = evaluator.evaluate(apxFiles.length);
                         var rep =ev2.evaluateForMultiple(apxFiles.length);

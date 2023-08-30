@@ -52,15 +52,15 @@ public class DetailedAnalysisOfNewSemantics {
 
 
         private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
-                List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.ADMISSIBLE
+                List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
 
                 ));
 
         private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = Arrays.asList(
 
-                ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH
+                //ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH
 
-                //ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_REL_STRENGTH,
+                ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_REL_STRENGTH
                 //ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ATT_ABS_STRENGTH
 
 
@@ -70,6 +70,24 @@ public class DetailedAnalysisOfNewSemantics {
 
         private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
                 CATEGORIZER,
+                NSA,
+
+
+
+                COUNTING,
+                MATT_TONI,
+                MAX,
+
+
+
+
+
+
+
+                EULER,
+                TRUST
+
+                /*,
 
 
 
@@ -95,6 +113,8 @@ public class DetailedAnalysisOfNewSemantics {
 
 
                 MATT_TONI
+
+                 */
 
 
 

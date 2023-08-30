@@ -139,6 +139,10 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 		var simpleStableReasoner = new SimpleStableReasoner();
 		var simplePrefReasoner = new SimplePreferredReasoner();
 		var simpleCompleteReasoner = new SimpleCompleteReasoner();
+		var percentage = 0.;
+		for (Double perc: (List<Double>)this.getPercentagesNodes()) {
+			percentage = percentage+perc;
+		}
 
 		try (final CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
 			try {
@@ -151,7 +155,7 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 					var compl = simpleCompleteReasoner.getModels(af);
 					var ext = (Extension) this.getAllExtensions().get(i);
 					var stab = simpleStableReasoner.getModels(af);
-					printer.printRecord(af, ext,ranking, grounded, ideal, stab, pref, compl);
+					printer.printRecord(af, ext,ranking, grounded, ideal, stab, pref, compl, (percentage/((double)this.getPercentagesNodes().size())));
 					//printer.printRecord(af, ranking, ext);
 				}
 				printer.print(this.prettyPrint());

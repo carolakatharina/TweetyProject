@@ -50,10 +50,12 @@ public class RankingPostulatesExample {
     private static BigDecimal epsilon = BigDecimal.valueOf(0.0001);
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
-            //MATT_TONI,
+
             CATEGORIZER,
-            COUNTING
-            //EULER,  ITS, TRUST, MAX, NSA
+            COUNTING,
+
+            EULER,  ITS, TRUST, MAX, NSA,
+            MATT_TONI
 
             //NSA , ITS, TRUST, MAX
 
@@ -66,6 +68,9 @@ public class RankingPostulatesExample {
 
     public static void main(String[] args) {
         all_postulates = new HashSet<>();
+
+        all_postulates.add(RankingPostulate.INCREASEOFATTACKBRANCH);
+        all_postulates.add(RankingPostulate.INCREASEOFDEFENSEBRANCH);
 
         all_postulates.add(RankingPostulate.STRICTCOUNTERTRANSITIVITY);
 
@@ -103,7 +108,7 @@ public class RankingPostulatesExample {
         //all_postulates.add(RankingPostulate.VOIDPRECEDENCE);
         File[] apxFiles;
         apxFiles = new File(
-                "C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\evaluation\\data\\all_withoutbigafs")
+                "C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rankings\\rankingbasedextension\\resources")
                 .listFiles(new ApxFilenameFilter());
 
 
