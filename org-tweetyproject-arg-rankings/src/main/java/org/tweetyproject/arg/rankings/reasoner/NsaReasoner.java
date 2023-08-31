@@ -27,33 +27,35 @@ import java.util.Collection;
 import java.util.HashSet;
 
 /**
- * This class implements the "h-categorizer" argument ranking approach that was 
- * originally proposed by [Besnard, Hunter. A logic-based theory of deductive arguments. 2001]
- * for deductive logics. It uses the Fixed-point algorithm of 
+ * This class implements the no self-attacked"h-categorizer" argument ranking approach that was
+ * proposed by [Vivien Beuselinck, Jérôme Delobelle, Srdjan Vesic.
+ * On Restricting the Impact of Self-Attacking Arguments
+ * in Gradual Semantics. 2021].
+ * It uses the Fixed-point algorithm of
  * [Pu, Zhang, Luo, Luo. Argument Ranking with Categoriser Function. KSEM 2014]
- * which allows for cycles in argumentation graphs. TODO: EXception for self-attacking Arguments
- * 
- * @see org.tweetyproject.arg.deductive.categorizer.HCategorizer
- * 
+ * which allows for cycles in argumentation graphs.
+ *
  * @author Carola Bauer
  */
 public class NsaReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
-	private double epsilon;
+	private final double epsilon;
+
 
 	/**
-	 * Create a new CountingRankingReasoner with default
+	 * Create a new NsaReasoner with default
 	 * parameters.
+	 *
 	 */
 	public NsaReasoner() {
-		this.epsilon = 0.001;
+		this.epsilon = 0.0001;
 	}
 
 	/**
-	 * Create a new CategorizerRankingReasoner with the given
+	 * Create a new NsaReasoner with the given
 	 * parameters.
 	 *
-	 * @param epsilon TODO add description
+	 * @param epsilon parameter for determining number of iterations
 	 */
 	public NsaReasoner(double epsilon) {
 		this.epsilon = epsilon;
@@ -62,17 +64,17 @@ public class NsaReasoner extends AbstractRankingReasoner<NumericalPartialOrder<A
 	@Override
 	public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
 		Collection<NumericalPartialOrder<Argument, DungTheory>> ranks 
-			= new HashSet<NumericalPartialOrder<Argument, DungTheory>>();
+			= new HashSet<>();
 		ranks.add(this.getModel(bbase));
 		return ranks;
 	}
 
 	@Override
 	public NumericalPartialOrder<Argument, DungTheory> getModel(DungTheory base) {
-		Matrix directAttackMatrix = ((DungTheory)base).getAdjacencyMatrix().transpose(); //The matrix of direct attackers
+		Matrix directAttackMatrix = base.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
 		int n = directAttackMatrix.getXDimension();
-		double valuations[] = new double[n];	 //Stores valuations of the current iteration
-		double valuationsOld[] = new double[n]; //Stores valuations of the last iteration
+		double[] valuations = new double[n];	 //Stores valuations of the current iteration
+		double[] valuationsOld = new double[n]; //Stores valuations of the last iteration
 		
 		//Keep computing valuations until the values stop changing much or converge 
 		do {
@@ -83,10 +85,10 @@ public class NsaReasoner extends AbstractRankingReasoner<NumericalPartialOrder<A
 	
 		//Use computed valuations as values for argument ranking
 		//Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
-		NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<Argument, DungTheory>();
+		NumericalPartialOrder<Argument, DungTheory> ranking = new NumericalPartialOrder<>();
 		ranking.setSortingType(NumericalPartialOrder.SortingType.DESCENDING);
 		int i = 0;
-		for (Argument a : ((DungTheory)base)) {
+		for (Argument a : base) {
 			if (directAttackMatrix.getEntry(i,i).doubleValue()!=0.){
 				ranking.put(a, 0.);
 				i++;
@@ -99,11 +101,11 @@ public class NsaReasoner extends AbstractRankingReasoner<NumericalPartialOrder<A
 	}
 
 	/**
-	 * Computes the h-Categorizer function.
+	 * Computes the nsa function.
 	 * @param vOld array of double valuations that were computed in the previous iteration
 	 * @param directAttackMatrix complete matrix of direct attacks
 	 * @param i row of the attack matrix that will be used in the calculation
-	 * @return categorizer valuation
+	 * @return nsa valuation
 	 */
 	private double calculateCategorizerFunction(double[] vOld, Matrix directAttackMatrix, int i) {
 		double c = 1.0;

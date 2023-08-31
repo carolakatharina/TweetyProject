@@ -20,12 +20,10 @@ package org.tweetyproject.arg.rankings.postulates;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.rankings.rankingbasedextension.exactreasoner.ExactGeneralRankingBasedExtensionReasoner;
 import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.comparator.GeneralComparator;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * The "Counting" postulate for gradual semantics as proposed in

@@ -1,0 +1,9 @@
+arg(A1).
+arg(A2).
+arg(A3).
+arg(A0).
+att(A1,A2).
+att(A1,A3).
+att(A2,A0).
+att(A2,A3).
+att(A3,A2).

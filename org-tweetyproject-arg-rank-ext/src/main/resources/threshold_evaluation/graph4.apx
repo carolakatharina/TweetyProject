@@ -1,0 +1,3 @@
+arg(A1).
+arg(A0).
+att(A1,A1).

@@ -220,6 +220,7 @@
     <module>org-tweetyproject-arg-dung</module>
     <module>org-tweetyproject-arg-prob</module>
     <module>org-tweetyproject-arg-rankings</module>
+    <module>org-tweetyproject-arg-rank-ext</module>
     <module>org-tweetyproject-arg-saf</module>
     <module>org-tweetyproject-arg-social</module>
     <module>org-tweetyproject-agents</module>
