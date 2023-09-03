@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.tweetyproject.arg.dung.reasoner.SimpleAdmissibleReasoner;
 import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
 import org.tweetyproject.comparator.GeneralComparator;
 import org.tweetyproject.arg.dung.syntax.Argument;
@@ -83,7 +84,15 @@ public class RaCounterTransitivity extends RankingPostulate {
 				return true;
 		}
 
-		return ranking.isStrictlyMoreOrEquallyAcceptableThan(a, b);
+		var res = ranking.isStrictlyMoreOrEquallyAcceptableThan(a, b);
+		if (res==false) {
+			System.out.println(a);
+			System.out.println(b);
+			System.out.println(dt);
+			System.out.println(ranking);
+			System.out.println(new SimpleAdmissibleReasoner().getModels(dt));
+		}
+		return res;
 	}
 
 }

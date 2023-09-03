@@ -1,2 +1,0 @@
-Bezeichnung,Value for threshold delta,Number of Principles fulfilled,principles_fulfilled,principles_not_fulfilled,node_ext_percentage
-COUNTING mit Epsilon=0.00010,0.9939,8,{Strong Admissibility / Admissibility / Directionality / Semi-Qualified Admissibility / Conflict-Free / Defence / Irrelevance of Necessarily Rejected Arguments (INRA) / Reduct Admissibility},{Reinstatement / SCC Decomposability / Naivety / CF-Reinstatement / Weak Reinstatement / Modularization / I-Maximality},[0.1335]

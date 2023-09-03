@@ -1,9 +1,0 @@
-arg(a2).
-arg(a1).
-arg(a3).
-arg(a0).
-
-att(a1,a2).
-att(a2,a1).
-att(a2,a3).
-

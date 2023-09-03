@@ -111,7 +111,7 @@ public class DetailedAnalysisOfNewSemantics {
 
 
         File[] apxFiles = new File(
-                ".\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\resources\\detailed_evaluation")
+                ".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\resources\\detailed_evaluation")
                 .listFiles(new ApxFilenameFilter());
         for (var vorg : vorgehen) {
             for (var epsilon : epsilon_values) {

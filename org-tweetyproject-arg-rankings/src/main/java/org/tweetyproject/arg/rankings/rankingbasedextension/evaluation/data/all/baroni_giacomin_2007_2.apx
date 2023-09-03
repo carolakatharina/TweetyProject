@@ -1,9 +1,0 @@
-arg(a).
-arg(b).
-arg(y).
-arg(e).
-arg(d).
-att(d,y).
-att(y,b).
-att(b,a).
-att(e,b).

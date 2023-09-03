@@ -21,6 +21,7 @@ package org.tweetyproject.arg.rankings.postulates;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.tweetyproject.arg.dung.reasoner.SimpleAdmissibleReasoner;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
 import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
@@ -68,7 +69,15 @@ public class RaQualityPrecedence extends RankingPostulate {
 		for (Argument f: dt.getAttackers(a)) 
 			if (!ranking.isStrictlyMoreAcceptableThan(c,f))
 				return true;
-		return ranking.isStrictlyMoreAcceptableThan(a, b);
+		var res= ranking.isStrictlyMoreAcceptableThan(a, b);
+		if (res==false) {
+			System.out.println(a);
+			System.out.println(b);
+			System.out.println(dt);
+			System.out.println(ranking);
+			System.out.println(new SimpleAdmissibleReasoner().getModels(dt));
+		}
+		return res;
 	}
 
 

@@ -115,7 +115,7 @@ public class ThreshholdEvalution {
         File[] apxFiles;
         List<ThresholdEvaluationObject> data = new ArrayList<>();
         apxFiles = new File(
-                "C:\\TweetyProject\\org-tweetyproject-arg-rankings\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\resources\\threshold_evaluation")
+                ".\\org-tweetyproject-arg-rank-ext\\src\\main\\resources\\threshold_evaluation")
                 .listFiles(new ApxFilenameFilter());
 
 
