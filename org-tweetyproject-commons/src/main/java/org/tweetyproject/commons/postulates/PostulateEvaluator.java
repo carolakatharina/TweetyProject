@@ -136,12 +136,10 @@ public class PostulateEvaluator<T extends Formula, U extends BeliefSet<T,?>>{
 				else {
 					rep.addNegativeInstance(postulate, instance);
 					failedPostulates.add(postulate);
-					//System.out.println(instance+" "+postulate.getName());
 				}
 			}
-
+			//System.out.println(rep);
 		}
-
 		return rep;
 	}
 	

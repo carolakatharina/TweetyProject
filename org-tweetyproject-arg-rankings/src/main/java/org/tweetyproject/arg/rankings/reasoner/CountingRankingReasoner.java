@@ -146,7 +146,7 @@ public class CountingRankingReasoner extends AbstractRankingReasoner<NumericalPa
 
 	/**
 	 * Computes the Euclidean distance between to the given column vectors.
-	 *
+	 * 
 	 * @param vOld first column vector
 	 * @param v     second column vector
 	 * @return distance between v and v_old

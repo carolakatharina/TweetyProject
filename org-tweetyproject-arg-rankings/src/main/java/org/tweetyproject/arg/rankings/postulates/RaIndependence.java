@@ -55,13 +55,13 @@ public class RaIndependence extends RankingPostulate {
 			return true;
 		if (ev.getModel((DungTheory) kb) == null)
 			return true;
-
+		
 		DungTheory dt = new DungTheory((DungTheory) kb);
 		Iterator<Argument> it = dt.iterator();
 		Argument a = it.next();
 		Argument b = it.next();
 		GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
-
+		
 		//add new arguments that are not connected to a or b
 		Argument t1 = new Argument("t");
 		Argument t2 = new Argument("t2");
@@ -69,7 +69,7 @@ public class RaIndependence extends RankingPostulate {
 		dt.add(t2);
 		dt.add(new Attack(t1, t2));
 		GeneralComparator<Argument, DungTheory> ranking2 = ev.getModel((DungTheory) dt);
-
+		
 		return ranking.compare(a, b) == ranking2.compare(a, b);
 	}
 

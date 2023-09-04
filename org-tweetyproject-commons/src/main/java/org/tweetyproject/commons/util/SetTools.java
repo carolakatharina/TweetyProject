@@ -39,20 +39,20 @@ public class SetTools<E> {
 	 * @return all subsets of "elements".
 	 */
 	public Set<Set<E>> subsets(Collection<? extends E> elements){
-		Set<Set<E>> subsets = new HashSet<Set<E>>();
+		Set<Set<E>> subsets = new HashSet<Set<E>>();		
 		if(elements.size() == 0){
 			subsets.add(new HashSet<E>());
 		}else{
 			E element = elements.iterator().next();
-
+			
 			Set<E> remainingElements = new HashSet<E>(elements);
 			remainingElements.remove(element);
 			Set<Set<E>> subsubsets = this.subsets(remainingElements);
 			for(Set<E> subsubset: subsubsets){
 				subsets.add(new HashSet<E>(subsubset));
 				subsubset.add(element);
-				subsets.add(new HashSet<E>(subsubset));
-			}
+				subsets.add(new HashSet<E>(subsubset));				
+			}				
 		}
 		return subsets;
 	}	

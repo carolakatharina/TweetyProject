@@ -95,7 +95,7 @@ public class BurdenBasedRankingReasoner extends AbstractRankingReasoner<LatticeP
 		}
 		return ranking;
 	}
-
+	
 	/**natively installed*/
 	@Override
 	public boolean isInstalled() {

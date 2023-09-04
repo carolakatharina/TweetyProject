@@ -62,7 +62,7 @@ public class RaAttackVsFullDefense extends RankingPostulate {
 		Iterator<Argument> it = dt.iterator();
 		Argument a = it.next();
 		Argument b = it.next();
-
+		
 		if (dt.getAttackers(b).size() != 1)
 			return true;
 		if (!dt.getAttackers(dt.getAttackers(b).iterator().next()).isEmpty())
