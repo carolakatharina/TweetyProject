@@ -36,6 +36,7 @@ import java.util.HashSet;
  * It uses the Fixed-point algorithm of
  * [Pu, Zhang, Luo, Luo. Argument Ranking with Categoriser Function. KSEM 2014]
  * which allows for cycles in argumentation graphs.
+ * It uses BigDecimal for more precision.
  *
  * @author Carola Bauer
  */
@@ -55,7 +56,7 @@ public class ExactNsaReasoner extends AbstractExactNumericalPartialOrderRankingR
 	 * Create a new CategorizerRankingReasoner with the given
 	 * parameters.
 	 *
-	 * @param epsilon TODO add description
+	 * @param epsilon determines number of iterations
 	 */
 	public ExactNsaReasoner(BigDecimal epsilon) {
 		this.epsilon = epsilon;

@@ -34,10 +34,11 @@ import java.util.HashSet;
  * for deductive logics. It uses the Fixed-point algorithm of 
  * [Pu, Zhang, Luo, Luo. Argument Ranking with Categoriser Function. KSEM 2014]
  * which allows for cycles in argumentation graphs.
+ * It was adapted to use BigDecimal, to improve precision.
  * 
  * @see org.tweetyproject.arg.deductive.categorizer.HCategorizer
  * 
- * @author Anna Gessler
+ * @author Anna Gessler, Carola Bauer
  */
 public class ExactCategorizerRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
@@ -55,7 +56,7 @@ public class ExactCategorizerRankingReasoner extends AbstractExactNumericalParti
 	 * Create a new CategorizerRankingReasoner with the given
 	 * parameters.
 	 *
-	 * @param epsilon TODO add description
+	 * @param epsilon determines number of iterations
 	 */
 	public ExactCategorizerRankingReasoner(BigDecimal epsilon) {
 		this.epsilon = epsilon;

@@ -31,22 +31,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
+/**
+ * This class allow for creating extension semantics based on gradual semantics.
+ *
+ * @author Carola Bauer
+ */
 public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtensionReasoner {
 
 
     RankingSemantics rankingSemantics;
-
     Vorgehensweise vorgehensweise;
     BigDecimal threshhold;
-
     BigDecimal epsilon;
-
-
 
     Akzeptanzbedingung akzeptanzbedingung;
 
     private Map<Argument, BigDecimal> ranking;
-
 
 
     private final AbstractExactNumericalPartialOrderRankingReasoner reasoner;
@@ -56,7 +56,6 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
         ADMISSIBLE, SIMPLE
 
     }
-
 
 
     public enum Akzeptanzbedingung {
@@ -78,22 +77,22 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
     }
 
+
     public ExactGeneralRankingBasedExtensionReasoner(Akzeptanzbedingung akzeptanzbedingung,
-                                                     RankingSemantics semantics, Vorgehensweise vorgehensweise, BigDecimal threshhold,
+                                                     RankingSemantics semantics,
+                                                     Vorgehensweise vorgehensweise,
+                                                     BigDecimal threshhold,
                                                      BigDecimal epsilon) {
 
         this.rankingSemantics = semantics;
-        this.akzeptanzbedingung=akzeptanzbedingung;
+        this.akzeptanzbedingung = akzeptanzbedingung;
         this.vorgehensweise = vorgehensweise;
         this.threshhold = threshhold;
 
-        this.epsilon=epsilon;
-        this.reasoner=getReasoner(semantics);
+        this.epsilon = epsilon;
+        this.reasoner = getReasoner(semantics);
 
     }
-
-
-
 
 
     public AbstractExactNumericalPartialOrderRankingReasoner getReasoner(RankingSemantics rankingSemantics) {
@@ -112,7 +111,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     @Override
     public Extension<DungTheory> getModel(DungTheory bbase) {
 
-        return null;
+        return getModels(bbase).stream().findFirst().orElse(null);
     }
 
 
@@ -129,7 +128,6 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     }
 
 
-
     private HashSet<Extension<DungTheory>> getAdmissibleExt(DungTheory bbase) {
 
         HashSet<Extension<DungTheory>> exts = new HashSet<>();
@@ -142,29 +140,26 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
         var rankingValues = rankingOrdered.stream().map(Map.Entry::getValue).distinct().collect(Collectors.toList());
 
 
-            for (var val : rankingValues) {
-                var args = rankingOrdered.stream()
-                        .filter(arg -> Objects.equals(arg.getValue(), val)).map(Map.Entry::getKey).collect(Collectors.toList());
+        for (var val : rankingValues) {
+            var args = rankingOrdered.stream()
+                    .filter(arg -> Objects.equals(arg.getValue(), val)).map(Map.Entry::getKey).collect(Collectors.toList());
 
-                    candidates
-                            .addAll(args);
+            candidates
+                    .addAll(args);
 
-                    ext = new Extension<>(candidates);
-                    if (!bbase.isAdmissable(ext)) {
-                        candidates
-                                .removeAll(args);
-                        ext = new Extension<>(candidates);
-                        exts.add(ext);
-                        return exts;
-                    }
-
-
+            ext = new Extension<>(candidates);
+            if (!bbase.isAdmissable(ext)) {
+                candidates
+                        .removeAll(args);
+                ext = new Extension<>(candidates);
+                exts.add(ext);
+                return exts;
             }
 
-            exts.add(ext);
 
+        }
 
-
+        exts.add(ext);
 
 
         return exts;
@@ -172,42 +167,28 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     }
 
 
-
-
-
     public ExactNumericalPartialOrder<Argument, DungTheory> getRanking(DungTheory bbase) {
-
-
         return reasoner.getModel(bbase);
-
-
     }
 
 
-
-        private List<Map.Entry<Argument, BigDecimal>> sortByValue(Map<Argument, BigDecimal> map) {
-            List<Map.Entry<Argument, BigDecimal>> list = new ArrayList<>(map.entrySet());
-            list.sort(Map.Entry.comparingByValue());
-            return list;
+    private List<Map.Entry<Argument, BigDecimal>> sortByValue(Map<Argument, BigDecimal> map) {
+        List<Map.Entry<Argument, BigDecimal>> list = new ArrayList<>(map.entrySet());
+        list.sort(Map.Entry.comparingByValue());
+        return list;
 
     }
-
 
 
     private Collection<Extension<DungTheory>> getExtensionsForSemantics_Simple(Map<Argument, BigDecimal> ranking,
                                                                                DungTheory bbase) {
         Collection<Extension<DungTheory>> finalAllExtensions = new HashSet<>();
 
-
         finalAllExtensions.add(getSetForSemantics(ranking, bbase, bbase));
-
 
 
         return finalAllExtensions;
     }
-
-
-
 
 
     private Extension<DungTheory> getSetForSemantics(Map<Argument, BigDecimal> ranking, Collection<Argument> e,
@@ -219,7 +200,14 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
             // absolute argument strength
             case RB_ARG_ABS_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg ->
-                        useThresholdArg(ranking.get(arg), threshhold)).collect(Collectors.toSet()));
+                {
+                    BigDecimal value = ranking.get(arg);
+
+
+                    return value.compareTo(threshhold) > 0;
+
+
+                }).collect(Collectors.toSet()));
 
 
             }
@@ -228,7 +216,14 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
             case RB_ARG_REL_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return attackers.stream().allMatch(att -> useThresholdArg(ranking.get(arg), ranking.get(att)));
+                    return attackers.stream().allMatch(att -> {
+                        BigDecimal value = ranking.get(arg);
+
+
+                        return value.compareTo(ranking.get(att)) > 0;
+
+
+                    });
                 }).collect(Collectors.toSet()));
 
             }
@@ -237,7 +232,13 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
             case RB_ATT_ABS_STRENGTH -> {
                 return new Extension<>(e.stream().filter(arg -> {
                     var attackers = bbase.getAttackers(arg);
-                    return attackers.stream().allMatch(att -> useThresholdAtt(ranking.get(att), threshhold));
+                    return attackers.stream().allMatch(att -> {
+                        BigDecimal att1 = ranking.get(att);
+
+                        return att1.compareTo(threshhold) < 0;
+
+
+                    });
                 }).collect(Collectors.toSet()));
             }
 
@@ -245,28 +246,6 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
         }
 
         return null;
-    }
-
-
-    private boolean useThresholdArg(BigDecimal value, BigDecimal thresh) {
-
-
-        return value.compareTo(thresh) > 0;
-
-
-
-    }
-
-
-
-
-    private boolean useThresholdAtt(BigDecimal att, BigDecimal thresh) {
-
-    return att.compareTo(thresh) < 0;
-
-
-
-
     }
 
 

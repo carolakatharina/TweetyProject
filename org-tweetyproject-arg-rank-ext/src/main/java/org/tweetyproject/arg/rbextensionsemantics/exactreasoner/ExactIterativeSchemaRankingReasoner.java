@@ -35,7 +35,7 @@ import java.util.HashSet;
  * This class implements the argument ranking approach of [Gabbay, D. M., and Rodrigues, O. 2015. Equilibrium states
  * in numerical argumentation networks, 2015]
  * <p>
- *
+ * It uses BigDecimal for more precision.
  *
  * @author Carola Bauer
  */

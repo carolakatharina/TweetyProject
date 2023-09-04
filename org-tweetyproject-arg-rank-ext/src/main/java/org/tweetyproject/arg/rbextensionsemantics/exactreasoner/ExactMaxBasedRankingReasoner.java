@@ -35,6 +35,7 @@ import java.util.HashSet;
  * <p>
  * This approach ranks arguments iteratively by considering an argument's basic
  * strength as well as the strength of its strongest attacker.
+ * It uses BigDecimal for more precision.
  *
  * @author Carola Bauer
  */
@@ -42,11 +43,6 @@ import java.util.HashSet;
 public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
     private final BigDecimal epsilon;
-
-
-    private Matrix directAttackMatrix;
-    private BigDecimal[] valuations;
-    private BigDecimal[] valuationsOld;
     private Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks;
     private ExactNumericalPartialOrder<Argument, DungTheory> ranking;
 
@@ -65,14 +61,15 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
     @Override
     public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
 
-        directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
+        Matrix directAttackMatrix = kb.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
         int n = directAttackMatrix.getXDimension();
-        valuations = new BigDecimal[n];	 //Stores valuations of the current iteration
+        BigDecimal[] valuations = new BigDecimal[n];     //Stores valuations of the current iteration
         for (int i=0; i<n; i++) {
             valuations[i]=BigDecimal.valueOf(1.);
         }
 
 
+        BigDecimal[] valuationsOld;
         do {
             valuationsOld = valuations.clone();
 
@@ -113,7 +110,7 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
 
         for (int j = 0; j < directAttackMatrix.getXDimension(); j++) {
             BigDecimal attacker= vOld[j].multiply(directAttackMatrix.getEntry(i,j).bigDecimalValue(), MathContext.DECIMAL128);
-            if (attacker.compareTo(max)==1) {
+            if (attacker.compareTo(max) > 0) {
                 max = attacker;
             }
         }

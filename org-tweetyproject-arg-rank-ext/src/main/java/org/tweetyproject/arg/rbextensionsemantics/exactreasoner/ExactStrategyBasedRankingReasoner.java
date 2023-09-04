@@ -38,8 +38,9 @@ import java.util.*;
  * 2008]. In this approach, the strength of an argument is computed using a
  * two-person zero-sum strategic game in which the strategies of players are
  * sets of arguments.
+ * It uses BigDecimal for more precision.
  * 
- * @author Anna Gessler
+ * @author Anna Gessler, Carola Bauer
  */
 public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 

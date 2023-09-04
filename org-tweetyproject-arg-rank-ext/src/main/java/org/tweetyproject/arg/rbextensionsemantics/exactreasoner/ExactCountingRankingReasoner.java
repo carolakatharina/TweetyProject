@@ -33,12 +33,12 @@ import java.util.HashSet;
  * This class implements the argument ranking approach of [Pu, Zhang, G.Luo,
  * J.Luo. Attacker and Defender Counting Approach for Abstract Argumentation.
  * CoRR 2015].
- * 
  * This approach ranks arguments by counting the number of their attackers and
  * defenders in form of a dialogue game where proponents are defenders and
  * opponents are attackers.
+ * It was adapted to use BigDecimal, for more precision.
  * 
- * @author Anna Gessler
+ * @author Anna Gessler, Carola Bauer
  */
 public class ExactCountingRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
@@ -61,7 +61,7 @@ public class ExactCountingRankingReasoner extends AbstractExactNumericalPartialO
 	 * Create a new CountingRankingReasoner with the given parameters.
 	 * 
 	 * @param damping_factor must be in (0,1)
-	 * @param epsilon TODO add description
+	 * @param epsilon parameter that determined number of iterations
 	 */
 	public ExactCountingRankingReasoner(BigDecimal damping_factor, BigDecimal epsilon) {
 		this.dampingFactor = damping_factor;
@@ -71,14 +71,14 @@ public class ExactCountingRankingReasoner extends AbstractExactNumericalPartialO
 
 	@Override
 	public Collection<ExactNumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-		Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<ExactNumericalPartialOrder<Argument, DungTheory>>();
+		Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
 		ranks.add(this.getModel(bbase));
 		return ranks;
 	}
 
 	@Override
 	public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
-		Matrix adjacencyMatrix = ((DungTheory)kb).getAdjacencyMatrix();
+		Matrix adjacencyMatrix = kb.getAdjacencyMatrix();
 
 		var normfactor = getInfiniteNormalizationFactor(adjacencyMatrix);
 
@@ -90,7 +90,7 @@ public class ExactCountingRankingReasoner extends AbstractExactNumericalPartialO
 		// Apply damping factor
 		adjacencyMatrix = adjacencyMatrix.mult(this.dampingFactor).simplify();
 		
-		int n = ((DungTheory)kb).getNumberOfNodes();
+		int n = kb.getNumberOfNodes();
 		Matrix valuations = new Matrix(1, n); // Stores values of the current iteration
 		Matrix valuationsOld = new Matrix(1, n); // Stores values of the last iteration
 		
@@ -127,7 +127,7 @@ public class ExactCountingRankingReasoner extends AbstractExactNumericalPartialO
 	 * Calculates the infinite matrix norm of the given matrix (i.e. the maximum
 	 * absolute row sum).
 	 * 
-	 * @param matrix
+	 * @param matrix the given matrix
 	 * @return infinite matrix norm of the matrix
 	 */
 	private BigDecimal getInfiniteNormalizationFactor(Matrix matrix) {

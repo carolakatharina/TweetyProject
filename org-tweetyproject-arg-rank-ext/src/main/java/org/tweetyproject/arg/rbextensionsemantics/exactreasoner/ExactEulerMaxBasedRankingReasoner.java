@@ -37,6 +37,7 @@ import static java.lang.StrictMath.exp;
  * <p>
  * This approach ranks arguments iteratively by considering an argument's basic
  * strength as well as the strength of its strongest attacker.
+ * It uses BigDecimal for more precision.
  *
  * @author Carola Bauer
  */

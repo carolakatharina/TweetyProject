@@ -34,6 +34,7 @@ import java.util.HashSet;
  * <p>
  * This approach ranks arguments iteratively by considering an argument's basic
  * strength or the strength of its strongest attacker.
+ * It uses BigDecimal for more precision.
  *
  * @author Carola Bauer
  */

@@ -35,7 +35,7 @@ import static org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGene
 
 
 /**
- * Evaluation Program for evaluating ranking-based extension semantics with regard
+ * Evaluation Program for evaluating extension semantics based on ranking-based semantics with regard
  * to principles.
  *
  * @author Carola Bauer
