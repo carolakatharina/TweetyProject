@@ -124,16 +124,14 @@ public class WeaklyAdmissibleReasoner extends AbstractExtensionReasoner {
 
             // remove argument, which do not attack any argument in the framework
             // because adding them to the set would do nothing for its weak admissibility
-            Set<Argument> nonAttackingCandidates = new HashSet<>(candidates);
-            nonAttackingCandidates.removeIf(candidate -> reduct.getAttacked(candidate).isEmpty());
-            candidates.retainAll(bbase);
-
+            for (Argument candidate: new HashSet<>(candidates)) {
+                if (reduct.getAttacked(candidate).isEmpty())
+                    candidates.remove(candidate);
+            }
             Set<Set<Argument>> subsets = getConflictFreeCandidateSets(reduct, candidates);
             for (Set<Argument> subset: subsets) {
-                Set<Argument> weakAdmissibleSet = new HashSet<>(nonAttackingCandidates);
-                weakAdmissibleSet.addAll(subset);
-                weakAdmissibleSet.add(attacker);
-                sets.add(weakAdmissibleSet);
+                subset.add(attacker);
+                sets.add(new HashSet<>(subset));
             }
             Set<Argument> set = new HashSet<>();
             set.add(attacker);
@@ -229,37 +227,31 @@ public class WeaklyAdmissibleReasoner extends AbstractExtensionReasoner {
      */
     public Set<Set<Argument>> getConflictFreeSets(DungTheory bbase, Collection<Argument> candidates) {
         Set<Set<Argument>> subsets = new HashSet<>();
-        Stack<Set<Argument>> stack = new Stack<>();
+        if (candidates.size() == 0 || bbase.size() == 0) {
+            subsets.add(new HashSet<>());
+        } else {
+            for (Argument element: candidates) {
+                DungTheory remainingTheory = new DungTheory(bbase);
+                remainingTheory.remove(element);
+                remainingTheory.removeAll(bbase.getAttacked(element));
 
-        // Push the initial set of candidates onto the stack
-        stack.push(new HashSet<>(candidates));
+                Set<Argument> remainingCandidates = new HashSet<>(candidates);
+                remainingCandidates.remove(element);
+                remainingCandidates.removeAll(bbase.getAttacked(element));
+                remainingCandidates.removeAll(bbase.getAttackers(element));
 
-        while (!stack.isEmpty()) {
-            Set<Argument> currentSet = stack.pop();
+                Set<Set<Argument>> subsubsets = this.getConflictFreeSets(remainingTheory, remainingCandidates);
 
-            // Check if the current set is conflict-free
-            if (bbase.isConflictFree(new Extension<>(currentSet))) {
-                subsets.add(currentSet);
-            } else {
-                for (Argument element : currentSet) {
-                    // Create a new set with the current element removed
-                    Set<Argument> remainingCandidates = new HashSet<>(currentSet);
-                    remainingCandidates.remove(element);
-                    remainingCandidates.removeAll(bbase.getAttacked(element));
-                    remainingCandidates.removeAll(bbase.getAttackers(element));
-
-                    // Check if the remaining candidates set is empty
-                    if (!remainingCandidates.isEmpty()) {
-                        // Push the new set onto the stack
-                        stack.push(remainingCandidates);
-                    }
+                for (Set<Argument> subsubset : subsubsets) {
+                    subsets.add(new HashSet<>(subsubset));
+                    subsubset.add(element);
+                    subsets.add(new HashSet<>(subsubset));
                 }
             }
         }
 
         return subsets;
     }
-
 
     /**
      * computes the set of arguments attacked by an element of arguments in bbase

@@ -102,12 +102,11 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 
 
 	/**
-	 * Returns an easy-to-read string representation of the report in which
-	 * the results are ordered alphabetically by postulate name.
+	 * Returns creates a csv representation of the report.
 	 */
-	public void printForSimple(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition, ExactGeneralRankingBasedExtensionReasoner.Approach approach) throws IOException {
+	public void printCsv(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition, ExactGeneralRankingBasedExtensionReasoner.Approach approach) throws IOException {
 
-		var headers = "AF;"+"Ext;"+"Ranking;"+"Grounded;"+"Percentage\"+\"\n";
+		var headers = "AF;"+"Ext;"+"Ranking;"+"Grounded\"+\"\n";
 
 
 
@@ -124,10 +123,7 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 				.build();
 
 		var simpleGroundedReasoner = new SimpleGroundedReasoner();
-		var percentage = 0.;
-		for (Double perc: (List<Double>)this.getPercentagesNodes()) {
-			percentage = percentage+perc;
-		}
+
 
 		try (final CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
 			try {
@@ -137,7 +133,7 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 					Extension grounded = simpleGroundedReasoner.getModel(af);
 
 					var ext = (Extension) this.getAllExtensions().get(i);
-					printer.printRecord(af, ext,ranking, grounded, (percentage/((double)this.getPercentagesNodes().size())));
+					printer.printRecord(af, ext,ranking, grounded);
 				}
 				printer.print(this.prettyPrint());
 

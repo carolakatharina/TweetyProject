@@ -63,7 +63,7 @@ public class SAFRankingReasoner extends AbstractRankingReasoner<NumericalPartial
 	 * Create a new SAFRankingReasoner with default parameters.
 	 */
 	public SAFRankingReasoner() {
-		this.epsilon = 0.001;
+		this.epsilon = 0.1;
 		this.precision =  0.0001;
 		this.tolerance = 0.0001;
 	}

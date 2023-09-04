@@ -18,18 +18,28 @@
  */
 package org.tweetyproject.arg.rankings.reasoner;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.commons.util.SetTools;
 import org.tweetyproject.comparator.NumericalPartialOrder;
+import org.tweetyproject.commons.util.SetTools;
 import org.tweetyproject.math.equation.Equation;
 import org.tweetyproject.math.equation.Inequation;
 import org.tweetyproject.math.opt.problem.OptimizationProblem;
 import org.tweetyproject.math.opt.solver.ApacheCommonsSimplex;
-import org.tweetyproject.math.term.*;
-
-import java.util.*;
+import org.tweetyproject.math.term.FloatConstant;
+import org.tweetyproject.math.term.FloatVariable;
+import org.tweetyproject.math.term.Product;
+import org.tweetyproject.math.term.Sum;
+import org.tweetyproject.math.term.Term;
+import org.tweetyproject.math.term.Variable;
 
 /**
  * This class implements the argument ranking approach of [Matt, Toni. A

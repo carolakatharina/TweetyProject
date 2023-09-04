@@ -47,7 +47,7 @@ public class DungTheory extends BeliefSet<Argument,DungSignature> implements Gra
 	/**
 	 * For archiving sub graphs 
 	 */
-	private Map<DungTheory, Collection<Graph<Argument>>> archivedSubgraphs = new HashMap<DungTheory, Collection<Graph<Argument>>>();
+	private static Map<DungTheory, Collection<Graph<Argument>>> archivedSubgraphs = new HashMap<DungTheory, Collection<Graph<Argument>>>();
 
 	/**
 	 * explicit listing of direct attackers and attackees (for efficiency reasons) 
@@ -284,15 +284,6 @@ public class DungTheory extends BeliefSet<Argument,DungSignature> implements Gra
 		for(Argument a: args)
 			attacked.addAll(this.getAttacked(a));
 		return attacked;
-	}
-
-	/**
-	 * Computes the number of attacks for some arg in args}.
-	 * @return the set of all arguments that are attacked by some argument
-	 *  in <code>args</code>.
-	 */
-	public int countAttacks(){
-		return this.getAttacks().size();
 	}
 
 	/**
@@ -897,21 +888,6 @@ public class DungTheory extends BeliefSet<Argument,DungSignature> implements Gra
 		return m;
 	}
 
-
-	public Matrix getTransposedAdjacencyMatrix() {
-		Matrix m = new Matrix(this.getNumberOfNodes(), this.getNumberOfNodes());
-		int i = 0, j;
-		for(Argument a: this){
-			j = 0;
-			for(Argument b : this){
-				m.setEntry(j, i, new IntegerConstant(this.areAdjacent(a, b) ? 1 : 0));
-				j++;
-			}
-			i++;
-		}
-		return m;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.tweetyproject.graphs.Graph#getComplementGraph(int)
 	 */
@@ -946,17 +922,6 @@ public class DungTheory extends BeliefSet<Argument,DungSignature> implements Gra
 		return false;
 	}
 
-
-
-
-	public int countSelfLoops() {
-		var counter =0;
-		for(Argument a: this)
-			if(this.isAttackedBy(a, a))
-				counter++;
-		return counter;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.tweetyproject.graphs.Graph#getEdge(org.tweetyproject.graphs.Node, org.tweetyproject.graphs.Node)
 	 */
@@ -984,21 +949,13 @@ public class DungTheory extends BeliefSet<Argument,DungSignature> implements Gra
 	}
 
 	/* (non-Javadoc)
-	 * @see org.tweetyproject.graphs.Graph#getStronglyConnectedComponents()
-	 */
-
-	public int countStronglyConnectedComponents() {
-		return DefaultGraph.getStronglyConnectedComponents(this).size();
-	}
-
-	/* (non-Javadoc)
 	 * @see org.tweetyproject.graphs.Graph#getSubgraphs()
 	 */
 	@Override
 	public Collection<Graph<Argument>> getSubgraphs() {	
-		if(!this.archivedSubgraphs.containsKey(this))
-			this.archivedSubgraphs.put(this, DefaultGraph.<Argument>getSubgraphs(this));
-		return this.archivedSubgraphs.get(this);
+		if(!DungTheory.archivedSubgraphs.containsKey(this))
+			DungTheory.archivedSubgraphs.put(this, DefaultGraph.<Argument>getSubgraphs(this));
+		return DungTheory.archivedSubgraphs.get(this);
 	}
 
 	/* (non-Javadoc)

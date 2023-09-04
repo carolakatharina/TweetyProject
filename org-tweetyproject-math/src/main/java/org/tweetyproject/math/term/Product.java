@@ -62,7 +62,6 @@ public class Product extends AssociativeOperation{
 	public Constant value(){
 		Constant value = new IntegerConstant(1);
 		for(Term t: this.getTerms()){
-			///TODO: BigDecimal
 			Constant tValue = t.value();
 			if((value instanceof IntegerConstant) && (tValue instanceof IntegerConstant))
 				value = new IntegerConstant(((IntegerConstant)value).getValue() * ((IntegerConstant)tValue).getValue());

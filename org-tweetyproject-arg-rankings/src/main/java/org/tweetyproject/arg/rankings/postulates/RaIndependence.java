@@ -20,8 +20,6 @@ package org.tweetyproject.arg.rankings.postulates;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.Attack;
@@ -59,38 +57,20 @@ public class RaIndependence extends RankingPostulate {
 			return true;
 
 		DungTheory dt = new DungTheory((DungTheory) kb);
+		Iterator<Argument> it = dt.iterator();
+		Argument a = it.next();
+		Argument b = it.next();
 		GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
 
-		for (var a : dt) {
-			List<Argument> potentialBs = dt.stream().filter(arg ->
-							!arg.equals(a))
-					.collect(Collectors.toList());
-			for (var b : potentialBs) {
-				DungTheory dt2 = new DungTheory((DungTheory) dt);
-				//add new arguments that are not connected to a or b
-				Argument t1 = new Argument("t");
-				Argument t2 = new Argument("t2");
-				Argument t3 = new Argument("t3");
-				Argument t4 = new Argument("t4");
-				Argument t5 = new Argument("t5");
-				dt2.add(t1);
-				dt2.add(t2);
-				dt2.add(t3);
-				dt2.add(t4);
-				dt2.add(t5);
-				dt2.add(new Attack(t1, t2));
-				dt2.add(new Attack(t2, t1));
-				dt2.add(new Attack(t1, t1));
-				dt2.add(new Attack(t3, t1));
-				dt2.add(new Attack(t4, t5));
-				GeneralComparator<Argument, DungTheory> ranking2 = ev.getModel((DungTheory) dt2);
+		//add new arguments that are not connected to a or b
+		Argument t1 = new Argument("t");
+		Argument t2 = new Argument("t2");
+		dt.add(t1);
+		dt.add(t2);
+		dt.add(new Attack(t1, t2));
+		GeneralComparator<Argument, DungTheory> ranking2 = ev.getModel((DungTheory) dt);
 
-				if (ranking2!=null && (ranking.compare(a, b) != ranking2.compare(a, b)|| ranking.compare(b,a) != ranking2.compare(b,a))) {
-					return false;
-				}
-			}
-		}
-		return true;
+		return ranking.compare(a, b) == ranking2.compare(a, b);
 	}
 
 }

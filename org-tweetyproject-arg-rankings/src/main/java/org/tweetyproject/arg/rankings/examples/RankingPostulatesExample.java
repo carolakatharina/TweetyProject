@@ -43,18 +43,14 @@ public class RankingPostulatesExample {
 
 	public static void main(String[] args) {
 		all_postulates = new HashSet<RankingPostulate>();
-
 		all_postulates.add(RankingPostulate.ABSTRACTION);
 		all_postulates.add(RankingPostulate.ADDITIONOFATTACKBRANCH);
 		all_postulates.add(RankingPostulate.ADDITIONOFDEFENSEBRANCH);
 		all_postulates.add(RankingPostulate.ATTACKVSFULLDEFENSE);
 		all_postulates.add(RankingPostulate.CARDINALITYPRECEDENCE);
 		all_postulates.add(RankingPostulate.COUNTERTRANSITIVITY);
-
-
 		all_postulates.add(RankingPostulate.DEFENSEPRECEDENCE);
 		all_postulates.add(RankingPostulate.DISTDEFENSEPRECEDENCE);
-
 		all_postulates.add(RankingPostulate.INCREASEOFATTACKBRANCH);
 		all_postulates.add(RankingPostulate.INCREASEOFDEFENSEBRANCH);
 		all_postulates.add(RankingPostulate.INDEPENDENCE);
@@ -183,7 +179,5 @@ public class RankingPostulatesExample {
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(2000, false).prettyPrint());
 	}
-
-
 
 }

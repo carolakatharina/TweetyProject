@@ -131,7 +131,7 @@ public class DetailedAnalysisOfNewSemantics {
 
 
                     System.out.println(ev.prettyPrint());
-                    ev.printForSimple(rankingSemantics, acceptanceCondition, vorg);
+                    ev.printCsv(rankingSemantics, acceptanceCondition, vorg);
 
 
                 }

@@ -59,7 +59,7 @@ public enum Semantics {
 	 * all semantics
 	 */
 	public static final Semantics 
-		/** GROUNDED SEMANTICS */
+		/** GROUNDED SEMANTICS*/
 		GROUNDED_SEMANTICS = GR,
 		/** STABLE_SEMANTICS */	
 		STABLE_SEMANTICS = ST,
