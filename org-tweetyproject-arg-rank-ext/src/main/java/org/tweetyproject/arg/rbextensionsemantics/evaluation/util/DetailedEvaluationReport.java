@@ -118,8 +118,8 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 				semantics+ "_"+acceptanceCondition+"_"+ approach+".csv"));
 
 		CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-				.setHeader(headers)
 				.setDelimiter(";")
+				.setHeader("AF", "Ext", "Ranking", "Grounded")
 				.build();
 
 		var simpleGroundedReasoner = new SimpleGroundedReasoner();

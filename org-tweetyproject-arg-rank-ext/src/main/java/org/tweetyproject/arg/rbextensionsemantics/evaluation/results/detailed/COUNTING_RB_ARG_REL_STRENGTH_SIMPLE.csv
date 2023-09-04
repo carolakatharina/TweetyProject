@@ -1,5 +1,4 @@
-"AF;Ext;Ranking;Grounded""+""
-"
+AF;Ext;Ranking;Grounded
 <{ A0 },[]>;{A0};{A0=1.0};{A0}
 <{ A0 },[(A0,A0)]>;{};{A0=0.5263603925704956};{}
 <{ A1, A0 },[(A1,A1), (A0,A1), (A1,A0)]>;{A0};{A1=0.44085538387298584, A0=0.8015868663787842};{}
@@ -506,7 +505,7 @@ Postulate                                            posInstances notApplicable 
 Admissibility                                        128          0             1
 CF-Reinstatement                                     74           0             1
 Conflict-Free                                        500          0             0
-Defence                                              128          0             1
+Defense                                              128          0             1
 Directionality                                       500          0             0
 I-Maximality                                         500          0             0
 Irrelevance of Necessarily Rejected Arguments (INRA) 71           0             1
