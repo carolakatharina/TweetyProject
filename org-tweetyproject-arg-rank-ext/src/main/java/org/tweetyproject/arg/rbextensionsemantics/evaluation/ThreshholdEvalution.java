@@ -104,7 +104,7 @@ public class ThreshholdEvalution {
         all_principles.add(Principle.REDUCT_ADM);
         all_principles.add(Principle.SEMIQUAL_ADM);
         all_principles.add(Principle.CONFLICT_FREE);
-        all_principles.add(Principle.DEFENCE);
+        all_principles.add(Principle.DEFENSE);
         all_principles.add(Principle.NAIVETY);
         all_principles.add(Principle.I_MAXIMALITY);
         all_principles.add(Principle.REINSTATEMENT);

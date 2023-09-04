@@ -9,11 +9,11 @@ import org.tweetyproject.arg.dung.syntax.DungTheory;
 import java.util.Collection;
 
 
-public class DefencePrinciple extends Principle {
+public class DefensePrinciple extends Principle {
 
     @Override
     public String getName() {
-        return "Defence";
+        return "Defense";
     }
 
     @Override
