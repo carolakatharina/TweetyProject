@@ -66,24 +66,24 @@ public class ThresholdValuesForRBSemantics {
 
             };
             case COUNTING ->
-                    new BigDecimal[]{BigDecimal.valueOf(0.9939) //admissibility
+                    new BigDecimal[]{BigDecimal.valueOf(0.9939)
             };
 
             case MAX ->
                     new BigDecimal[]{
-                            BigDecimal.valueOf(0.6181)}; //conflict-freeness+admissibility+mostprinciples
+                            BigDecimal.valueOf(0.6181)};
 
             case TRUST ->  new BigDecimal[]{
-                    BigDecimal.valueOf(0.5)}; //conflict-freeness + admissibility+am meisten
+                    BigDecimal.valueOf(0.5)};
             case NSA ->   new BigDecimal[]{
 
-                    BigDecimal.valueOf(0.687) //cf, sq und reduct admissbility
+                    BigDecimal.valueOf(0.687)
             };
 
             case EULER ->  new BigDecimal[]{
-                    BigDecimal.valueOf(0.5672)}; //conflict-freeness+admissibility+mostprinciples
+                    BigDecimal.valueOf(0.5672)};
             case ITS ->
-                    new BigDecimal[]{BigDecimal.valueOf(0.5) };//conflict-freeness+admissibility+mostprinciples
+                    new BigDecimal[]{BigDecimal.valueOf(0.5) };
             case MATT_TONI ->
                     new BigDecimal[]{BigDecimal.valueOf(0.5556) };
         };
@@ -91,8 +91,8 @@ public class ThresholdValuesForRBSemantics {
 
 
     public static BigDecimal[] getThresholdForSemantics(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics,
-                                                        ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung) {
-        return switch (akzeptanzbedingung) {
+                                                        ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition) {
+        return switch (acceptanceCondition) {
             case RB_ARG_ABS_STRENGTH -> getAbsArgThresholdForSemantics(semantics);
             case RB_ATT_ABS_STRENGTH -> getAbsAttThresholdForSemantics(semantics);
             default -> new BigDecimal[]{BigDecimal.valueOf(0.0)};
@@ -104,12 +104,12 @@ public class ThresholdValuesForRBSemantics {
     private static BigDecimal[] getAbsAttThresholdForSemantics(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics) {
         return switch (semantics) {
             case CATEGORIZER ->
-                    new BigDecimal[]{BigDecimal.valueOf(0.089), //most principles
-                            BigDecimal.valueOf(0.094) //admissibility
+                    new BigDecimal[]{BigDecimal.valueOf(0.089),
+                            BigDecimal.valueOf(0.094)
                     };
             case COUNTING ->
-                    new BigDecimal[]{BigDecimal.valueOf(0.229), //most principles
-                            BigDecimal.valueOf(0.285) //admissibility
+                    new BigDecimal[]{BigDecimal.valueOf(0.229),
+                            BigDecimal.valueOf(0.285)
                     };
 
             case MAX ->

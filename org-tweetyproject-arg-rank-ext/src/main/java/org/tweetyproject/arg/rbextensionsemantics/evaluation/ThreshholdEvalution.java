@@ -51,11 +51,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.*;
+import static org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition.*;
 import static org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.*;
 
 /**
- * Evaluation program to determine optimum threshold for the
+ * Evaluation program to determine the optimum thresholds for the
  * new extension semantics based on gradual semantics.
  *
  * @author Carola Bauer
@@ -71,15 +71,15 @@ public class ThreshholdEvalution {
     };
 
 
-    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
+    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Approach> vorgehen = new ArrayList<>(
             List.of(
-                    ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.ADMISSIBLE,
+                    ExactGeneralRankingBasedExtensionReasoner.Approach.ADMISSIBLE,
 
-                    ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE
+                    ExactGeneralRankingBasedExtensionReasoner.Approach.SIMPLE
 
             ));
 
-    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = Arrays.asList(
+    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition> AKZEPTANZBEDINGUNGEN = Arrays.asList(
 
             RB_ARG_ABS_STRENGTH,
             RB_ATT_ABS_STRENGTH,
@@ -118,7 +118,7 @@ public class ThreshholdEvalution {
 
 
         for (var rank : rank_semantics) {
-            for (var bed : akzeptanzbedingungen) {
+            for (var bed : AKZEPTANZBEDINGUNGEN) {
 
                     evaluate(bed, rank);
 
@@ -127,7 +127,7 @@ public class ThreshholdEvalution {
 
     }
 
-    public static void evaluate(ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics) throws IOException {
+    public static void evaluate(ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics) throws IOException {
         var threshholds = ThresholdValuesForRBSemantics.getThresholdValues(rankingSemantics);
 
 
@@ -152,7 +152,7 @@ public class ThreshholdEvalution {
 
                 for (BigDecimal thresh : threshholds) {
 
-                        reasoner = new ExactGeneralRankingBasedExtensionReasoner(akzeptanzbedingung,
+                        reasoner = new ExactGeneralRankingBasedExtensionReasoner(acceptanceCondition,
                                 rankingSemantics, vorg, thresh, epsilon);
                         ExtensionbasedPrincipleEvaluator evaluator = new ExtensionbasedPrincipleEvaluator(dg,
                                 reasoner, all_principles);
@@ -189,8 +189,8 @@ public class ThreshholdEvalution {
             }
         }
 
-        new CsvThreshholdEvaluationWriter("Threshold_evaluation_principles_detail_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + Math.random(), "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
-        new CsvThreshholdEvaluationWriter("Threshold_evaluation_principles_number_for_" + rankingSemantics + "_" + akzeptanzbedingung + "_" + Math.random(), "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
+        new CsvThreshholdEvaluationWriter("Threshold_evaluation_principles_detail_for_" + rankingSemantics + "_" + acceptanceCondition + "_" + Math.random(), "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
+        new CsvThreshholdEvaluationWriter("Threshold_evaluation_principles_number_for_" + rankingSemantics + "_" + acceptanceCondition + "_" + Math.random(), "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
 
     }
 }

@@ -102,30 +102,26 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 
 
 	/**
-	 * @return an easy-to-read string representation of the report in which
+	 * Returns an easy-to-read string representation of the report in which
 	 * the results are ordered alphabetically by postulate name.
 	 */
-	public void printForSimple(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung) throws IOException {
+	public void printForSimple(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition) throws IOException {
 
-		var headers = "AF,"+"Ext,"+"Ranking,"+"grounded,"+"Ideal,"+"Stable,"+",Pref, Compl, Percentage\"+\"\n";
+		var headers = "AF,"+"Ext,"+"Ranking,"+"Grounded,"+"Percentage\"+\"\n";
 
 
 
-		createCsvForSimple(headers, semantics, akzeptanzbedingung );
+		createCsvForSimple(headers, semantics, acceptanceCondition);
 	}
-	public void createCsvForSimple(String headers, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung) throws IOException {
+	public void createCsvForSimple(String headers, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition) throws IOException {
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\evaluation\\results\\detailed\\detailsemantics_evaluation" +
-				Math.random() + semantics+akzeptanzbedingung+".csv"));
+				Math.random() + semantics+ acceptanceCondition +".csv"));
 
 		CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
 				.setHeader(headers)
 				.build();
 
 		var simpleGroundedReasoner = new SimpleGroundedReasoner();
-		var simpleIdealReasoner = new SimpleIdealReasoner();
-		var simpleStableReasoner = new SimpleStableReasoner();
-		var simplePrefReasoner = new SimplePreferredReasoner();
-		var simpleCompleteReasoner = new SimpleCompleteReasoner();
 		var percentage = 0.;
 		for (Double perc: (List<Double>)this.getPercentagesNodes()) {
 			percentage = percentage+perc;
@@ -137,13 +133,9 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 					var af = (DungTheory) this.allAfs.get(i);
 					var ranking = this.rankings.get(i);
 					Extension grounded = simpleGroundedReasoner.getModel(af);
-					Extension ideal = simpleIdealReasoner.getModel(af);
-					var pref = simplePrefReasoner.getModels(af);
-					var compl = simpleCompleteReasoner.getModels(af);
+
 					var ext = (Extension) this.getAllExtensions().get(i);
-					var stab = simpleStableReasoner.getModels(af);
-					printer.printRecord(af, ext,ranking, grounded, ideal, stab, pref, compl, (percentage/((double)this.getPercentagesNodes().size())));
-					//printer.printRecord(af, ranking, ext);
+					printer.printRecord(af, ext,ranking, grounded, (percentage/((double)this.getPercentagesNodes().size())));
 				}
 				printer.print(this.prettyPrint());
 

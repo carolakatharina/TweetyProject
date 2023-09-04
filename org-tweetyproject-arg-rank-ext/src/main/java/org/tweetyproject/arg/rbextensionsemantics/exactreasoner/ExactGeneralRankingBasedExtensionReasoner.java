@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * This class allow for creating extension semantics based on gradual semantics.
+ * Class that creates extension semantics based on gradual semantics.
  *
  * @author Carola Bauer
  */
@@ -40,11 +40,11 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
 
 
     RankingSemantics rankingSemantics;
-    Vorgehensweise vorgehensweise;
+    Approach approach;
     BigDecimal threshhold;
     BigDecimal epsilon;
 
-    Akzeptanzbedingung akzeptanzbedingung;
+    AcceptanceCondition acceptanceCondition;
 
     private Map<Argument, BigDecimal> ranking;
 
@@ -52,21 +52,37 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     private final AbstractExactNumericalPartialOrderRankingReasoner reasoner;
 
 
-    public enum Vorgehensweise {
+    /**
+     * Determines whether the extensions based on a gradual semantics tau
+     * are computed without additional acceptance criteria
+     * or if with the additional acceptance criteria based on admissibility (Ar-tau^ad).
+     */
+    public enum Approach {
         ADMISSIBLE, SIMPLE
 
     }
 
 
-    public enum Akzeptanzbedingung {
+
+    /**
+     * Determines the conditions for acceptance.
+     */
+    public enum AcceptanceCondition {
+        // Arguments are accepted based on absolute argument strength
         RB_ARG_ABS_STRENGTH,
+
+        // Arguments are accepted based on relative argument strength
         RB_ARG_REL_STRENGTH,
 
+        // Arguments are accepted based on absolute attack strength
         RB_ATT_ABS_STRENGTH,
 
     }
 
 
+    /**
+     * Determines the ranking semantics used as a basis for a new extension semantics.
+     */
     public enum RankingSemantics {
         CATEGORIZER,
 
@@ -78,15 +94,23 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     }
 
 
-    public ExactGeneralRankingBasedExtensionReasoner(Akzeptanzbedingung akzeptanzbedingung,
+    /**
+     * Creates a new extension semantics based on a gradual semantics
+     * @param acceptanceCondition determines whether absolute/relative argument strength or absolute attack strength is used
+     * @param semantics the gradual semantics
+     * @param approach determines whether additional acceptance criteria are used
+     * @param threshhold determines which threshold is used for acceptance
+     * @param epsilon parameter that determines the number of iterations for the fixed point technique
+     */
+    public ExactGeneralRankingBasedExtensionReasoner(AcceptanceCondition acceptanceCondition,
                                                      RankingSemantics semantics,
-                                                     Vorgehensweise vorgehensweise,
+                                                     Approach approach,
                                                      BigDecimal threshhold,
                                                      BigDecimal epsilon) {
 
         this.rankingSemantics = semantics;
-        this.akzeptanzbedingung = akzeptanzbedingung;
-        this.vorgehensweise = vorgehensweise;
+        this.acceptanceCondition = acceptanceCondition;
+        this.approach = approach;
         this.threshhold = threshhold;
 
         this.epsilon = epsilon;
@@ -95,7 +119,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     }
 
 
-    public AbstractExactNumericalPartialOrderRankingReasoner getReasoner(RankingSemantics rankingSemantics) {
+    private AbstractExactNumericalPartialOrderRankingReasoner getReasoner(RankingSemantics rankingSemantics) {
         return switch (rankingSemantics) {
             case CATEGORIZER -> new ExactCategorizerRankingReasoner(epsilon);
             case EULER -> new ExactEulerMaxBasedRankingReasoner(epsilon);
@@ -118,9 +142,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     @Override
     public Collection<Extension<DungTheory>> getModels(DungTheory bbase) {
         ranking = getRanking(bbase);
-
-
-        return switch (this.vorgehensweise) {
+        return switch (this.approach) {
             case ADMISSIBLE -> getAdmissibleExt(bbase);
             case SIMPLE -> getExtensionsForSemantics_Simple(ranking, bbase);
         };
@@ -167,6 +189,11 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
     }
 
 
+    /**
+     * Get ranking of the gradual semantics used for a given argumentation framework.
+     * @param bbase the argumentation framework
+     * @return the ranking
+     */
     public ExactNumericalPartialOrder<Argument, DungTheory> getRanking(DungTheory bbase) {
         return reasoner.getModel(bbase);
     }
@@ -195,7 +222,7 @@ public class ExactGeneralRankingBasedExtensionReasoner extends AbstractExtension
                                                      DungTheory bbase) {
 
 
-        switch (this.akzeptanzbedingung) {
+        switch (this.acceptanceCondition) {
 
             // absolute argument strength
             case RB_ARG_ABS_STRENGTH -> {

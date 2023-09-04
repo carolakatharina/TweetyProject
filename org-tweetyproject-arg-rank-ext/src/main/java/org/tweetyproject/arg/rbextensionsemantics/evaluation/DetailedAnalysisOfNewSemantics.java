@@ -49,20 +49,17 @@ public class DetailedAnalysisOfNewSemantics {
     };
 
 
-    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise> vorgehen = new ArrayList<>(
-            List.of(ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.SIMPLE,
-                    ExactGeneralRankingBasedExtensionReasoner.Vorgehensweise.ADMISSIBLE
+    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Approach> vorgehen = new ArrayList<>(
+            List.of(ExactGeneralRankingBasedExtensionReasoner.Approach.SIMPLE,
+                    ExactGeneralRankingBasedExtensionReasoner.Approach.ADMISSIBLE
 
             ));
 
-    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung> akzeptanzbedingungen = Arrays.asList(
+    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition> AKZEPTANZBEDINGUNGEN = Arrays.asList(
 
-            ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_ABS_STRENGTH,
-
-            ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ARG_REL_STRENGTH,
-            ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung.RB_ATT_ABS_STRENGTH
-
-
+            ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition.RB_ARG_ABS_STRENGTH,
+            ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition.RB_ARG_REL_STRENGTH,
+            ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition.RB_ATT_ABS_STRENGTH
     );
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
@@ -99,15 +96,15 @@ public class DetailedAnalysisOfNewSemantics {
 
 
         for (var rank : rank_semantics) {
-            for (var bed : akzeptanzbedingungen) {
+            for (var bed : AKZEPTANZBEDINGUNGEN) {
                 evaluate(bed, rank);
             }
         }
 
     }
 
-    public static void evaluate(ExactGeneralRankingBasedExtensionReasoner.Akzeptanzbedingung akzeptanzbedingung, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics) throws IOException {
-        var threshholds = ThresholdValuesForRBSemantics.getThresholdForSemantics(rankingSemantics, akzeptanzbedingung);
+    private static void evaluate(ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics rankingSemantics) throws IOException {
+        var threshholds = ThresholdValuesForRBSemantics.getThresholdForSemantics(rankingSemantics, acceptanceCondition);
 
 
         File[] apxFiles = new File(
@@ -124,7 +121,7 @@ public class DetailedAnalysisOfNewSemantics {
                 for (BigDecimal thresh : threshholds) {
 
 
-                    reasoner = new ExactGeneralRankingBasedExtensionReasoner(akzeptanzbedingung,
+                    reasoner = new ExactGeneralRankingBasedExtensionReasoner(acceptanceCondition,
                             rankingSemantics, vorg, thresh, epsilon);
                     DetailedRankingExtensionbasedEvaluator evaluator = new DetailedRankingExtensionbasedEvaluator(dg,
                             reasoner, all_principles);
@@ -134,7 +131,7 @@ public class DetailedAnalysisOfNewSemantics {
 
 
                     System.out.println(ev.prettyPrint());
-                    ev.printForSimple(rankingSemantics, akzeptanzbedingung);
+                    ev.printForSimple(rankingSemantics, acceptanceCondition);
 
 
                 }

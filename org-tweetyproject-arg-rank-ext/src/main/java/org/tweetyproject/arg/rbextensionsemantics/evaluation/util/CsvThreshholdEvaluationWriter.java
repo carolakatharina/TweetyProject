@@ -56,6 +56,10 @@ public class CsvThreshholdEvaluationWriter {
     }
 
 
+    /**
+     * Creates a csv documenting the results of a threshold evaluation wrt. the principles fulfilled
+     * @throws IOException if Csv cannot be created
+     */
     public void createCsv() throws IOException {
         BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\evaluation\\results\\threshold"+title+".csv"));
 
@@ -91,8 +95,10 @@ public class CsvThreshholdEvaluationWriter {
     }
 
 
-
-
+    /**
+     * Creates a CSV with detailed information about which principles are fulfilled for each threshold.
+     * @throws IOException if Csv cannot be created
+     */
     public void createCsvForChart() throws IOException {
         BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\evaluation\\results\\threshold\\"+title+".csv"));
         var bezeichnungen = data.stream().map(obj -> obj.getName()).distinct().collect(Collectors.joining(",","",""));

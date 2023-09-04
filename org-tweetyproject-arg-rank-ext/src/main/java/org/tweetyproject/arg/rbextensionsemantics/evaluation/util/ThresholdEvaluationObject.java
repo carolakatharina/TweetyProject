@@ -59,8 +59,14 @@ public class ThresholdEvaluationObject {
     }
 
 
-
-
+    /**
+     * Creates a new threshold evaluation object for a gradual semantics
+     * @param name the name for the report
+     * @param prinziplesFulfilled list of the number of principles fulfilled for each threshold
+     * @param prinziplesNotFulfilled list of the number of principles not fulfilled for each threshold
+     * @param thresholds the thresholds used
+     * @param percOfNodes the percentage of the average nodes in an extension
+     */
     public ThresholdEvaluationObject(String name, List<List<Principle>>
             prinziplesFulfilled, List<List<Principle>> prinziplesNotFulfilled, List<BigDecimal> thresholds,
                                      List<Double> percOfNodes) {
