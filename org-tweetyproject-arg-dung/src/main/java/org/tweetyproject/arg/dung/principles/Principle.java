@@ -82,21 +82,10 @@ public abstract class Principle implements Postulate<Argument> {
      */
     @Override
     public boolean isSatisfied(Collection<Argument> kb, PostulateEvaluatable<Argument> ev) {
-        if(ev instanceof AbstractExtensionReasoner) {
+        if(ev instanceof AbstractExtensionReasoner)
             return this.isSatisfied(kb, (AbstractExtensionReasoner) ev);
-        }
         throw new RuntimeException("PostulateEvaluatable of type AbstractExtensionReasoner expected.");
     }
-
-
-
-
-
-    /* (non-Javadoc)
-     * @see org.tweetyproject.commons.postulates.Postulate#isSatisfied(org.tweetyproject.commons.BeliefBase, org.tweetyproject.commons.postulates.PostulateEvaluatable)
-     */
-
-
 
     /* (non-Javadoc)
      * @see org.tweetyproject.commons.postulates.Postulate#isSatisfied(org.tweetyproject.commons.BeliefBase, org.tweetyproject.commons.postulates.PostulateEvaluatable)

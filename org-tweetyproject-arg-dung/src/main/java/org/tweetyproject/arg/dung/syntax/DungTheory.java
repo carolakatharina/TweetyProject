@@ -953,8 +953,8 @@ public class DungTheory extends BeliefSet<Argument,DungSignature> implements Gra
 	 */
 	@Override
 	public Collection<Graph<Argument>> getSubgraphs() {	
-		if(!DungTheory.archivedSubgraphs.containsKey(this))
-			DungTheory.archivedSubgraphs.put(this, DefaultGraph.<Argument>getSubgraphs(this));
+		if(!DungTheory.archivedSubgraphs.containsKey(this))			
+			DungTheory.archivedSubgraphs.put(this, DefaultGraph.<Argument>getSubgraphs(this));		
 		return DungTheory.archivedSubgraphs.get(this);
 	}
 
