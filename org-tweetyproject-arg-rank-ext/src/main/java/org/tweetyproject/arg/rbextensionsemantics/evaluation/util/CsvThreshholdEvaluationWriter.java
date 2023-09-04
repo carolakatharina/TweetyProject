@@ -57,14 +57,14 @@ public class CsvThreshholdEvaluationWriter {
 
 
     /**
-     * Creates a csv documenting the results of a threshold evaluation wrt. the principles fulfilled
+     * Creates a CSV with information about which principles are fulfilled for each threshold.
      * @throws IOException if Csv cannot be created
      */
-    public void createCsv() throws IOException {
-        BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\evaluation\\results\\threshold"+title+".csv"));
+    public void createCsvPrinciplesDetailed() throws IOException {
+        BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\evaluation\\results\\threshold\\"+title+"_detail.csv"));
 
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                .setHeader("Bezeichnung", x_axis, y_axis, "principles_fulfilled", "principles_not_fulfilled", "node_ext_percentage")
+                .setHeader("Bezeichnung", x_axis, y_axis, "principles_fulfilled", "principles_not_fulfilled")
                 .build();
 
 
@@ -78,8 +78,7 @@ public class CsvThreshholdEvaluationWriter {
                             try {
                                 printer.printRecord(bezeichnung, thresholds.get(i), principlesFulfilled.get(i).size(),
                                         getPrinciples(principlesFulfilled.get(i)),
-                                        getPrinciples(principlesNotFulfilled.get(i)),
-                                        obj.getNumberOfNodes());
+                                        getPrinciples(principlesNotFulfilled.get(i)));
 
 
                             } catch (IOException e) {
@@ -96,11 +95,11 @@ public class CsvThreshholdEvaluationWriter {
 
 
     /**
-     * Creates a CSV with detailed information about which principles are fulfilled for each threshold.
+     * Creates a CSV with information about how many principles are fulfilled for each threshold.
      * @throws IOException if Csv cannot be created
      */
-    public void createCsvForChart() throws IOException {
-        BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\evaluation\\results\\threshold\\"+title+".csv"));
+    public void createCsvNumberPrinciples() throws IOException {
+        BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\evaluation\\results\\threshold\\"+title+"_number.csv"));
         var bezeichnungen = data.stream().map(obj -> obj.getName()).distinct().collect(Collectors.joining(",","",""));
         bezeichnungen = bezeichnungen.replaceAll("\"", "");
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder()

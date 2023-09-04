@@ -39,13 +39,13 @@ import java.util.List;
 import static org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.*;
 
 /**
- * Example code for evaluating ranking semantics with regard
+ * Example code for evaluating the new exact ranking semantics with regard
  * to postulates. Each postulate represents a single property
  * that characterizes how the semantics ranks arguments.
  *
  * @author Carola Bauer
  */
-public class RankingPostulatesExample {
+public class ExactRankingPostulatesExample {
     private static Collection<RankingPostulate> all_postulates;
     private static BigDecimal epsilon = BigDecimal.valueOf(0.0001);
 

@@ -39,10 +39,10 @@ package org.tweetyproject.arg.rbextensionsemantics.evaluation;
 
 import org.tweetyproject.arg.dung.parser.ApxFilenameFilter;
 import org.tweetyproject.arg.dung.parser.ApxParser;
-import org.tweetyproject.arg.dung.principles.ExtensionbasedPrincipleEvaluator;
 import org.tweetyproject.arg.dung.principles.Principle;
 import org.tweetyproject.arg.dung.util.FileDungTheoryGenerator;
 import org.tweetyproject.arg.rbextensionsemantics.evaluation.util.CsvThreshholdEvaluationWriter;
+import org.tweetyproject.arg.rbextensionsemantics.evaluation.util.DetailedRankingExtensionbasedEvaluator;
 import org.tweetyproject.arg.rbextensionsemantics.evaluation.util.ThresholdEvaluationObject;
 import org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGeneralRankingBasedExtensionReasoner;
 
@@ -134,7 +134,7 @@ public class ThreshholdEvalution {
         File[] apxFiles;
         List<ThresholdEvaluationObject> data = new ArrayList<>();
         apxFiles = new File(
-                ".\\org-tweetyproject-arg-rank-ext\\src\\main\\resources\\threshold_evaluation")
+                ".\\org-tweetyproject-arg-rank-ext\\src\\main\\resources\\detailed_evaluation")
                 .listFiles(new ApxFilenameFilter());
 
 
@@ -154,7 +154,7 @@ public class ThreshholdEvalution {
 
                         reasoner = new ExactGeneralRankingBasedExtensionReasoner(acceptanceCondition,
                                 rankingSemantics, vorg, thresh, epsilon);
-                        ExtensionbasedPrincipleEvaluator evaluator = new ExtensionbasedPrincipleEvaluator(dg,
+                        DetailedRankingExtensionbasedEvaluator evaluator = new DetailedRankingExtensionbasedEvaluator(dg,
                                 reasoner, all_principles);
 
                         List<Principle> principlesNotFulfilled = new ArrayList<>();
@@ -189,8 +189,9 @@ public class ThreshholdEvalution {
             }
         }
 
-        new CsvThreshholdEvaluationWriter("Threshold_evaluation_principles_detail_for_" + rankingSemantics + "_" + acceptanceCondition + "_" + Math.random(), "Value for threshold delta", "Number of Principles fulfilled", data).createCsvForChart();
-        new CsvThreshholdEvaluationWriter("Threshold_evaluation_principles_number_for_" + rankingSemantics + "_" + acceptanceCondition + "_" + Math.random(), "Value for threshold delta", "Number of Principles fulfilled", data).createCsv();
+        var writer = new CsvThreshholdEvaluationWriter("Threshold_" + rankingSemantics + "_" + acceptanceCondition, "Value for threshold delta", "Number of Principles fulfilled", data);
+        writer.createCsvNumberPrinciples();
+        writer.createCsvPrinciplesDetailed();
 
     }
 }

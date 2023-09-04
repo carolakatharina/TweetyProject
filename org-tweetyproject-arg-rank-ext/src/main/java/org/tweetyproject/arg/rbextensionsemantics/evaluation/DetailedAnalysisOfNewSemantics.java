@@ -49,7 +49,7 @@ public class DetailedAnalysisOfNewSemantics {
     };
 
 
-    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Approach> vorgehen = new ArrayList<>(
+    private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Approach> approach = new ArrayList<>(
             List.of(ExactGeneralRankingBasedExtensionReasoner.Approach.SIMPLE,
                     ExactGeneralRankingBasedExtensionReasoner.Approach.ADMISSIBLE
 
@@ -108,9 +108,9 @@ public class DetailedAnalysisOfNewSemantics {
 
 
         File[] apxFiles = new File(
-                ".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\resources\\detailed_evaluation")
+                ".\\org-tweetyproject-arg-rank-ext\\src\\main\\resources\\detailed_evaluation")
                 .listFiles(new ApxFilenameFilter());
-        for (var vorg : vorgehen) {
+        for (var vorg : approach) {
             for (var epsilon : epsilon_values) {
 
                 var dg = new FileDungTheoryGenerator(apxFiles, new ApxParser(), true);
@@ -131,7 +131,7 @@ public class DetailedAnalysisOfNewSemantics {
 
 
                     System.out.println(ev.prettyPrint());
-                    ev.printForSimple(rankingSemantics, acceptanceCondition);
+                    ev.printForSimple(rankingSemantics, acceptanceCondition, vorg);
 
 
                 }

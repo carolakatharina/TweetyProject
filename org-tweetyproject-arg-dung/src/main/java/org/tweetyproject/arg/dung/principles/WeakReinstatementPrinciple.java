@@ -72,28 +72,4 @@ public class WeakReinstatementPrinciple extends Principle {
 
         return true;
     }
-
-    @Override
-    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
-        DungTheory theory = (DungTheory) kb;
-
-        for (Extension<DungTheory> ext: exts) {
-            for (Argument a: theory) {
-                if (ext.contains(a))
-                    continue;
-                boolean stronglyDefended = true;
-                for (Argument b: theory.getAttackers(a)) {
-                    if (!theory.isAttacked(b, ext)) {
-                        stronglyDefended = false;
-                        break;
-                    }
-                }
-                if (stronglyDefended)
-                    return false;
-            }
-        }
-
-
-        return true;
-    }
 }

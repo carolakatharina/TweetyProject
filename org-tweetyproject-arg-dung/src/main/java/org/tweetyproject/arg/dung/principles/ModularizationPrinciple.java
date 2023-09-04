@@ -65,22 +65,4 @@ public class ModularizationPrinciple extends Principle {
         }
         return true;
     }
-
-    @Override
-    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
-        DungTheory theory = (DungTheory) kb;
-
-        for (Extension<DungTheory> ext1: exts) {
-            DungTheory reduct = theory.getReduct(ext1);
-            Collection<Extension<DungTheory>> exts_reduct = ev.getModels(reduct);
-            for (Extension<DungTheory> ext2: exts_reduct) {
-                Extension<DungTheory> union = new Extension<DungTheory>(ext1);
-                union.addAll(ext2);
-                if (!exts.contains(union)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 }

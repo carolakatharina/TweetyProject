@@ -105,20 +105,22 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 	 * Returns an easy-to-read string representation of the report in which
 	 * the results are ordered alphabetically by postulate name.
 	 */
-	public void printForSimple(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition) throws IOException {
+	public void printForSimple(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition, ExactGeneralRankingBasedExtensionReasoner.Approach approach) throws IOException {
 
-		var headers = "AF,"+"Ext,"+"Ranking,"+"Grounded,"+"Percentage\"+\"\n";
+		var headers = "AF;"+"Ext;"+"Ranking;"+"Grounded;"+"Percentage\"+\"\n";
 
 
 
-		createCsvForSimple(headers, semantics, acceptanceCondition);
+		createCsvForSimple(headers, semantics, acceptanceCondition, approach);
 	}
-	public void createCsvForSimple(String headers, ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition) throws IOException {
-		BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\evaluation\\results\\detailed\\detailsemantics_evaluation" +
-				Math.random() + semantics+ acceptanceCondition +".csv"));
+	private void createCsvForSimple(String headers,
+								   ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition, ExactGeneralRankingBasedExtensionReasoner.Approach approach) throws IOException {
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\evaluation\\results\\detailed\\" +
+				semantics+ "_"+acceptanceCondition+"_"+ approach+".csv"));
 
 		CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
 				.setHeader(headers)
+				.setDelimiter(";")
 				.build();
 
 		var simpleGroundedReasoner = new SimpleGroundedReasoner();

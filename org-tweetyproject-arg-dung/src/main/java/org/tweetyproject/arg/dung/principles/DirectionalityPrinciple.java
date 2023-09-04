@@ -74,31 +74,6 @@ public class DirectionalityPrinciple extends Principle {
         return true;
     }
 
-    @Override
-    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
-        DungTheory theory = (DungTheory) kb;
-
-        Collection<Extension<DungTheory>> unattackedSets = this.getUnattackedSets(theory);
-        for (Extension<DungTheory> set : unattackedSets) {
-            // calculate extensions of the theory restricted to set
-            DungTheory theory_set = (DungTheory) theory.getRestriction(set);
-            Collection<Extension<DungTheory>> exts_set = ev.getModels(theory_set);
-
-            // get intersections of the extensions of theory with set
-            Collection<Extension<DungTheory>> exts_2 = new HashSet<>();
-            for (Extension<DungTheory> ext : exts) {
-                Extension<DungTheory> new_ext = new Extension<>(ext);
-                new_ext.retainAll(set);
-                exts_2.add(new_ext);
-            }
-
-            // if these two sets are not equal, then this semantics violates directionality
-            if (!exts_set.equals(exts_2))
-                return false;
-        }
-        return true;
-    }
-
     /**
      * utility method for calculating unattacked sets in a given theory
      * a set E is unattacked in theory iff there exists no argument a in theory \ E, with a attacks E

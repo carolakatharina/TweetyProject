@@ -60,21 +60,4 @@ public class NaivetyPrinciple extends Principle {
 
         return naiveExts.containsAll(exts);
     }
-
-    @Override
-    public boolean isSatisfied(Collection<Argument> kb, Collection<Extension<DungTheory>> exts, AbstractExtensionReasoner ev) {
-        DungTheory theory = (DungTheory) kb;
-
-        /*for(var ext:exts) {
-            if(!theory.isConflictFree(ext)) {
-                return false;
-            }
-        }
-
-         */
-
-        Collection<Extension<DungTheory>> naiveExts = reasoner.getModels(theory);
-        //ueberpruefen ob so tatsächlich korrekt!
-        return naiveExts.containsAll(exts);
-    }
 }

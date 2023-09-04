@@ -95,14 +95,14 @@ public class DetailedRankingExtensionbasedEvaluator extends PostulateEvaluator {
 			rep.addRanking(ev.getRanking(instance));
 			exts = ev.getModels(instance);
 			rep.addExtension(exts.stream().findFirst().get());
-			rep.addPercentage(Double.valueOf(exts.stream().findFirst().get().size())/Double.valueOf(instance.getNumberOfNodes()));
+			//rep.addPercentage(Double.valueOf(exts.stream().findFirst().get().size())/Double.valueOf(instance.getNumberOfNodes()));
 			for(var principle: (List<Principle>)this.getPostulates()) {
 				System.out.println(principle);
 				if(stopWhenFailed && failedPrinciples.contains(principle))
 					continue;
 				if(!principle.isApplicable(instance))
 					rep.addNotApplicableInstance(principle, instance);
-				else if(principle.isSatisfied(instance, exts, (AbstractExtensionReasoner) this.getEv()))
+				else if(principle.isSatisfied(instance, (AbstractExtensionReasoner) this.getEv()))
 					rep.addPositiveInstance(principle, instance);
 				else {
 					rep.addNegativeInstance(principle, instance);
