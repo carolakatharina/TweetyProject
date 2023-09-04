@@ -1,3 +1,16 @@
+# Disclaimer
+Fork of the Tweety Project for the master's thesis 'Creating New Extension-Based Semantics Based On Gradual Semantics in Abstract Argumentation'.  
+
+# Abstract
+Ranking-based and extension-based semantics are two important families of semantics in abstract argumentation theory that differ regarding goals and type of outcome.
+In the new project 'org-tweetyproject-arg-rank-ext' of the Tweety Project, a new family of extension-based semantics based on gradual
+semantics is created, thus combining the advantages of both approaches. 
+
+This implementaton repository includes an evaluation program for the threshold search as well as a program executing a detailed principle-based evaluation for the new semantics.
+
+The test data used for the thesis as well as results are included in the repository.
+
+
 # TweetyProject
 ![TweetyProject Logo](./logo/tweety_small.png "TweetyProject Logo")
 
