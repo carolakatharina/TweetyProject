@@ -96,6 +96,7 @@ public class ThreshholdEvalution {
             ITS,
             EULER
     ));
+    private static ExactGeneralRankingBasedExtensionReasoner reasoner;
 
     public static void main(String[] args) throws IOException {
         all_principles = new HashSet<>();
@@ -146,7 +147,6 @@ public class ThreshholdEvalution {
                 String bezeichnung = rankingSemantics + " mit Epsilon=" + epsilon;
                 List<List<Principle>> principles_fulfilled = new ArrayList<>();
                 List<List<Principle>> principles_not_fulfilled = new ArrayList<>();
-                List<Double> percentage_of_ext_nodes = new ArrayList<>();
                 ExactGeneralRankingBasedExtensionReasoner reasoner;
 
 
@@ -178,13 +178,12 @@ public class ThreshholdEvalution {
 
                         principles_fulfilled.add(principlesFulfilled);
                         principles_not_fulfilled.add(principlesNotFulfilled);
-                        percentage_of_ext_nodes.add(ev.getPercentagesNodes().stream().mapToDouble(perc -> (double) perc).sum() / (double) ev.getPercentagesNodes().size());
 
 
                         System.out.println(evaluator.evaluate(1000, true).prettyPrint());
 
                 }
-                data.add(new ThresholdEvaluationObject(bezeichnung, principles_fulfilled, principles_not_fulfilled, threshholds, percentage_of_ext_nodes));
+                data.add(new ThresholdEvaluationObject(bezeichnung, principles_fulfilled, principles_not_fulfilled, threshholds));
 
             }
         }

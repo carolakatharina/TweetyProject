@@ -33,11 +33,7 @@ public class ThresholdEvaluationObject {
     private final String name;
     private final List<List<Principle>> prinziplesFulfilled;
 
-    public List<Double> getNumberOfNodes() {
-        return percNodesInExtension;
-    }
 
-    private final List<Double> percNodesInExtension;
 
     public List<List<Principle>> getPrinziplesNotFulfilled() {
         return prinziplesNotFulfilled;
@@ -65,17 +61,14 @@ public class ThresholdEvaluationObject {
      * @param prinziplesFulfilled list of the number of principles fulfilled for each threshold
      * @param prinziplesNotFulfilled list of the number of principles not fulfilled for each threshold
      * @param thresholds the thresholds used
-     * @param percOfNodes the percentage of the average nodes in an extension
      */
     public ThresholdEvaluationObject(String name, List<List<Principle>>
-            prinziplesFulfilled, List<List<Principle>> prinziplesNotFulfilled, List<BigDecimal> thresholds,
-                                     List<Double> percOfNodes) {
+            prinziplesFulfilled, List<List<Principle>> prinziplesNotFulfilled, List<BigDecimal> thresholds) {
 
         this.name = name;
         this.prinziplesFulfilled = prinziplesFulfilled;
         this.prinziplesNotFulfilled = prinziplesNotFulfilled;
         this.thresholds = thresholds;
-        this.percNodesInExtension = percOfNodes;
     }
 
 
