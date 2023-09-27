@@ -24,7 +24,7 @@ an argument given by gradual semantics to determine whether an argument is accep
   - We have added implementations of 
     - the _Max-Based_ semantics (Amgoud et al. 2019), 
     - the _Euler-Max-Based_ semantics (Amgoud, Doder 2019),
-    - the _Iterative Schema_ semantics (Gabbay, Rodrigues 2015, 
+    - the _Iterative Schema_ semantics (Gabbay, Rodrigues 2015), 
     - the _Trust-Based semantics_ (DaCosta 2011) , and
     - the _No-self-attack h-categorizer_ semantics (Beuselinck et al. 2021)
 
