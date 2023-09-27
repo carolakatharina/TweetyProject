@@ -18,13 +18,16 @@
  */
 package org.tweetyproject.arg.rankings.postulates;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
-import org.tweetyproject.comparator.GeneralComparator;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
+import org.tweetyproject.comparator.GeneralComparator;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The "distributed-defense precedence" postulate for ranking semantics as
