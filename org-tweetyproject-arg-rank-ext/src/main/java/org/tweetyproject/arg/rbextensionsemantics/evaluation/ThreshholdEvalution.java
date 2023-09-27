@@ -172,7 +172,6 @@ public class ThreshholdEvalution {
                     principles_not_fulfilled.add(principlesNotFulfilled);
 
 
-                    System.out.println(evaluator.evaluate(1000, true).prettyPrint());
 
                 }
                 data.add(new ThresholdEvaluationObject(bezeichnung, principles_fulfilled, principles_not_fulfilled, threshholds));

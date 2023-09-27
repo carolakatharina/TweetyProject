@@ -18,16 +18,15 @@
  */
 package org.tweetyproject.arg.rankings.postulates;
 
-import org.tweetyproject.arg.dung.syntax.Argument;
-import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
-import org.tweetyproject.comparator.GeneralComparator;
-
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
+import org.tweetyproject.comparator.GeneralComparator;
+import org.tweetyproject.arg.dung.syntax.Argument;
+import org.tweetyproject.arg.dung.syntax.DungTheory;
 
 /**
  * The "distributed-defense precedence" postulate for ranking semantics as
@@ -60,51 +59,52 @@ public class RaDistDefensePrecedence extends RankingPostulate {
 			return true;
 		
 		DungTheory dt = (DungTheory) kb;
+		Iterator<Argument> it = dt.iterator();
+		Argument a = it.next();
+		Argument b = it.next();
 
+		if (dt.getAttackers(a).size() != dt.getAttackers(b).size())
+			return true;
+		Set<Argument> defendersA = new HashSet<Argument>();
+		Set<Argument> defendersB = new HashSet<Argument>();
+		for (Argument at : dt.getAttackers(a))
+			defendersA.addAll(dt.getAttackers(at));
+		for (Argument bt : dt.getAttackers(b))
+			defendersB.addAll(dt.getAttackers(bt));
+		if (defendersA.size() != defendersB.size())
+			return true;
 
-		var satisfied=true;
-		for (var a: dt) {
-
-			List<Argument> potentialBs = dt.stream().filter(arg ->
-							dt.getAttackers(arg).size()==dt.getAttackers(a).size() && !arg.equals(a))
-					.collect(Collectors.toList());
-			for (var b: potentialBs) {
-				Set<Argument> defendersA = new HashSet<Argument>();
-				Set<Argument> defendersB = new HashSet<Argument>();
-				for (Argument at : dt.getAttackers(a))
-					defendersA.addAll(dt.getAttackers(at));
-				for (Argument bt : dt.getAttackers(b))
-					defendersB.addAll(dt.getAttackers(bt));
-				if (defendersA.size() != defendersB.size())
-					break;
-				if (defenseIsDistributed(a, dt) && defenseIsSimple(a, dt) &&
-						!defenseIsDistributed(b, dt) && defenseIsSimple(b, dt)) {
-					GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
-					if(!ranking.isStrictlyMoreAcceptableThan(a, b)) {
-						return false;
-					}
-				}
-			}
-
-
+		// check if defense of a and b is simple
+		for (Argument defender : defendersA) {
+			Set<Argument> attackersA = new HashSet<Argument>(dt.getAttackers(a));
+			attackersA.retainAll(dt.getAttacked(defender));
+			if (attackersA.size() > 1)
+				return true;
 		}
-		return satisfied;
-	}
+		for (Argument defender : defendersB) {
+			Set<Argument> attackersB = new HashSet<Argument>(dt.getAttackers(b));
+			attackersB.retainAll(dt.getAttacked(defender));
+			if (attackersB.size() > 1)
+				return true;
+		}
 
+		// check if defense of a is distributed
+		for (Argument attacker : dt.getAttackers(a)) {
+			if (dt.getAttackers(attacker).size() > 1)
+				return true;
+		}
 
-	/*The defense of an argument x is simple iff each defender of x
-	attacks exactly one attacker of x*/
-	private boolean defenseIsSimple(Argument x, DungTheory kb) {
-		var defenders= kb.getAttackers(kb.getAttackers(x));
-		return defenders.stream().allMatch(def ->
-				kb.getAttackers(x).stream().filter(att -> kb.isAttackedBy(att, def)).collect(Collectors.toList()).size()==1);
-	}
+		// check if defense of b is not distributed
+		boolean defenseIsDistributed = true;
+		for (Argument attacker : dt.getAttackers(a)) {
+			if (dt.getAttackers(attacker).size() > 1)
+				defenseIsDistributed = false;
+		}
+		if (defenseIsDistributed)
+			return true;
 
-	/*The defense of an argument x is distributed iff every attacker of x is attacked by at most
-	one argument */
-	private boolean defenseIsDistributed(Argument x, DungTheory kb) {
-		var attackers= kb.getAttackers(x);
-		return attackers.stream().allMatch(att -> kb.getAttackers(att).size()<=1);
+		GeneralComparator<Argument, DungTheory> ranking = ev.getModel(dt);
+		return ranking.isStrictlyMoreAcceptableThan(a, b);
 	}
 
 }

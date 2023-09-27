@@ -62,21 +62,17 @@ public class ExactRankingPostulatesExample {
     public static void main(String[] args) {
         all_postulates = new HashSet<>();
 
-        all_postulates.add(RankingPostulate.INCREASEOFATTACKBRANCH);
-        all_postulates.add(RankingPostulate.INCREASEOFDEFENSEBRANCH);
 
-        all_postulates.add(RankingPostulate.STRICTCOUNTERTRANSITIVITY);
+
 
         all_postulates.add(RankingPostulate.ABSTRACTION);
         all_postulates.add(RankingPostulate.ADDITIONOFATTACKBRANCH);
         all_postulates.add(RankingPostulate.ADDITIONOFDEFENSEBRANCH);
 
-
          
         all_postulates.add(RankingPostulate.ATTACKVSFULLDEFENSE);
         all_postulates.add(RankingPostulate.CARDINALITYPRECEDENCE);
         all_postulates.add(RankingPostulate.COUNTERTRANSITIVITY);
-        all_postulates.add(RankingPostulate.STRICTCOUNTERTRANSITIVITY);
 
 
         all_postulates.add(RankingPostulate.COUNTING);
@@ -103,7 +99,7 @@ public class ExactRankingPostulatesExample {
 
         File[] apxFiles;
         apxFiles = new File(
-                ".\\org-tweetyproject-arg-rank-ext\\src\\main\\resources\\detailed_evaluation")
+                ".\\org-tweetyproject-arg-rank-ext\\src\\main\\resources\\test_data_reduced")
                 .listFiles(new ApxFilenameFilter());
 
 

@@ -18,14 +18,15 @@
  */
 package org.tweetyproject.arg.rankings.postulates;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
+import org.tweetyproject.comparator.GeneralComparator;
 import org.tweetyproject.arg.dung.semantics.Extension;
 import org.tweetyproject.arg.dung.syntax.Argument;
 import org.tweetyproject.arg.dung.syntax.DungTheory;
-import org.tweetyproject.arg.rankings.reasoner.AbstractRankingReasoner;
-import org.tweetyproject.comparator.GeneralComparator;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 /**
  * The "defense precedence" postulate for ranking semantics as proposed in
@@ -56,24 +57,20 @@ public class RaDefensePrecedence extends RankingPostulate {
 			return true;
 
 		DungTheory dt = new DungTheory((DungTheory) kb);
+		Iterator<Argument> it = dt.iterator();
+		Argument a = it.next();
+		Argument b = it.next();
+		Set<Argument> attackersA = dt.getAttackers(a);
+		Set<Argument> attackersB = dt.getAttackers(b);
+		if (attackersA.size() != attackersB.size())
+			return true;
 
-		for (var a : dt) {
-			var potentialbs = dt.stream()
-					.filter(b ->
-							dt.getAttackers(a).size() == dt.getAttackers(b).size()
-									&& !b.equals(a))
-					.collect(Collectors.toList());
-			for (var b : potentialbs) {
-				if (dt.isAttacked(new Extension(dt.getAttackers(a)), new Extension(kb))
-						&& !dt.isAttacked(new Extension(dt.getAttackers(b)), new Extension(kb))) {
-					GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
-					if (!ranking.isStrictlyMoreAcceptableThan(a, b)) {
-						return false;
-					}
-				}
-			}
-
-		}return true;
+		if (dt.isAttacked(new Extension(dt.getAttackers(a)), new Extension(kb))
+				&& !dt.isAttacked(new Extension(dt.getAttackers(b)), new Extension(kb))) {
+			GeneralComparator<Argument, DungTheory> ranking = ev.getModel((DungTheory) dt);
+			return ranking.isStrictlyMoreAcceptableThan(a, b);
+		}
+		return true;
 	}
 
 }
