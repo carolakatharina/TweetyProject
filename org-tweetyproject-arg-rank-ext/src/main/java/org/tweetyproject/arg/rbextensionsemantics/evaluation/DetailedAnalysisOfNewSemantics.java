@@ -108,7 +108,7 @@ public class DetailedAnalysisOfNewSemantics {
 
 
         File[] apxFiles = new File(
-                ".\\org-tweetyproject-arg-rank-ext\\src\\main\\resources\\detailed_evaluation")
+                ".\\org-tweetyproject-arg-rank-ext\\src\\main\\resources\\test_data_complete")
                 .listFiles(new ApxFilenameFilter());
         for (var vorg : approach) {
             for (var epsilon : epsilon_values) {

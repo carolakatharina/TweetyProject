@@ -1,14 +1,43 @@
 # Disclaimer
-Fork of the Tweety Project for the master's thesis 'Creating New Extension-Based Semantics Based On Gradual Semantics in Abstract Argumentation'.  
+Fork of the Tweety Project for the master's thesis _Creating New Extension-Based Semantics Based On Gradual Semantics in Abstract Argumentation_.  
+
+# Abstract 
+Ranking-based and extension-based semantics are two important families of semantics
+in abstract argumentation theory that differ regarding goals and types of outcome.
+
+Given an argumentation framework, an extension-based semantics returns extensions,
+i.e., sets of arguments that can be accepted together. However, a detailed evaluation
+of an argument’s strength is missing. In contrast, ranking-based semantics focus on
+evaluating the strength of arguments by assigning values or defining a ranking order. However, the relative strength of an argument allows no conclusion as to which
+arguments can be accepted together.
+
+This project implements new extension-based semantics based on gradual semantics (a particular type of ranking-based semantics), thus combining the advantages
+of both approaches. Given an argumentation framework, we use the strength of
+an argument given by gradual semantics to determine whether an argument is accepted in an extension. Different possibilities regarding the conditions for acceptance and the gradual semantics used are explored.
 
 # Implementation Details
-Ranking-based and extension-based semantics are two important families of semantics in abstract argumentation theory that differ regarding goals and type of outcome.
-In the new project 'org-tweetyproject-arg-rank-ext' of the Tweety Project, a new family of extension-based semantics based on gradual
-semantics is created, thus combining the advantages of both approaches. 
 
-This implementaton repository includes an evaluation program for the threshold search as well as a program executing a detailed principle-based evaluation for the new semantics.
 
-The test data used for the thesis as well as results are included in the repository.
+<b>This fork includes the following contributions:</b>
+
+- **Implementation of gradual semantics**: 
+  - We have added implementations of 
+    - the _Max-Based_ semantics (Amgoud et al. 2019), 
+    - the _Euler-Max-Based_ semantics (Amgoud, Doder 2019),
+    - the _Iterative Schema_ semantics (Gabbay, Rodrigues 2015, 
+    - the _Trust-Based semantics_ (DaCosta 2011) , and
+    - the _No-self-attack h-categorizer_ semantics (Beuselinck et al. 2021)
+
+    to the _rankings_-project.
+- **Implementation of new extension semantics based on gradual semantics:**
+  - We have created the project _ext-rank_ containing
+    - an implementations of the new semantics (_ExactGeneralRankingBasedExtensionReasoner.java_), 
+    - an evaluation program for the threshold search (_ThresholdEvaluation.java_), and
+    - an evaluation program for the newly created semantics (DetailedAnalysisOfNewSemantics.java).
+- **Included are:**
+    - the test data used for this thesis (see resources) and
+    - exemplary results.
+    
 
 
 # TweetyProject
