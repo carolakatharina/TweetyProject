@@ -76,6 +76,7 @@ public class RankingPostulatesExample {
 		TrustBasedExample();
 		TuplesExample();
 		DiscussionExample();
+		NsaExample();
 
 
 
@@ -85,6 +86,14 @@ public class RankingPostulatesExample {
 		DungTheoryGenerator dg = new DefaultDungTheoryGenerator(new DungTheoryGenerationParameters());
 		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
 				new CategorizerRankingReasoner());
+		evaluator.addAllPostulates(all_postulates);
+		System.out.println(evaluator.evaluate(20, false).prettyPrint());
+	}
+
+	public static void NsaExample() {
+		DungTheoryGenerator dg = new DefaultDungTheoryGenerator(new DungTheoryGenerationParameters());
+		PostulateEvaluator<Argument, DungTheory> evaluator = new PostulateEvaluator<Argument, DungTheory>(dg,
+				new NsaReasoner());
 		evaluator.addAllPostulates(all_postulates);
 		System.out.println(evaluator.evaluate(20, false).prettyPrint());
 	}
