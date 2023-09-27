@@ -51,7 +51,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition.*;
+import static org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition.RB_ARG_ABS_STRENGTH;
+import static org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition.RB_ATT_ABS_STRENGTH;
 import static org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGeneralRankingBasedExtensionReasoner.RankingSemantics.*;
 
 /**
@@ -64,7 +65,7 @@ public class ThreshholdEvalution {
     private static Collection<Principle> all_principles;
 
     private static final BigDecimal[] epsilon_values = {
-            BigDecimal.valueOf(0.01),BigDecimal.valueOf(0.001),
+            BigDecimal.valueOf(0.01), BigDecimal.valueOf(0.001),
             BigDecimal.valueOf(0.0001)
             , BigDecimal.valueOf(0.00001)
 
@@ -72,18 +73,12 @@ public class ThreshholdEvalution {
 
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.Approach> vorgehen = new ArrayList<>(
-            List.of(
-                    ExactGeneralRankingBasedExtensionReasoner.Approach.ADMISSIBLE,
-
-                    ExactGeneralRankingBasedExtensionReasoner.Approach.SIMPLE
-
-            ));
+            List.of(ExactGeneralRankingBasedExtensionReasoner.Approach.SIMPLE));
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition> AKZEPTANZBEDINGUNGEN = Arrays.asList(
 
             RB_ARG_ABS_STRENGTH,
-            RB_ATT_ABS_STRENGTH,
-            RB_ARG_REL_STRENGTH
+            RB_ATT_ABS_STRENGTH
     );
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
@@ -116,11 +111,10 @@ public class ThreshholdEvalution {
         all_principles.add(Principle.DIRECTIONALITY);
 
 
-
         for (var rank : rank_semantics) {
             for (var bed : AKZEPTANZBEDINGUNGEN) {
 
-                    evaluate(bed, rank);
+                evaluate(bed, rank);
 
             }
         }
@@ -138,7 +132,6 @@ public class ThreshholdEvalution {
                 .listFiles(new ApxFilenameFilter());
 
 
-
         for (var vorg : vorgehen) {
             for (var epsilon : epsilon_values) {
 
@@ -151,35 +144,35 @@ public class ThreshholdEvalution {
 
                 for (BigDecimal thresh : threshholds) {
 
-                        reasoner = new ExactGeneralRankingBasedExtensionReasoner(acceptanceCondition,
-                                rankingSemantics, vorg, thresh, epsilon);
-                        DetailedRankingExtensionbasedEvaluator evaluator = new DetailedRankingExtensionbasedEvaluator(dg,
-                                reasoner, all_principles);
+                    reasoner = new ExactGeneralRankingBasedExtensionReasoner(acceptanceCondition,
+                            rankingSemantics, vorg, thresh, epsilon);
+                    DetailedRankingExtensionbasedEvaluator evaluator = new DetailedRankingExtensionbasedEvaluator(dg,
+                            reasoner, all_principles);
 
-                        List<Principle> principlesNotFulfilled = new ArrayList<>();
+                    List<Principle> principlesNotFulfilled = new ArrayList<>();
 
-                        var ev = evaluator.evaluate(
-                                apxFiles.length,
-                                true);
-                        List<Principle> principlesFulfilled = new ArrayList<>();
+                    var ev = evaluator.evaluate(
+                            apxFiles.length,
+                            true);
+                    List<Principle> principlesFulfilled = new ArrayList<>();
 
 
-                        for (var princ : all_principles) {
+                    for (var princ : all_principles) {
 
-                            if (ev.getNegativeInstances(princ).size() > 0) {
-                                principlesNotFulfilled.add(princ);
-                            } else {
-                                principlesFulfilled.add(princ);
+                        if (ev.getNegativeInstances(princ).size() > 0) {
+                            principlesNotFulfilled.add(princ);
+                        } else {
+                            principlesFulfilled.add(princ);
 
-                            }
                         }
-                        System.out.println(ev.prettyPrint());
+                    }
+                    System.out.println(ev.prettyPrint());
 
-                        principles_fulfilled.add(principlesFulfilled);
-                        principles_not_fulfilled.add(principlesNotFulfilled);
+                    principles_fulfilled.add(principlesFulfilled);
+                    principles_not_fulfilled.add(principlesNotFulfilled);
 
 
-                        System.out.println(evaluator.evaluate(1000, true).prettyPrint());
+                    System.out.println(evaluator.evaluate(1000, true).prettyPrint());
 
                 }
                 data.add(new ThresholdEvaluationObject(bezeichnung, principles_fulfilled, principles_not_fulfilled, threshholds));
