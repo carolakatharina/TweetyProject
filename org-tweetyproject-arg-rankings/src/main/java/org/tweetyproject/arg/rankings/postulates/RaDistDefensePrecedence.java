@@ -62,7 +62,7 @@ public class RaDistDefensePrecedence extends RankingPostulate {
 		Iterator<Argument> it = dt.iterator();
 		Argument a = it.next();
 		Argument b = it.next();
-
+		
 		if (dt.getAttackers(a).size() != dt.getAttackers(b).size())
 			return true;
 		Set<Argument> defendersA = new HashSet<Argument>();
@@ -73,7 +73,7 @@ public class RaDistDefensePrecedence extends RankingPostulate {
 			defendersB.addAll(dt.getAttackers(bt));
 		if (defendersA.size() != defendersB.size())
 			return true;
-
+	
 		// check if defense of a and b is simple
 		for (Argument defender : defendersA) {
 			Set<Argument> attackersA = new HashSet<Argument>(dt.getAttackers(a));

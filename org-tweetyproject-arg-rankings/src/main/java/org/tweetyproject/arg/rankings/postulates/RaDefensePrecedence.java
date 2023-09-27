@@ -55,7 +55,7 @@ public class RaDefensePrecedence extends RankingPostulate {
 			return true;
 		if (ev.getModel((DungTheory) kb) == null)
 			return true;
-
+		
 		DungTheory dt = new DungTheory((DungTheory) kb);
 		Iterator<Argument> it = dt.iterator();
 		Argument a = it.next();
