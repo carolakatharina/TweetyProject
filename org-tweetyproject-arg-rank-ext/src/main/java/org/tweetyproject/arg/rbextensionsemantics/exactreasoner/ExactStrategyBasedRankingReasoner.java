@@ -46,18 +46,18 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 
 	@Override
 	public Collection<ExactNumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-		Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<ExactNumericalPartialOrder<Argument, DungTheory>>();
+		Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
 		ranks.add(this.getModel(bbase));
 		return ranks;
 	}
 
 	@Override
 	public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory kb) {
-		ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<Argument, DungTheory>();
+		ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<>();
 		ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
-		Set<Set<Argument>> subsets = new SetTools<Argument>().subsets(((DungTheory)kb).getNodes());
-		for (Argument a : ((DungTheory)kb)) 
-			ranking.put(a, computeStrengthOfArgument(a, ((DungTheory)kb), subsets)); 
+		Set<Set<Argument>> subsets = new SetTools<Argument>().subsets(kb.getNodes());
+		for (Argument a : kb)
+			ranking.put(a, computeStrengthOfArgument(a, kb, subsets));
 		return ranking;
 	}
 
@@ -86,8 +86,8 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 		problem.setTargetFunction(targetVar);
 		
 		//Generate strategies of the proponent and opponent of the zero-sum strategic game
-		Set<Collection<Argument>> proponentStrategies = new HashSet<Collection<Argument>>();
-		Set<Collection<Argument>> opponentStrategies = new HashSet<Collection<Argument>>();
+		Set<Collection<Argument>> proponentStrategies = new HashSet<>();
+		Set<Collection<Argument>> opponentStrategies = new HashSet<>();
 		for (Set<Argument> p : subsets) {
 			opponentStrategies.add(p);
 			if (p.contains(a)) 
@@ -108,7 +108,7 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 		problem.add(new Inequation(targetVar, new BigDecimalConstant(0.0), Inequation.GREATER_EQUAL));
 		
 		for (Collection<Argument> j : opponentStrategies) {
-			List<Term> products = new ArrayList<Term>(); 
+			List<Term> products = new ArrayList<>();
 			int pi = 0;
 			for (Collection<Argument> i : proponentStrategies) {
 				BigDecimalConstant rewardsIj = new BigDecimalConstant(computeRewards(i, j, kb));
@@ -143,9 +143,9 @@ public class ExactStrategyBasedRankingReasoner extends AbstractExactNumericalPar
 	 * @return rewards of A
 	 */
 	public BigDecimal computeRewards(Collection<Argument> A, Collection<Argument> B, DungTheory kb) {
-		if (kb.isAttacked(new Extension<DungTheory>(A), new Extension<DungTheory>(A)))
+		if (kb.isAttacked(new Extension<>(A), new Extension<>(A)))
 			return BigDecimal.valueOf(0.0);
-		else if (kb.isAttacked(new Extension<DungTheory>(A), new Extension<DungTheory>(B)))
+		else if (kb.isAttacked(new Extension<>(A), new Extension<>(B)))
 			return computeDegreeOfAcceptability(A, B, kb);
 		return BigDecimal.valueOf(1.0);
 	}

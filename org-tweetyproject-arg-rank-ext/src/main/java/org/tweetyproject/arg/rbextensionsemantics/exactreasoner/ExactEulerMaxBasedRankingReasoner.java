@@ -131,8 +131,7 @@ public class ExactEulerMaxBasedRankingReasoner extends AbstractExactNumericalPar
             sum = sum.add(distance.pow(2), MathContext.DECIMAL128);
         }
 
-        BigDecimal result = sum.sqrt(MathContext.DECIMAL64);
-        return result;
+        return sum.sqrt(MathContext.DECIMAL64);
     }
     /**
      * natively installed

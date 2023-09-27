@@ -47,7 +47,7 @@ import static org.tweetyproject.arg.rbextensionsemantics.exactreasoner.ExactGene
  */
 public class ExactRankingPostulatesExample {
     private static Collection<RankingPostulate> all_postulates;
-    private static BigDecimal epsilon = BigDecimal.valueOf(0.0001);
+    private static final BigDecimal epsilon = BigDecimal.valueOf(0.0001);
 
     private static final Collection<ExactGeneralRankingBasedExtensionReasoner.RankingSemantics> rank_semantics = new ArrayList<>(List.of(
 

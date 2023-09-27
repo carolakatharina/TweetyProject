@@ -96,7 +96,6 @@ public class ThreshholdEvalution {
             ITS,
             EULER
     ));
-    private static ExactGeneralRankingBasedExtensionReasoner reasoner;
 
     public static void main(String[] args) throws IOException {
         all_principles = new HashSet<>();

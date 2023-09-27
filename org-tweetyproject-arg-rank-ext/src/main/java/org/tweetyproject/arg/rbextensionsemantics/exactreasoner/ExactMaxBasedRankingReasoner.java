@@ -43,8 +43,6 @@ import java.util.HashSet;
 public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
     private final BigDecimal epsilon;
-    private Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks;
-    private ExactNumericalPartialOrder<Argument, DungTheory> ranking;
 
     public ExactMaxBasedRankingReasoner(BigDecimal epsilon) {
         this.epsilon = epsilon;
@@ -53,7 +51,7 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
 
     @Override
     public Collection<ExactNumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
-        ranks = new HashSet<>();
+        Collection<ExactNumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
         ranks.add(this.getModel(bbase));
         return ranks;
     }
@@ -80,7 +78,7 @@ public class ExactMaxBasedRankingReasoner extends AbstractExactNumericalPartialO
 
         //Use computed valuations as values for argument ranking
         //Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
-        ranking = new ExactNumericalPartialOrder<>();
+        ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<>();
         ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
         int i = 0;
         for (Argument a : kb)

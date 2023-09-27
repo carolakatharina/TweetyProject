@@ -73,7 +73,7 @@ public class ThresholdValuesForRBSemantics {
                     new BigDecimal[]{
                             BigDecimal.valueOf(0.6181)};
 
-            case TRUST ->  new BigDecimal[]{
+            case TRUST, ITS ->  new BigDecimal[]{
                     BigDecimal.valueOf(0.5)};
             case NSA ->   new BigDecimal[]{
 
@@ -82,8 +82,6 @@ public class ThresholdValuesForRBSemantics {
 
             case EULER ->  new BigDecimal[]{
                     BigDecimal.valueOf(0.5672)};
-            case ITS ->
-                    new BigDecimal[]{BigDecimal.valueOf(0.5) };
             case MATT_TONI ->
                     new BigDecimal[]{BigDecimal.valueOf(0.5556) };
         };

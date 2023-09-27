@@ -135,8 +135,7 @@ public class ExactIterativeSchemaRankingReasoner extends AbstractExactNumericalP
             sum = sum.add(distance.pow(2), MathContext.DECIMAL32);
         }
 
-        BigDecimal result = sum.sqrt(MathContext.DECIMAL32);
-        return result;
+        return sum.sqrt(MathContext.DECIMAL32);
     }
 
     /**

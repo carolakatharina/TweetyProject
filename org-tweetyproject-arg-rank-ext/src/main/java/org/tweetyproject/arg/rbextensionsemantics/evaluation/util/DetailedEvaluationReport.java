@@ -65,8 +65,8 @@ import java.util.Map;
  */
 public class DetailedEvaluationReport<S extends Formula> extends PostulateEvaluationReport {
 
-	List<Collection<S>> allAfs = new ArrayList<Collection<S>>();
-	List<Collection<S>> allExtensions = new ArrayList<Collection<S>>();
+	List<Collection<S>> allAfs = new ArrayList<>();
+	List<Collection<S>> allExtensions = new ArrayList<>();
 
 	List<Map<Argument, BigDecimal>> rankings = new ArrayList<>();
 
@@ -106,14 +106,10 @@ public class DetailedEvaluationReport<S extends Formula> extends PostulateEvalua
 	 */
 	public void printCsv(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition, ExactGeneralRankingBasedExtensionReasoner.Approach approach) throws IOException {
 
-		var headers = "AF;"+"Ext;"+"Ranking;"+"Grounded\"+\"\n";
 
-
-
-		createCsvForSimple(headers, semantics, acceptanceCondition, approach);
+		createCsvForSimple(semantics, acceptanceCondition, approach);
 	}
-	private void createCsvForSimple(String headers,
-								   ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition, ExactGeneralRankingBasedExtensionReasoner.Approach approach) throws IOException {
+	private void createCsvForSimple(ExactGeneralRankingBasedExtensionReasoner.RankingSemantics semantics, ExactGeneralRankingBasedExtensionReasoner.AcceptanceCondition acceptanceCondition, ExactGeneralRankingBasedExtensionReasoner.Approach approach) throws IOException {
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get(".\\org-tweetyproject-arg-rank-ext\\src\\main\\java\\org\\tweetyproject\\arg\\rbextensionsemantics\\evaluation\\results\\detailed\\" +
 				semantics+ "_"+acceptanceCondition+"_"+ approach+".csv"));
 

@@ -42,7 +42,7 @@ import java.util.HashSet;
  */
 public class ExactCategorizerRankingReasoner extends AbstractExactNumericalPartialOrderRankingReasoner {
 
-	private BigDecimal epsilon;
+	private final BigDecimal epsilon;
 
 	/**
 	 * Create a new CountingRankingReasoner with default
@@ -72,10 +72,10 @@ public class ExactCategorizerRankingReasoner extends AbstractExactNumericalParti
 
 	@Override
 	public ExactNumericalPartialOrder<Argument, DungTheory> getModel(DungTheory base) {
-		Matrix directAttackMatrix = ((DungTheory)base).getAdjacencyMatrix().transpose(); //The matrix of direct attackers
+		Matrix directAttackMatrix = base.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
 		int n = directAttackMatrix.getXDimension();
-		BigDecimal valuations[] = new BigDecimal[n];	 //Stores valuations of the current iteration
-		BigDecimal valuationsOld[] = new BigDecimal[n]; //Stores valuations of the last iteration
+		BigDecimal[] valuations = new BigDecimal[n];	 //Stores valuations of the current iteration
+		BigDecimal[] valuationsOld; //Stores valuations of the last iteration
 
 		for (int i=0; i<n; i++) {
 			valuations[i]= BigDecimal.valueOf(1.);
@@ -90,10 +90,10 @@ public class ExactCategorizerRankingReasoner extends AbstractExactNumericalParti
 	
 		//Use computed valuations as values for argument ranking
 		//Note: The order of valuations v[i] is the same as the order of DungTheory.iterator()
-		ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<Argument, DungTheory>();
+		ExactNumericalPartialOrder<Argument, DungTheory> ranking = new ExactNumericalPartialOrder<>();
 		ranking.setSortingType(ExactNumericalPartialOrder.SortingType.DESCENDING);
 		int i = 0;
-		for (Argument a : ((DungTheory)base)) {
+		for (Argument a : base) {
 				ranking.put(a, valuations[i++]);
 		}
 
@@ -138,8 +138,7 @@ public class ExactCategorizerRankingReasoner extends AbstractExactNumericalParti
 			sum = sum.add(distance.pow(2), MathContext.DECIMAL128);
 		}
 
-		BigDecimal result = sum.sqrt(MathContext.DECIMAL128);
-		return result;
+		return sum.sqrt(MathContext.DECIMAL128);
 	}
 
 

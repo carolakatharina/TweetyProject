@@ -74,7 +74,7 @@ public class NsaReasoner extends AbstractRankingReasoner<NumericalPartialOrder<A
 		Matrix directAttackMatrix = base.getAdjacencyMatrix().transpose(); //The matrix of direct attackers
 		int n = directAttackMatrix.getXDimension();
 		double[] valuations = new double[n];	 //Stores valuations of the current iteration
-		double[] valuationsOld = new double[n]; //Stores valuations of the last iteration
+		double[] valuationsOld; //Stores valuations of the last iteration
 		
 		//Keep computing valuations until the values stop changing much or converge 
 		do {

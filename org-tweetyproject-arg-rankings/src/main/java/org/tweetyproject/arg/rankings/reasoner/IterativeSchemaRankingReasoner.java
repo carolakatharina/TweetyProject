@@ -39,7 +39,6 @@ import java.util.HashSet;
  */
 public class IterativeSchemaRankingReasoner extends AbstractRankingReasoner<NumericalPartialOrder<Argument, DungTheory>> {
 
-    private double epsilon=0.0001;
     @Override
     public Collection<NumericalPartialOrder<Argument, DungTheory>> getModels(DungTheory bbase) {
         Collection<NumericalPartialOrder<Argument, DungTheory>> ranks = new HashSet<>();
@@ -59,12 +58,13 @@ public class IterativeSchemaRankingReasoner extends AbstractRankingReasoner<Nume
         double[] valuationsOld; //Stores valuations of the last iteration
 
         //Keep computing valuations until the values stop changing
+        double epsilon = 0.0001;
         do {
             valuationsOld = valuations.clone();
 
             for (int i = 0; i < n; i++)
                 valuations[i] = calculateFunction(valuationsOld, directAttackMatrix, i);
-        } while (getDistance(valuationsOld, valuations) > this.epsilon);
+        } while (getDistance(valuationsOld, valuations) > epsilon);
 
 
         //Use computed valuations as values for argument ranking
